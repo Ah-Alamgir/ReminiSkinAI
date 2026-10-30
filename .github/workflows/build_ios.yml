@@ -1,0 +1,59 @@
+name: Build iOS (.ipa)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ios-ipa:
+    name: Build iOS App (.ipa)
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission to Gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Shared Kotlin Multiplatform Framework
+        run: |
+          ./gradlew :shared:assembleSharedReleaseXCFramework
+
+      - name: Build Xcode Archive (.xcarchive)
+        run: |
+          mkdir -p build
+          xcodebuild archive \
+            -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/ReminiSkinAI.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package .ipa File
+        run: |
+          mkdir -p build/ipa/Payload
+          cp -r build/ReminiSkinAI.xcarchive/Products/Applications/ReminiSkinAI.app build/ipa/Payload/
+          cd build/ipa
+          zip -r ReminiSkinAI.ipa Payload
+          cd ../..
+
+      - name: Upload .ipa as Downloadable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReminiSkinAI-iOS-ipa
+          path: build/ipa/ReminiSkinAI.ipa
+          retention-days: 14

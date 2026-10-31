@@ -79,31 +79,27 @@ enum class ExportResolution(
     val dimensions: String,
     val badge: String,
     val fileSize: String,
-    val subtitle: String,
     val creditCost: Int
 ) {
     ORIGINAL_1080P(
-        title = "Original (1080p)",
-        dimensions = "1080 x 1440",
+        title = "Original 1080p",
+        dimensions = "1080 × 1440 px",
         badge = "SDR",
         fileSize = "2.4 MB",
-        subtitle = "2.4 MB • Free • Fast Export",
         creditCost = 0
     ),
     ULTRA_4K(
         title = "Ultra 4K",
-        dimensions = "3840 x 5120",
+        dimensions = "3840 × 5120 px",
         badge = "4× UHD",
         fileSize = "16.4 MB",
-        subtitle = "3840 x 5120 • Crystal Clear • 1 Credit",
         creditCost = 1
     ),
     MASTER_PRINT_8K(
         title = "Master Print 8K",
-        dimensions = "7680 x 10240",
+        dimensions = "7680 × 10240 px",
         badge = "8× Raw",
         fileSize = "64.8 MB",
-        subtitle = "7680 x 10240 • Archival Quality • 2 Credits",
         creditCost = 2
     )
 }
@@ -294,88 +290,113 @@ fun Export4kModal(
                                 )
                                 .clickable { selectedResolution = res }
                                 .padding(horizontal = 14.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            // Radio Circle
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clip(CircleShape)
+                                    .background(if (isSelected) AuraSecondary else Color.Transparent)
+                                    .border(
+                                        width = if (isSelected) 0.dp else 1.5.dp,
+                                        color = if (isSelected) Color.Transparent else AuraOutline,
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
                             ) {
-                                // Radio Circle
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .clip(CircleShape)
-                                        .background(if (isSelected) AuraSecondary else Color.Transparent)
-                                        .border(
-                                            width = if (isSelected) 0.dp else 1.5.dp,
-                                            color = if (isSelected) Color.Transparent else AuraOutline,
-                                            shape = CircleShape
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (isSelected) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(CircleShape)
-                                                .background(AuraSurfaceLowest)
-                                        )
-                                    }
-                                }
-
-                                Column {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Text(
-                                            text = res.title,
-                                            color = AuraOnSurface,
-                                            fontSize = 15.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold
-                                        )
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(4.dp))
-                                                .background(
-                                                    if (isSelected) AuraSecondary.copy(alpha = 0.20f)
-                                                    else Color.White.copy(alpha = 0.08f)
-                                                )
-                                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                                        ) {
-                                            Text(
-                                                text = res.badge,
-                                                color = if (isSelected) AuraSecondary else AuraOnSurfaceVariant,
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = res.subtitle,
-                                        color = if (isSelected) AuraOnSurfaceVariant else AuraOutline,
-                                        fontSize = 12.sp
+                                if (isSelected) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(AuraSurfaceLowest)
                                     )
                                 }
                             }
 
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = res.fileSize,
-                                    color = if (isSelected) AuraSecondary else AuraOutline,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                if (res.creditCost > 0) {
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            // Text details with weight(1f) to guarantee no wrapping or overlap
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     Text(
-                                        text = "${res.creditCost} Credit",
-                                        color = AuraPrimary,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
+                                        text = res.title,
+                                        color = AuraOnSurface,
+                                        fontSize = 15.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(
+                                                if (isSelected) AuraSecondary.copy(alpha = 0.20f)
+                                                else Color.White.copy(alpha = 0.08f)
+                                            )
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            text = res.badge,
+                                            color = if (isSelected) AuraSecondary else AuraOnSurfaceVariant,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(
+                                        text = res.dimensions,
+                                        color = if (isSelected) AuraOnSurfaceVariant else AuraOutline,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Normal
+                                    )
+                                    Text(
+                                        text = "•",
+                                        color = AuraOutline.copy(alpha = 0.5f),
+                                        fontSize = 10.sp
+                                    )
+                                    Text(
+                                        text = res.fileSize,
+                                        color = if (isSelected) AuraSecondary else AuraOutline,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
+                            }
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            // Right Pill: Credit / Free Badge
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        if (res.creditCost > 0) {
+                                            if (isSelected) AuraPrimaryElectric.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.06f)
+                                        } else {
+                                            Color.White.copy(alpha = 0.05f)
+                                        }
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (res.creditCost > 0 && isSelected) AuraPrimaryElectric.copy(alpha = 0.45f) else Color.Transparent,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = if (res.creditCost == 0) "Free" else "${res.creditCost} Credit",
+                                    color = if (res.creditCost > 0) (if (isSelected) AuraPrimaryElectric else AuraPrimary) else AuraOnSurfaceVariant,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }

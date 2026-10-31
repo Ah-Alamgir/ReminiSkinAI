@@ -122,15 +122,16 @@ fun BeforeAfterSlider(
 ) {
     var rawSplitFraction by remember { mutableFloatStateOf(0.50f) }
 
-    // When user holds the compare button, smoothly reveal full before image (split = 1.0f)
-    val animatedSplitFraction by animateFloatAsState(
-        targetValue = if (isHoldCompareActive) 1.0f else rawSplitFraction,
-        animationSpec = tween(durationMillis = 200)
+    // Instant zero-lag direct tracking for gestures; smooth transition only for hold-compare toggle
+    val holdSplitFraction by animateFloatAsState(
+        targetValue = if (isHoldCompareActive) 1.0f else 0.0f,
+        animationSpec = tween(durationMillis = 150)
     )
+    val effectiveSplitFraction = if (isHoldCompareActive) holdSplitFraction else rawSplitFraction
 
     val animatedZoom by animateFloatAsState(
         targetValue = zoomFactor,
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = tween(durationMillis = 200)
     )
 
     // Pulsing animation for telemetry & landmark nodes
@@ -198,7 +199,7 @@ fun BeforeAfterSlider(
 
             val visibleLeft = leftOff.toFloat().coerceAtLeast(0f)
             val visibleRight = (leftOff + drawW).toFloat().coerceAtMost(canvasW)
-            val splitX = (visibleLeft + (visibleRight - visibleLeft) * animatedSplitFraction)
+            val splitX = (visibleLeft + (visibleRight - visibleLeft) * effectiveSplitFraction)
                 .coerceIn(visibleLeft, visibleRight)
 
             val drawSize = Size(drawW.toFloat(), drawH.toFloat())
@@ -371,7 +372,7 @@ fun BeforeAfterSlider(
         }
 
         // Bottom HUD Badge: Left - Before
-        if (animatedSplitFraction > 0.08f) {
+        if (effectiveSplitFraction > 0.08f) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -403,7 +404,7 @@ fun BeforeAfterSlider(
         }
 
         // Bottom HUD Badge: Right - After
-        if (animatedSplitFraction < 0.92f) {
+        if (effectiveSplitFraction < 0.92f) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)

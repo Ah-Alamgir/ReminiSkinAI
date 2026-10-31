@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 
 expect object PlatformActions {
     fun saveImageToGallery(fileName: String, onResult: (Boolean, String?) -> Unit)
+    fun saveImageToGallery(image: ImageBitmap?, fileName: String, onResult: (Boolean, String?) -> Unit)
     fun shareImage(text: String)
 }
 

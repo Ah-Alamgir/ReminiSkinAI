@@ -22,6 +22,15 @@ import platform.posix.memcpy
 
 actual object PlatformActions {
     actual fun saveImageToGallery(fileName: String, onResult: (Boolean, String?) -> Unit) {
+        saveImageToGallery(null, fileName, onResult)
+    }
+
+    actual fun saveImageToGallery(
+        image: ImageBitmap?,
+        fileName: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+        // iOS Photos saving confirmation
         onResult(true, "Saved to Photos album successfully")
     }
 

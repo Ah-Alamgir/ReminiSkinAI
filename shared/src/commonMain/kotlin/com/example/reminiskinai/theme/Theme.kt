@@ -5,18 +5,27 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val ReminiDarkColorScheme = darkColorScheme(
-    primary = Color.White,
-    onPrimary = ReminiBlack,
-    secondary = ReminiCrimson,
-    onSecondary = Color.White,
-    tertiary = ReminiGold,
-    background = ReminiBlack,
-    onBackground = ReminiTextPrimary,
-    surface = ReminiSurface,
-    onSurface = ReminiTextPrimary,
-    surfaceVariant = ReminiCard,
-    onSurfaceVariant = ReminiTextSecondary
+private val AuraDarkColorScheme = darkColorScheme(
+    primary = AuraPrimary,
+    onPrimary = AuraOnPrimary,
+    primaryContainer = AuraPrimaryContainer,
+    onPrimaryContainer = AuraOnPrimaryContainer,
+    secondary = AuraSecondary,
+    onSecondary = AuraOnSecondary,
+    secondaryContainer = AuraSecondaryContainer,
+    onSecondaryContainer = AuraOnSecondaryContainer,
+    tertiary = AuraTertiary,
+    onTertiary = AuraOnTertiary,
+    tertiaryContainer = AuraTertiaryContainer,
+    onTertiaryContainer = AuraOnTertiaryContainer,
+    background = AuraSurfaceLowest,
+    onBackground = AuraOnSurface,
+    surface = AuraSurface,
+    onSurface = AuraOnSurface,
+    surfaceVariant = AuraSurfaceContainerHighest,
+    onSurfaceVariant = AuraOnSurfaceVariant,
+    outline = AuraOutline,
+    outlineVariant = AuraOutlineVariant
 )
 
 @Composable
@@ -24,7 +33,7 @@ fun ReminiSkinAITheme(
     content: @Composable () -> Unit,
 ) {
     MaterialTheme(
-        colorScheme = ReminiDarkColorScheme,
+        colorScheme = AuraDarkColorScheme,
         typography = Typography,
         content = content
     )

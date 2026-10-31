@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.reminiskinai.theme.ReminiBlack
+import com.example.reminiskinai.theme.AuraSurfaceLowest
 import com.example.reminiskinai.theme.ReminiSkinAITheme
 import com.example.reminiskinai.ui.main.MainScreen
 import com.example.reminiskinai.ui.passport.PassportPhotoScreen
@@ -26,8 +26,8 @@ fun App() {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .background(ReminiBlack),
-            color = ReminiBlack
+                .background(AuraSurfaceLowest),
+            color = AuraSurfaceLowest
         ) {
             var currentScreen by remember { mutableStateOf(AppScreen.MAIN) }
 

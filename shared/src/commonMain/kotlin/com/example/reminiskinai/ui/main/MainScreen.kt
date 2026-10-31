@@ -1,5 +1,7 @@
 package com.example.reminiskinai.ui.main
 
+import com.example.reminiskinai.processor.SkinToneProcessor
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -273,9 +275,55 @@ fun MainScreen(
         }
     }
 
-    val photoPickerLauncher = rememberPhotoPickerLauncher {
-        selectedSample = samplePhotos[0]
-        startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.COMPARISON_STUDIO)
+    var userCustomOriginalBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var userCustomEnhancedBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var userCustomGradedBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    var pendingTargetMode by remember { mutableStateOf(EditorScreenMode.COMPARISON_STUDIO) }
+    var pendingPreset by remember { mutableStateOf(AestheticPreset.REMINI_NATURAL) }
+
+    val photoPickerLauncher = rememberPhotoPickerLauncher { picked ->
+        if (picked != null) {
+            coroutineScope.launch {
+                val enhanced = SkinToneProcessor.enhancePhoto(picked)
+                val graded = SkinToneProcessor.applySkinToneGrading(
+                    source = enhanced,
+                    preset = pendingPreset,
+                    warmth = editParams.skinWarmth,
+                    radiance = editParams.skinRadiance
+                )
+                userCustomOriginalBitmap = picked
+                userCustomEnhancedBitmap = enhanced
+                userCustomGradedBitmap = graded
+                editParams = editParams.copy(preset = pendingPreset)
+                startProcessing(
+                    before = samplePhotos[0].beforeDrawable,
+                    after = samplePhotos[0].reminiRefDrawable,
+                    targetMode = pendingTargetMode,
+                    presetMode = pendingPreset
+                )
+            }
+        }
+    }
+
+    fun triggerPhotoPicker(targetMode: EditorScreenMode, preset: AestheticPreset = AestheticPreset.REMINI_NATURAL) {
+        pendingTargetMode = targetMode
+        pendingPreset = preset
+        photoPickerLauncher()
+    }
+
+    // Dynamic Skin-Gated Tone Grading: When user tweaks preset, warmth, or radiance,
+    // recalculate graded dermis tones selectively without tinting clothes, hair, or background!
+    LaunchedEffect(editParams.preset, editParams.skinWarmth, editParams.skinRadiance, userCustomEnhancedBitmap) {
+        val base = userCustomEnhancedBitmap
+        if (base != null) {
+            userCustomGradedBitmap = SkinToneProcessor.applySkinToneGrading(
+                source = base,
+                preset = editParams.preset,
+                warmth = editParams.skinWarmth,
+                radiance = editParams.skinRadiance
+            )
+        }
     }
 
     PlatformBackHandler(enabled = mode != EditorScreenMode.HOME) {
@@ -288,25 +336,9 @@ fun MainScreen(
         }
     }
 
-    // Live Color Filter calibrated with photo editing parameters
-    val liveColorFilter = remember(editParams) {
-        val warmth = editParams.skinWarmth * editParams.preset.warmthBoost
-        val contrast = editParams.preset.contrastLift
-        val rMult = warmth * 1.02f
-        val gMult = 1.0f
-        val bMult = (2f - warmth) * 0.98f
-
-        ColorFilter.colorMatrix(
-            ColorMatrix(
-                floatArrayOf(
-                    rMult * contrast, 0f, 0f, 0f, (editParams.skinRadiance - 1f) * 20f,
-                    0f, gMult * contrast, 0f, 0f, (editParams.skinRadiance - 1f) * 15f,
-                    0f, 0f, bMult * contrast, 0f, (editParams.skinRadiance - 1f) * 10f,
-                    0f, 0f, 0f, 1f, 0f
-                )
-            )
-        )
-    }
+    // Global color filter is null to prevent tinting non-skin areas;
+    // Remini regional skin grading is applied selectively by SkinToneProcessor
+    val liveColorFilter: ColorFilter? = null
 
     Box(
         modifier = modifier
@@ -357,24 +389,20 @@ fun MainScreen(
                             .verticalScroll(rememberScrollState())
                             .padding(bottom = 100.dp)
                     ) {
-                        // Top App Bar
-                        AuraTopAppBar(
-                            credits = userCredits,
-                            onOpenCredits = { showCreditsDialog = true },
-                            onOpenSettings = { showSettingsDialog = true }
-                        )
-
-                        // Main Content
+                        // Main Content (Title bar removed for edge-to-edge immersive studio)
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp),
                             verticalArrangement = Arrangement.spacedBy(22.dp)
                         ) {
-                            // Hero Headline & Avatars
+                            // Hero Headline, Avatars, Credits & Settings
                             AuraHeroHeader(
                                 avatar1 = Res.drawable.sample_1_remini_ref,
-                                avatar2 = Res.drawable.sample_2_remini_ref
+                                avatar2 = Res.drawable.sample_2_remini_ref,
+                                credits = userCredits,
+                                onOpenCredits = { showCreditsDialog = true },
+                                onOpenSettings = { showSettingsDialog = true }
                             )
 
                             // Hero Feature Card: AI HD Enhance & Unblur
@@ -382,53 +410,27 @@ fun MainScreen(
                                 beforeDrawable = Res.drawable.sample_1_before,
                                 afterDrawable = Res.drawable.sample_1_remini_ref,
                                 onOneTapEnhance = {
-                                    startProcessing(
-                                        Res.drawable.sample_1_before,
-                                        Res.drawable.sample_1_remini_ref,
-                                        EditorScreenMode.COMPARISON_STUDIO,
-                                        AestheticPreset.REMINI_NATURAL
-                                    )
+                                    triggerPhotoPicker(EditorScreenMode.COMPARISON_STUDIO, AestheticPreset.REMINI_NATURAL)
                                 }
                             )
 
-                            // Precision Tools Bento Grid
+                            // Precision Tools Bento Grid - Let user pick an image on any tool click
                             AuraPrecisionToolsSection(
                                 sampleVintageDrawable = Res.drawable.sample_2_before,
                                 onViewAll = { showAllToolsDialog = true },
                                 onToolSelected = { toolKey ->
                                     when (toolKey) {
                                         "portrait_4k" -> {
-                                            startProcessing(
-                                                samplePhotos[0].beforeDrawable,
-                                                samplePhotos[0].reminiRefDrawable,
-                                                EditorScreenMode.COMPARISON_STUDIO,
-                                                AestheticPreset.REMINI_NATURAL
-                                            )
+                                            triggerPhotoPicker(EditorScreenMode.COMPARISON_STUDIO, AestheticPreset.REMINI_NATURAL)
                                         }
                                         "old_restore" -> {
-                                            selectedSample = samplePhotos[1]
-                                            startProcessing(
-                                                samplePhotos[1].beforeDrawable,
-                                                samplePhotos[1].reminiRefDrawable,
-                                                EditorScreenMode.RETOUCH_SUITE,
-                                                AestheticPreset.REMINI_NATURAL
-                                            )
+                                            triggerPhotoPicker(EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
                                         }
                                         "denoise" -> {
-                                            startProcessing(
-                                                samplePhotos[0].beforeDrawable,
-                                                samplePhotos[0].reminiRefDrawable,
-                                                EditorScreenMode.RETOUCH_SUITE,
-                                                AestheticPreset.REMINI_NATURAL
-                                            )
+                                            triggerPhotoPicker(EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
                                         }
                                         "face_glow" -> {
-                                            startProcessing(
-                                                samplePhotos[0].beforeDrawable,
-                                                samplePhotos[0].reminiRefDrawable,
-                                                EditorScreenMode.RETOUCH_SUITE,
-                                                AestheticPreset.KOREAN
-                                            )
+                                            triggerPhotoPicker(EditorScreenMode.RETOUCH_SUITE, AestheticPreset.KOREAN)
                                         }
                                     }
                                 }
@@ -451,7 +453,7 @@ fun MainScreen(
                                     mode = EditorScreenMode.COMPARISON_STUDIO
                                 },
                                 onBatchEnhance = {
-                                    photoPickerLauncher()
+                                    triggerPhotoPicker(EditorScreenMode.COMPARISON_STUDIO, AestheticPreset.REMINI_NATURAL)
                                 },
                                 onOpenHistory = {
                                     showProjectsDialog = true
@@ -475,9 +477,7 @@ fun MainScreen(
                                     mode = EditorScreenMode.COMPARISON_STUDIO
                                 }
                                 AuraBottomNavTab.RESTORE -> {
-                                    activeBeforeDrawable = samplePhotos[0].beforeDrawable
-                                    activeAfterDrawable = samplePhotos[0].reminiRefDrawable
-                                    mode = EditorScreenMode.RETOUCH_SUITE
+                                    triggerPhotoPicker(EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
                                 }
                                 AuraBottomNavTab.PROJECTS -> {
                                     showProjectsDialog = true
@@ -495,6 +495,8 @@ fun MainScreen(
                 AuraComparisonStudioScreen(
                     beforeDrawable = activeBeforeDrawable,
                     afterDrawable = activeAfterDrawable ?: activeBeforeDrawable,
+                    beforeImageBitmap = userCustomOriginalBitmap,
+                    afterImageBitmap = userCustomGradedBitmap ?: userCustomEnhancedBitmap,
                     colorFilter = liveColorFilter,
                     editParams = editParams,
                     userCredits = userCredits,
@@ -514,6 +516,8 @@ fun MainScreen(
                 AuraRetouchSuiteScreen(
                     beforeDrawable = activeBeforeDrawable,
                     afterDrawable = activeAfterDrawable ?: activeBeforeDrawable,
+                    beforeImageBitmap = userCustomOriginalBitmap,
+                    afterImageBitmap = userCustomGradedBitmap ?: userCustomEnhancedBitmap,
                     colorFilter = liveColorFilter,
                     editParams = editParams,
                     userCredits = userCredits,
@@ -563,10 +567,12 @@ fun MainScreen(
                 if (userCredits >= creditCost) {
                     userCredits -= creditCost
                 }
-                PlatformActions.saveImageToGallery("AuraAI_${resolution.name}.png") { success, fileName ->
+                val exportBitmap = userCustomGradedBitmap ?: userCustomEnhancedBitmap
+                val fileName = "AuraAI_${resolution.title.replace(" ", "_")}"
+                PlatformActions.saveImageToGallery(image = exportBitmap, fileName = fileName) { success, savedName ->
                     isSaving = false
                     showExportModal = false
-                    savedFileName = fileName ?: "Aura_${resolution.title}_Export.png"
+                    savedFileName = savedName ?: "${fileName}.jpg"
                     mode = EditorScreenMode.SAVED_SHARE
                 }
             },
@@ -580,10 +586,11 @@ fun MainScreen(
             },
             onRawTiff = {
                 isSaving = true
-                PlatformActions.saveImageToGallery("AuraAI_Master_8K_Raw.tiff") { success, fileName ->
+                val exportBitmap = userCustomGradedBitmap ?: userCustomEnhancedBitmap
+                PlatformActions.saveImageToGallery(image = exportBitmap, fileName = "AuraAI_Master_8K_Raw") { success, savedName ->
                     isSaving = false
                     showExportModal = false
-                    savedFileName = fileName ?: "AuraAI_Master_8K_Raw.tiff"
+                    savedFileName = savedName ?: "AuraAI_Master_8K_Raw.jpg"
                     mode = EditorScreenMode.SAVED_SHARE
                 }
             },
@@ -620,11 +627,11 @@ fun MainScreen(
                     showAllToolsDialog = false
                     when (toolId) {
                         "passport" -> onNavigateToPassport()
-                        "portrait_4k" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.COMPARISON_STUDIO, AestheticPreset.REMINI_NATURAL)
-                        "old_restore" -> startProcessing(samplePhotos[1].beforeDrawable, samplePhotos[1].reminiRefDrawable, EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
-                        "denoise" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
-                        "beauty" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.RETOUCH_SUITE, AestheticPreset.KOREAN)
-                        "custom" -> photoPickerLauncher()
+                        "portrait_4k" -> triggerPhotoPicker(EditorScreenMode.COMPARISON_STUDIO, AestheticPreset.REMINI_NATURAL)
+                        "old_restore" -> triggerPhotoPicker(EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
+                        "denoise" -> triggerPhotoPicker(EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
+                        "beauty" -> triggerPhotoPicker(EditorScreenMode.RETOUCH_SUITE, AestheticPreset.KOREAN)
+                        "custom" -> triggerPhotoPicker(EditorScreenMode.COMPARISON_STUDIO, AestheticPreset.REMINI_NATURAL)
                     }
                 },
                 onDismiss = { showAllToolsDialog = false }
@@ -753,14 +760,72 @@ private fun AuraTopAppBar(
 }
 
 // =========================================================================
-// SCREEN 1: Hero Header
+// SCREEN 1: Hero Header (Edge-to-Edge with sleek status controls)
 // =========================================================================
 @Composable
 private fun AuraHeroHeader(
     avatar1: DrawableResource,
-    avatar2: DrawableResource
+    avatar2: DrawableResource,
+    credits: Int,
+    onOpenCredits: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 36.dp)
+    ) {
+        // Floating Top Utility Row: Credits Pill & Settings Button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Credits Pill
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.06f))
+                    .border(1.dp, Color.White.copy(alpha = 0.14f), CircleShape)
+                    .clickable { onOpenCredits() }
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Bolt,
+                    contentDescription = "Credits",
+                    tint = AuraSecondary,
+                    modifier = Modifier.size(15.dp)
+                )
+                Text(
+                    text = "$credits Credits",
+                    color = AuraOnSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Settings Icon
+            IconButton(
+                onClick = onOpenSettings,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = AuraOnSurfaceVariant,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -1614,6 +1679,8 @@ private fun AuraNavTabItem(
 private fun AuraComparisonStudioScreen(
     beforeDrawable: DrawableResource,
     afterDrawable: DrawableResource,
+    beforeImageBitmap: ImageBitmap? = null,
+    afterImageBitmap: ImageBitmap? = null,
     colorFilter: ColorFilter?,
     editParams: SkinEditParams,
     userCredits: Int,
@@ -1760,9 +1827,11 @@ private fun AuraComparisonStudioScreen(
                 .weight(1f)
                 .padding(horizontal = 14.dp, vertical = 4.dp)
         ) {
+            val beforeP = if (beforeImageBitmap != null) remember(beforeImageBitmap) { BitmapPainter(beforeImageBitmap) } else painterResource(beforeDrawable)
+            val afterP = if (afterImageBitmap != null) remember(afterImageBitmap) { BitmapPainter(afterImageBitmap) } else painterResource(afterDrawable)
             BeforeAfterSlider(
-                beforePainter = painterResource(beforeDrawable),
-                afterPainter = painterResource(afterDrawable),
+                beforePainter = beforeP,
+                afterPainter = afterP,
                 beforeLabel = "BEFORE (720p)",
                 afterLabel = "AFTER (4K AI)",
                 colorFilter = colorFilter,
@@ -2048,6 +2117,8 @@ private fun AuraComparisonStudioScreen(
 private fun AuraRetouchSuiteScreen(
     beforeDrawable: DrawableResource,
     afterDrawable: DrawableResource,
+    beforeImageBitmap: ImageBitmap? = null,
+    afterImageBitmap: ImageBitmap? = null,
     colorFilter: ColorFilter?,
     editParams: SkinEditParams,
     userCredits: Int,
@@ -2152,9 +2223,11 @@ private fun AuraRetouchSuiteScreen(
                 .weight(1.05f)
                 .padding(horizontal = 14.dp, vertical = 4.dp)
         ) {
+            val beforeP = if (beforeImageBitmap != null) remember(beforeImageBitmap) { BitmapPainter(beforeImageBitmap) } else painterResource(beforeDrawable)
+            val afterP = if (afterImageBitmap != null) remember(afterImageBitmap) { BitmapPainter(afterImageBitmap) } else painterResource(afterDrawable)
             BeforeAfterSlider(
-                beforePainter = painterResource(beforeDrawable),
-                afterPainter = painterResource(afterDrawable),
+                beforePainter = beforeP,
+                afterPainter = afterP,
                 beforeLabel = "ORIGINAL RAW",
                 afterLabel = "AURA ENHANCED",
                 colorFilter = colorFilter,

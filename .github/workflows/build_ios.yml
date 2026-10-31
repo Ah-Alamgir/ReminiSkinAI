@@ -26,10 +26,6 @@ jobs:
       - name: Grant Execute Permission to Gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Shared Kotlin Multiplatform Framework
-        run: |
-          ./gradlew :shared:assembleSharedReleaseXCFramework
-
       - name: Build Xcode Archive (.xcarchive)
         run: |
           mkdir -p build

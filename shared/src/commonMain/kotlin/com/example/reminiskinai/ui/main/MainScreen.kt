@@ -11,7 +11,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -34,44 +33,41 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Compare
-import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FaceRetouchingNatural
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Flare
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -93,8 +89,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
@@ -115,20 +110,27 @@ import com.example.reminiskinai.platform.PlatformActions
 import com.example.reminiskinai.platform.PlatformBackHandler
 import com.example.reminiskinai.platform.PlatformSettings
 import com.example.reminiskinai.platform.rememberPhotoPickerLauncher
+import com.example.reminiskinai.theme.AuraCyanGradient
+import com.example.reminiskinai.theme.AuraExportButtonGradient
+import com.example.reminiskinai.theme.AuraGlassBorderFade
+import com.example.reminiskinai.theme.AuraGlassBorderLight
+import com.example.reminiskinai.theme.AuraGlassBorderSubtle
+import com.example.reminiskinai.theme.AuraGlassCardBg
+import com.example.reminiskinai.theme.AuraHeroButtonGradient
 import com.example.reminiskinai.theme.AuraOnPrimary
 import com.example.reminiskinai.theme.AuraOnPrimaryContainer
 import com.example.reminiskinai.theme.AuraOnSecondary
 import com.example.reminiskinai.theme.AuraOnSecondaryContainer
 import com.example.reminiskinai.theme.AuraOnSurface
 import com.example.reminiskinai.theme.AuraOnSurfaceVariant
-import com.example.reminiskinai.theme.AuraOnTertiary
-import com.example.reminiskinai.theme.AuraOnTertiaryContainer
 import com.example.reminiskinai.theme.AuraOutline
 import com.example.reminiskinai.theme.AuraOutlineVariant
 import com.example.reminiskinai.theme.AuraPrimary
 import com.example.reminiskinai.theme.AuraPrimaryContainer
+import com.example.reminiskinai.theme.AuraPrimaryElectric
 import com.example.reminiskinai.theme.AuraSecondary
 import com.example.reminiskinai.theme.AuraSecondaryContainer
+import com.example.reminiskinai.theme.AuraSecondaryLuminous
 import com.example.reminiskinai.theme.AuraSurface
 import com.example.reminiskinai.theme.AuraSurfaceBright
 import com.example.reminiskinai.theme.AuraSurfaceContainer
@@ -139,15 +141,11 @@ import com.example.reminiskinai.theme.AuraSurfaceLowest
 import com.example.reminiskinai.theme.AuraTertiary
 import com.example.reminiskinai.theme.AuraTertiaryContainer
 import com.example.reminiskinai.theme.AuraTertiaryFixed
-import com.example.reminiskinai.theme.ReminiBlack
-import com.example.reminiskinai.theme.ReminiCard
-import com.example.reminiskinai.theme.ReminiCrimson
-import com.example.reminiskinai.theme.ReminiGold
-import com.example.reminiskinai.theme.ReminiRose
-import com.example.reminiskinai.theme.ReminiSurface
-import com.example.reminiskinai.theme.ReminiTextPrimary
-import com.example.reminiskinai.theme.ReminiTextSecondary
+import com.example.reminiskinai.theme.AuraTertiaryHotMagenta
+import com.example.reminiskinai.theme.AuraVioletCyanGradient
 import com.example.reminiskinai.ui.components.BeforeAfterSlider
+import com.example.reminiskinai.ui.components.Export4kModal
+import com.example.reminiskinai.ui.components.ExportResolution
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -158,13 +156,12 @@ import reminiskinai.shared.generated.resources.sample_1_remini_ref
 import reminiskinai.shared.generated.resources.sample_2_before
 import reminiskinai.shared.generated.resources.sample_2_remini_ref
 import reminiskinai.shared.generated.resources.sample_3_before
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 enum class EditorScreenMode {
     HOME,
+    COMPARISON_STUDIO,
+    RETOUCH_SUITE,
     PROCESSING,
-    RESULT,
     SAVED_SHARE
 }
 
@@ -173,6 +170,13 @@ enum class AuraBottomNavTab {
     STUDIO,
     RESTORE,
     PROJECTS
+}
+
+enum class RetouchSuiteTab {
+    RESTORE,
+    RETOUCH,
+    COLORIZE,
+    BACKGROUND
 }
 
 @Composable
@@ -221,23 +225,33 @@ fun MainScreen(
     var settingsSavedConfirmation by remember { mutableStateOf(false) }
 
     var stageProgress by remember { mutableStateOf<PipelineStageProgress?>(null) }
-    var showFineTuneSliders by remember { mutableStateOf(false) }
-    var showModelArchitectureSheet by remember { mutableStateOf(false) }
+    var targetModeAfterProcessing by remember { mutableStateOf(EditorScreenMode.COMPARISON_STUDIO) }
+
+    // Dialogs & Modal Sheets
+    var showExportModal by remember { mutableStateOf(false) }
     var showCreditsDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showAllToolsDialog by remember { mutableStateOf(false) }
     var showProjectsDialog by remember { mutableStateOf(false) }
+    var showModelArchitectureSheet by remember { mutableStateOf(false) }
 
+    // Export Feedback
     var isSaving by remember { mutableStateOf(false) }
     var savedFileName by remember { mutableStateOf("") }
     var telemetry by remember { mutableStateOf(SkinAnalysisTelemetry()) }
 
-    fun startProcessing(before: DrawableResource, after: DrawableResource?, presetMode: AestheticPreset? = null) {
+    fun startProcessing(
+        before: DrawableResource,
+        after: DrawableResource?,
+        targetMode: EditorScreenMode = EditorScreenMode.COMPARISON_STUDIO,
+        presetMode: AestheticPreset? = null
+    ) {
         if (presetMode != null) {
             editParams = editParams.copy(preset = presetMode)
         }
         activeBeforeDrawable = before
         activeAfterDrawable = after ?: before
+        targetModeAfterProcessing = targetMode
         mode = EditorScreenMode.PROCESSING
 
         coroutineScope.launch {
@@ -251,26 +265,47 @@ fun MainScreen(
 
             for (stage in stages) {
                 stageProgress = stage
-                delay(260)
+                delay(220)
             }
-            delay(120)
+            delay(100)
             stageProgress = null
-            mode = EditorScreenMode.RESULT
+            mode = targetModeAfterProcessing
         }
     }
 
     val photoPickerLauncher = rememberPhotoPickerLauncher {
         selectedSample = samplePhotos[0]
-        startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable)
+        startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.COMPARISON_STUDIO)
     }
 
     PlatformBackHandler(enabled = mode != EditorScreenMode.HOME) {
         when (mode) {
             EditorScreenMode.PROCESSING -> mode = EditorScreenMode.HOME
-            EditorScreenMode.RESULT -> mode = EditorScreenMode.HOME
-            EditorScreenMode.SAVED_SHARE -> mode = EditorScreenMode.RESULT
+            EditorScreenMode.COMPARISON_STUDIO -> mode = EditorScreenMode.HOME
+            EditorScreenMode.RETOUCH_SUITE -> mode = EditorScreenMode.HOME
+            EditorScreenMode.SAVED_SHARE -> mode = EditorScreenMode.COMPARISON_STUDIO
             EditorScreenMode.HOME -> {}
         }
+    }
+
+    // Live Color Filter calibrated with photo editing parameters
+    val liveColorFilter = remember(editParams) {
+        val warmth = editParams.skinWarmth * editParams.preset.warmthBoost
+        val contrast = editParams.preset.contrastLift
+        val rMult = warmth * 1.02f
+        val gMult = 1.0f
+        val bMult = (2f - warmth) * 0.98f
+
+        ColorFilter.colorMatrix(
+            ColorMatrix(
+                floatArrayOf(
+                    rMult * contrast, 0f, 0f, 0f, (editParams.skinRadiance - 1f) * 20f,
+                    0f, gMult * contrast, 0f, 0f, (editParams.skinRadiance - 1f) * 15f,
+                    0f, 0f, bMult * contrast, 0f, (editParams.skinRadiance - 1f) * 10f,
+                    0f, 0f, 0f, 1f, 0f
+                )
+            )
+        )
     }
 
     Box(
@@ -278,42 +313,41 @@ fun MainScreen(
             .fillMaxSize()
             .background(AuraSurfaceLowest)
     ) {
-        // Ambient Deep OLED Glow Meshes in Background
-        Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                // Top-left primary purple blur
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(AuraPrimary.copy(alpha = 0.16f), Color.Transparent),
-                        center = Offset(-40f, -40f),
-                        radius = size.width * 0.9f
-                    ),
+        // Deep Atmospheric OLED Glow Meshes
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            // Top-left Electric Violet blur
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(AuraPrimaryElectric.copy(alpha = 0.20f), Color.Transparent),
                     center = Offset(-40f, -40f),
-                    radius = size.width * 0.9f
-                )
-                // Mid-right cyan glow
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(AuraSecondaryContainer.copy(alpha = 0.14f), Color.Transparent),
-                        center = Offset(size.width + 60f, size.height * 0.28f),
-                        radius = size.width * 0.85f
-                    ),
-                    center = Offset(size.width + 60f, size.height * 0.28f),
                     radius = size.width * 0.85f
-                )
-                // Lower center tertiary magenta glow
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(AuraTertiaryContainer.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.5f, size.height * 0.65f),
-                        radius = size.width * 0.8f
-                    ),
+                ),
+                center = Offset(-40f, -40f),
+                radius = size.width * 0.85f
+            )
+            // Mid-right Luminous Cyan glow
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(AuraSecondaryContainer.copy(alpha = 0.16f), Color.Transparent),
+                    center = Offset(size.width + 60f, size.height * 0.28f),
+                    radius = size.width * 0.80f
+                ),
+                center = Offset(size.width + 60f, size.height * 0.28f),
+                radius = size.width * 0.80f
+            )
+            // Lower Hot Magenta glow
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(AuraTertiaryContainer.copy(alpha = 0.14f), Color.Transparent),
                     center = Offset(size.width * 0.5f, size.height * 0.65f),
-                    radius = size.width * 0.8f
-                )
-            }
+                    radius = size.width * 0.75f
+                ),
+                center = Offset(size.width * 0.5f, size.height * 0.65f),
+                radius = size.width * 0.75f
+            )
         }
 
+        // Active Screen Router
         when (mode) {
             EditorScreenMode.HOME -> {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -323,27 +357,27 @@ fun MainScreen(
                             .verticalScroll(rememberScrollState())
                             .padding(bottom = 100.dp)
                     ) {
-                        // Header: TopAppBar
+                        // Top App Bar
                         AuraTopAppBar(
                             credits = userCredits,
                             onOpenCredits = { showCreditsDialog = true },
                             onOpenSettings = { showSettingsDialog = true }
                         )
 
-                        // Main Content Container
+                        // Main Content
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp),
                             verticalArrangement = Arrangement.spacedBy(22.dp)
                         ) {
-                            // Hero Headline & Subtitle with Overlapping Avatar Badges
+                            // Hero Headline & Avatars
                             AuraHeroHeader(
                                 avatar1 = Res.drawable.sample_1_remini_ref,
                                 avatar2 = Res.drawable.sample_2_remini_ref
                             )
 
-                            // Hero Feature Card: AI HD Enhance & Unblur with Interactive Split Slider
+                            // Hero Feature Card: AI HD Enhance & Unblur
                             AuraHeroFeatureCard(
                                 beforeDrawable = Res.drawable.sample_1_before,
                                 afterDrawable = Res.drawable.sample_1_remini_ref,
@@ -351,6 +385,7 @@ fun MainScreen(
                                     startProcessing(
                                         Res.drawable.sample_1_before,
                                         Res.drawable.sample_1_remini_ref,
+                                        EditorScreenMode.COMPARISON_STUDIO,
                                         AestheticPreset.REMINI_NATURAL
                                     )
                                 }
@@ -366,6 +401,7 @@ fun MainScreen(
                                             startProcessing(
                                                 samplePhotos[0].beforeDrawable,
                                                 samplePhotos[0].reminiRefDrawable,
+                                                EditorScreenMode.COMPARISON_STUDIO,
                                                 AestheticPreset.REMINI_NATURAL
                                             )
                                         }
@@ -374,6 +410,7 @@ fun MainScreen(
                                             startProcessing(
                                                 samplePhotos[1].beforeDrawable,
                                                 samplePhotos[1].reminiRefDrawable,
+                                                EditorScreenMode.RETOUCH_SUITE,
                                                 AestheticPreset.REMINI_NATURAL
                                             )
                                         }
@@ -381,6 +418,7 @@ fun MainScreen(
                                             startProcessing(
                                                 samplePhotos[0].beforeDrawable,
                                                 samplePhotos[0].reminiRefDrawable,
+                                                EditorScreenMode.RETOUCH_SUITE,
                                                 AestheticPreset.REMINI_NATURAL
                                             )
                                         }
@@ -388,6 +426,7 @@ fun MainScreen(
                                             startProcessing(
                                                 samplePhotos[0].beforeDrawable,
                                                 samplePhotos[0].reminiRefDrawable,
+                                                EditorScreenMode.RETOUCH_SUITE,
                                                 AestheticPreset.KOREAN
                                             )
                                         }
@@ -395,7 +434,7 @@ fun MainScreen(
                                 }
                             )
 
-                            // Recent Restorations Horizontal Scroll
+                            // Recent Restorations
                             AuraRecentRestorationsSection(
                                 sample1Drawable = Res.drawable.sample_1_remini_ref,
                                 sample2Drawable = Res.drawable.sample_2_remini_ref,
@@ -403,13 +442,13 @@ fun MainScreen(
                                     selectedSample = samplePhotos[0]
                                     activeBeforeDrawable = samplePhotos[0].beforeDrawable
                                     activeAfterDrawable = samplePhotos[0].reminiRefDrawable
-                                    mode = EditorScreenMode.RESULT
+                                    mode = EditorScreenMode.COMPARISON_STUDIO
                                 },
                                 onOpenSample2 = {
                                     selectedSample = samplePhotos[1]
                                     activeBeforeDrawable = samplePhotos[1].beforeDrawable
                                     activeAfterDrawable = samplePhotos[1].reminiRefDrawable
-                                    mode = EditorScreenMode.RESULT
+                                    mode = EditorScreenMode.COMPARISON_STUDIO
                                 },
                                 onBatchEnhance = {
                                     photoPickerLauncher()
@@ -421,20 +460,24 @@ fun MainScreen(
                         }
                     }
 
-                    // Floating Bottom Navigation Bar
+                    // Floating Glass Bottom Navigation Bar
                     AuraBottomNavBar(
                         selectedTab = activeBottomTab,
                         onTabSelected = { tab ->
                             activeBottomTab = tab
                             when (tab) {
                                 AuraBottomNavTab.HOME -> {
-                                    // already home
+                                    mode = EditorScreenMode.HOME
                                 }
                                 AuraBottomNavTab.STUDIO -> {
-                                    onNavigateToPassport()
+                                    activeBeforeDrawable = samplePhotos[0].beforeDrawable
+                                    activeAfterDrawable = samplePhotos[0].reminiRefDrawable
+                                    mode = EditorScreenMode.COMPARISON_STUDIO
                                 }
                                 AuraBottomNavTab.RESTORE -> {
-                                    photoPickerLauncher()
+                                    activeBeforeDrawable = samplePhotos[0].beforeDrawable
+                                    activeAfterDrawable = samplePhotos[0].reminiRefDrawable
+                                    mode = EditorScreenMode.RETOUCH_SUITE
                                 }
                                 AuraBottomNavTab.PROJECTS -> {
                                     showProjectsDialog = true
@@ -448,6 +491,46 @@ fun MainScreen(
                 }
             }
 
+            EditorScreenMode.COMPARISON_STUDIO -> {
+                AuraComparisonStudioScreen(
+                    beforeDrawable = activeBeforeDrawable,
+                    afterDrawable = activeAfterDrawable ?: activeBeforeDrawable,
+                    colorFilter = liveColorFilter,
+                    editParams = editParams,
+                    userCredits = userCredits,
+                    onBack = { mode = EditorScreenMode.HOME },
+                    onNavigateToRetouchSuite = { mode = EditorScreenMode.RETOUCH_SUITE },
+                    onRegenerate = {
+                        startProcessing(activeBeforeDrawable, activeAfterDrawable, EditorScreenMode.COMPARISON_STUDIO)
+                    },
+                    onOpenExportModal = { showExportModal = true },
+                    onUpdateIntensity = { intensity ->
+                        editParams = editParams.copy(facialClarity = intensity)
+                    }
+                )
+            }
+
+            EditorScreenMode.RETOUCH_SUITE -> {
+                AuraRetouchSuiteScreen(
+                    beforeDrawable = activeBeforeDrawable,
+                    afterDrawable = activeAfterDrawable ?: activeBeforeDrawable,
+                    colorFilter = liveColorFilter,
+                    editParams = editParams,
+                    userCredits = userCredits,
+                    onBack = { mode = EditorScreenMode.HOME },
+                    onNavigateToStudio = { mode = EditorScreenMode.COMPARISON_STUDIO },
+                    onUpdateParams = { update ->
+                        editParams = update(editParams)
+                        settingsSavedConfirmation = false
+                    },
+                    onSelectPreset = { preset ->
+                        editParams = editParams.copy(preset = preset)
+                    },
+                    onOpenExportModal = { showExportModal = true },
+                    onOpenSettings = { showSettingsDialog = true }
+                )
+            }
+
             EditorScreenMode.PROCESSING -> {
                 AuraProcessingScreen(
                     stageProgress = stageProgress,
@@ -455,60 +538,11 @@ fun MainScreen(
                 )
             }
 
-            EditorScreenMode.RESULT -> {
-                ReminiResultScreen(
-                    beforeDrawable = activeBeforeDrawable,
-                    afterDrawable = activeAfterDrawable ?: activeBeforeDrawable,
-                    customPickedBitmap = null,
-                    editParams = editParams,
-                    telemetry = telemetry,
-                    showFineTuneSliders = showFineTuneSliders,
-                    settingsSavedConfirmation = settingsSavedConfirmation,
-                    hasCustomSavedSettings = hasCustomSavedSettings,
-                    isSaving = isSaving,
-                    onBack = { mode = EditorScreenMode.HOME },
-                    onToggleFineTuneSliders = { showFineTuneSliders = !showFineTuneSliders },
-                    onSelectPreset = { preset ->
-                        editParams = editParams.copy(preset = preset)
-                        settingsSavedConfirmation = false
-                    },
-                    onSelectLipShade = { lip ->
-                        editParams = editParams.copy(lipShade = lip)
-                        settingsSavedConfirmation = false
-                    },
-                    onSelectHairShade = { hair ->
-                        editParams = editParams.copy(hairShade = hair)
-                        settingsSavedConfirmation = false
-                    },
-                    onUpdateParams = { update ->
-                        editParams = update(editParams)
-                        settingsSavedConfirmation = false
-                    },
-                    onSaveDefaultSettings = {
-                        PlatformSettings.saveParams(editParams)
-                        settingsSavedConfirmation = true
-                        hasCustomSavedSettings = true
-                    },
-                    onOpenArchitecture = { showModelArchitectureSheet = true },
-                    onSaveToGallery = {
-                        isSaving = true
-                        PlatformActions.saveImageToGallery("AuraAI_${selectedSample?.id ?: "4K"}.png") { success, fileName ->
-                            isSaving = false
-                            savedFileName = fileName ?: "Aura_Restored_4K.png"
-                            mode = EditorScreenMode.SAVED_SHARE
-                        }
-                    },
-                    onShare = {
-                        PlatformActions.shareImage("Check out my ultra-sharp 4K restored portrait enhanced with Aura AI!")
-                    }
-                )
-            }
-
             EditorScreenMode.SAVED_SHARE -> {
-                ReminiShareScreen(
+                AuraSavedShareScreen(
                     savedDrawable = activeAfterDrawable ?: activeBeforeDrawable,
                     fileName = savedFileName,
-                    onBackToResult = { mode = EditorScreenMode.RESULT },
+                    onBackToResult = { mode = EditorScreenMode.COMPARISON_STUDIO },
                     onEnhanceAnother = { mode = EditorScreenMode.HOME },
                     onShare = {
                         PlatformActions.shareImage("Check out my ultra-sharp 4K restored portrait enhanced with Aura AI!")
@@ -517,17 +551,58 @@ fun MainScreen(
             }
         }
 
-        // Dialogs & Sheets
+        // 4K Export Upscale Modal
+        Export4kModal(
+            isVisible = showExportModal,
+            userCredits = userCredits,
+            isSaving = isSaving,
+            onDismiss = { showExportModal = false },
+            onSaveToCameraRoll = { resolution, removeWatermark, preserveExif, p3Color ->
+                isSaving = true
+                val creditCost = resolution.creditCost
+                if (userCredits >= creditCost) {
+                    userCredits -= creditCost
+                }
+                PlatformActions.saveImageToGallery("AuraAI_${resolution.name}.png") { success, fileName ->
+                    isSaving = false
+                    showExportModal = false
+                    savedFileName = fileName ?: "Aura_${resolution.title}_Export.png"
+                    mode = EditorScreenMode.SAVED_SHARE
+                }
+            },
+            onShareSheet = {
+                showExportModal = false
+                PlatformActions.shareImage("Check out my ultra-sharp 4K restored portrait enhanced with Aura AI!")
+            },
+            onInstagramStory = {
+                showExportModal = false
+                PlatformActions.shareImage("My 4K portrait restored by Aura AI!")
+            },
+            onRawTiff = {
+                isSaving = true
+                PlatformActions.saveImageToGallery("AuraAI_Master_8K_Raw.tiff") { success, fileName ->
+                    isSaving = false
+                    showExportModal = false
+                    savedFileName = fileName ?: "AuraAI_Master_8K_Raw.tiff"
+                    mode = EditorScreenMode.SAVED_SHARE
+                }
+            },
+            onGetMoreCredits = {
+                showExportModal = false
+                showCreditsDialog = true
+            }
+        )
+
+        // Refill / Credits Dialog
         if (showCreditsDialog) {
             AuraCreditsDialog(
                 credits = userCredits,
-                onClaimBonus = {
-                    userCredits += 10
-                },
+                onClaimBonus = { userCredits += 10 },
                 onDismiss = { showCreditsDialog = false }
             )
         }
 
+        // Settings Dialog
         if (showSettingsDialog) {
             AuraSettingsDialog(
                 onOpenArchitecture = {
@@ -538,16 +613,17 @@ fun MainScreen(
             )
         }
 
+        // Precision Tools Picker Dialog
         if (showAllToolsDialog) {
             AuraAllToolsDialog(
                 onSelectTool = { toolId ->
                     showAllToolsDialog = false
                     when (toolId) {
                         "passport" -> onNavigateToPassport()
-                        "portrait_4k" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, AestheticPreset.REMINI_NATURAL)
-                        "old_restore" -> startProcessing(samplePhotos[1].beforeDrawable, samplePhotos[1].reminiRefDrawable, AestheticPreset.REMINI_NATURAL)
-                        "denoise" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, AestheticPreset.REMINI_NATURAL)
-                        "beauty" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, AestheticPreset.KOREAN)
+                        "portrait_4k" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.COMPARISON_STUDIO, AestheticPreset.REMINI_NATURAL)
+                        "old_restore" -> startProcessing(samplePhotos[1].beforeDrawable, samplePhotos[1].reminiRefDrawable, EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
+                        "denoise" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.RETOUCH_SUITE, AestheticPreset.REMINI_NATURAL)
+                        "beauty" -> startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable, EditorScreenMode.RETOUCH_SUITE, AestheticPreset.KOREAN)
                         "custom" -> photoPickerLauncher()
                     }
                 },
@@ -555,6 +631,7 @@ fun MainScreen(
             )
         }
 
+        // Projects / History Dialog
         if (showProjectsDialog) {
             AuraProjectsDialog(
                 onSelectProject = { index ->
@@ -563,18 +640,19 @@ fun MainScreen(
                         selectedSample = samplePhotos[0]
                         activeBeforeDrawable = samplePhotos[0].beforeDrawable
                         activeAfterDrawable = samplePhotos[0].reminiRefDrawable
-                        mode = EditorScreenMode.RESULT
+                        mode = EditorScreenMode.COMPARISON_STUDIO
                     } else {
                         selectedSample = samplePhotos[1]
                         activeBeforeDrawable = samplePhotos[1].beforeDrawable
                         activeAfterDrawable = samplePhotos[1].reminiRefDrawable
-                        mode = EditorScreenMode.RESULT
+                        mode = EditorScreenMode.COMPARISON_STUDIO
                     }
                 },
                 onDismiss = { showProjectsDialog = false }
             )
         }
 
+        // Model Architecture Sheet
         if (showModelArchitectureSheet) {
             ModelArchitectureDialog(
                 onDismiss = { showModelArchitectureSheet = false }
@@ -583,9 +661,9 @@ fun MainScreen(
     }
 }
 
-// -------------------------------------------------------------------------
-// Top App Bar
-// -------------------------------------------------------------------------
+// =========================================================================
+// SCREEN 1: Top App Bar
+// =========================================================================
 @Composable
 private fun AuraTopAppBar(
     credits: Int,
@@ -599,21 +677,20 @@ private fun AuraTopAppBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Logo & Title
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(34.dp)
                     .clip(CircleShape)
-                    .background(AuraPrimary.copy(alpha = 0.20f))
-                    .border(1.dp, AuraPrimary.copy(alpha = 0.35f), CircleShape),
+                    .background(AuraPrimaryElectric.copy(alpha = 0.20f))
+                    .border(1.dp, AuraPrimaryElectric.copy(alpha = 0.35f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = "Aura AI Logo",
                     tint = AuraPrimary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(19.dp)
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
@@ -622,12 +699,14 @@ private fun AuraTopAppBar(
                 color = AuraOnSurface,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-0.4).sp
             )
         }
 
-        // Credits Pill & Settings Button
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             // Credits Counter Pill
             Row(
                 modifier = Modifier
@@ -643,7 +722,7 @@ private fun AuraTopAppBar(
                     imageVector = Icons.Default.Bolt,
                     contentDescription = "Credits",
                     tint = AuraSecondary,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(15.dp)
                 )
                 Text(
                     text = "$credits Credits",
@@ -660,73 +739,63 @@ private fun AuraTopAppBar(
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Settings",
                     tint = AuraOnSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(19.dp)
                 )
             }
         }
     }
 }
 
-// -------------------------------------------------------------------------
-// Hero Headline & Avatars
-// -------------------------------------------------------------------------
+// =========================================================================
+// SCREEN 1: Hero Header
+// =========================================================================
 @Composable
 private fun AuraHeroHeader(
     avatar1: DrawableResource,
     avatar2: DrawableResource
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Revive Your Memories",
                 color = AuraOnSurface,
-                fontSize = 30.sp,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-0.8).sp,
-                modifier = Modifier.weight(1f)
+                letterSpacing = (-0.5).sp,
+                lineHeight = 34.sp
             )
 
-            // Overlapping Avatars
-            Row(
-                modifier = Modifier.padding(start = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
+            // Overlapping Avatar Circles
+            Row(modifier = Modifier.offset(x = 6.dp)) {
+                Image(
+                    painter = painterResource(avatar1),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(34.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .border(2.dp, AuraSurfaceLowest, CircleShape)
-                ) {
-                    Image(
-                        painter = painterResource(avatar1),
-                        contentDescription = "Avatar 1",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                Box(
+                )
+                Image(
+                    painter = painterResource(avatar2),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .offset(x = (-10).dp)
-                        .size(34.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .border(2.dp, AuraSurfaceLowest, CircleShape)
-                ) {
-                    Image(
-                        painter = painterResource(avatar2),
-                        contentDescription = "Avatar 2",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                )
             }
         }
 
@@ -740,47 +809,78 @@ private fun AuraHeroHeader(
     }
 }
 
-// -------------------------------------------------------------------------
-// Hero Feature Card: AI HD Enhance & Unblur
-// -------------------------------------------------------------------------
+// =========================================================================
+// SCREEN 1: Hero Feature Card (Interactive Split Preview)
+// =========================================================================
 @Composable
 private fun AuraHeroFeatureCard(
     beforeDrawable: DrawableResource,
     afterDrawable: DrawableResource,
     onOneTapEnhance: () -> Unit
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(Color.White.copy(alpha = 0.05f))
             .border(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
-                    listOf(
-                        Color.White.copy(alpha = 0.28f),
-                        Color.White.copy(alpha = 0.10f)
-                    )
+                    listOf(Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.05f))
                 ),
-                shape = RoundedCornerShape(28.dp)
+                shape = RoundedCornerShape(24.dp)
             )
-            .padding(14.dp)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Interactive Split Visual Canvas / Comparison Slider
-            AuraHeroComparisonCanvas(
-                beforeDrawable = beforeDrawable,
-                afterDrawable = afterDrawable,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+        // Interactive Simulated Before & After Split Canvas
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+                .clip(RoundedCornerShape(18.dp))
+        ) {
+            BeforeAfterSlider(
+                beforePainter = painterResource(beforeDrawable),
+                afterPainter = painterResource(afterDrawable),
+                beforeLabel = "ORIGINAL BLURRY",
+                afterLabel = "4K RESTORED",
+                showTelemetry = false,
+                modifier = Modifier.fillMaxSize()
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            // Tag badge on top left corner
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(10.dp)
+                    .clip(CircleShape)
+                    .background(AuraSurfaceLowest.copy(alpha = 0.75f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(AuraSecondary)
+                    )
+                    Text(
+                        text = "Face Reconstruction v4.2",
+                        color = AuraOnSurface,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
 
-            // Card Information
+        // Title & Description
+        Column {
             Text(
                 text = "AI HD Enhance & Unblur",
                 color = AuraOnSurface,
@@ -791,254 +891,56 @@ private fun AuraHeroFeatureCard(
             Text(
                 text = "Reconstruct skin texture, eye catchlights, and hair strands",
                 color = AuraOnSurfaceVariant,
-                fontSize = 12.sp
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Primary Action Button with Specular Glow Gradient
-            Button(
-                onClick = onOneTapEnhance,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(9999.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                contentPadding = PaddingValues()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(
-                                    Color(0xFFA078FF),
-                                    Color(0xFFA078FF),
-                                    Color(0xFFF751A1)
-                                )
-                            )
-                        )
-                        .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(9999.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "One-Tap Magic Enhance",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-// -------------------------------------------------------------------------
-// Interactive Comparison Canvas for Hero Card
-// -------------------------------------------------------------------------
-@Composable
-private fun AuraHeroComparisonCanvas(
-    beforeDrawable: DrawableResource,
-    afterDrawable: DrawableResource,
-    modifier: Modifier = Modifier
-) {
-    val beforePainter = painterResource(beforeDrawable)
-    val afterPainter = painterResource(afterDrawable)
-
-    var splitFraction by remember { mutableFloatStateOf(0.55f) }
-
-    val infiniteTransition = rememberInfiniteTransition()
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.35f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(900),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
-    Box(
-        modifier = modifier
-            .background(Color.Black)
-            .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    if (size.width > 0) {
-                        splitFraction = (offset.x / size.width).coerceIn(0.05f, 0.95f)
-                    }
-                }
-            }
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { change, _ ->
-                    change.consume()
-                    if (size.width > 0) {
-                        splitFraction = (change.position.x / size.width).coerceIn(0.05f, 0.95f)
-                    }
-                }
-            }
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val canvasW = size.width
-            val canvasH = size.height
-
-            val intrinsicSize = afterPainter.intrinsicSize
-            val imgW = if (intrinsicSize.width.isFinite() && intrinsicSize.width > 0f) intrinsicSize.width else canvasW
-            val imgH = if (intrinsicSize.height.isFinite() && intrinsicSize.height > 0f) intrinsicSize.height else canvasH
-
-            val scale = maxOf(canvasW / imgW, canvasH / imgH)
-            val drawW = imgW * scale
-            val drawH = imgH * scale
-            val leftOff = (canvasW - drawW) * 0.5f
-            val topOff = (canvasH - drawH) * 0.5f
-            val drawSize = Size(drawW, drawH)
-
-            val splitX = (canvasW * splitFraction).coerceIn(0f, canvasW)
-
-            // Draw full After image
-            clipRect(0f, 0f, canvasW, canvasH) {
-                translate(left = leftOff, top = topOff) {
-                    with(afterPainter) {
-                        draw(size = drawSize)
-                    }
-                }
-            }
-
-            // Draw Before image clipped to [0 .. splitX]
-            clipRect(0f, 0f, splitX, canvasH) {
-                translate(left = leftOff, top = topOff) {
-                    with(beforePainter) {
-                        draw(size = drawSize)
-                    }
-                }
-            }
-
-            // Gradient shadow overlays
-            drawRect(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Color.Black.copy(alpha = 0.40f), Color.Transparent, Color.Black.copy(alpha = 0.70f))
-                )
-            )
-
-            // Divider vertical line
-            drawLine(
-                color = Color.White,
-                start = Offset(splitX, 0f),
-                end = Offset(splitX, canvasH),
-                strokeWidth = 2.dp.toPx()
+                fontSize = 13.sp
             )
         }
 
-        // Draggable Thumb Disc in Center of Split Line
+        // One-Tap Magic Enhance Gradient Button with Specular Glow
         Box(
             modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = (splitFraction * 320).dp - 18.dp) // responsive fallback
-                .size(36.dp)
+                .fillMaxWidth()
+                .height(50.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.25f))
-                .border(1.5.dp, Color.White, CircleShape),
+                .background(AuraHeroButtonGradient)
+                .border(1.dp, Color.White.copy(alpha = 0.40f), CircleShape)
+                .clickable { onOneTapEnhance() },
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.CompareArrows,
-                contentDescription = "Compare handle",
-                tint = Color.White,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-
-        // Tag badge top-left: Face Reconstruction v4.2 with Pulsing Cyan Dot
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(10.dp)
-                .clip(CircleShape)
-                .background(AuraSurfaceLowest.copy(alpha = 0.75f))
-                .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                .padding(horizontal = 10.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(AuraSecondary.copy(alpha = pulseAlpha))
-            )
-            Text(
-                text = "Face Reconstruction v4.2",
-                color = AuraOnSurface,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        // Floating Comparison Pills
-        // Bottom-left: Original Blurry
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(10.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.65f))
-                .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
-                .padding(horizontal = 10.dp, vertical = 4.dp)
-        ) {
-            Text(
-                text = "ORIGINAL BLURRY",
-                color = Color.White.copy(alpha = 0.85f),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.5.sp
-            )
-        }
-
-        // Bottom-right: 4K Restored
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(10.dp)
-                .clip(CircleShape)
-                .background(AuraPrimaryContainer.copy(alpha = 0.85f))
-                .border(1.dp, Color.White.copy(alpha = 0.30f), CircleShape)
-                .padding(horizontal = 10.dp, vertical = 4.dp)
-        ) {
-            Text(
-                text = "4K RESTORED",
-                color = Color.White,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.5.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(19.dp)
+                )
+                Text(
+                    text = "One-Tap Magic Enhance",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
 
-// -------------------------------------------------------------------------
-// Precision Tools Bento Grid
-// -------------------------------------------------------------------------
+// =========================================================================
+// SCREEN 1: Precision Tools Bento Grid
+// =========================================================================
 @Composable
 private fun AuraPrecisionToolsSection(
     sampleVintageDrawable: DrawableResource,
     onViewAll: () -> Unit,
     onToolSelected: (String) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Precision Tools",
@@ -1049,56 +951,96 @@ private fun AuraPrecisionToolsSection(
             Text(
                 text = "View All",
                 color = AuraSecondary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable { onViewAll() }
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 2x2 Bento Grid
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            // Row 1
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Tool 1: AI Portrait 4K
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                    .clickable { onToolSelected("portrait_4k") }
+                    .padding(14.dp)
             ) {
-                // Tool 1: AI Portrait 4K
-                AuraBentoCard(
-                    modifier = Modifier.weight(1f),
-                    badgeText = "HD 4K",
-                    badgeColor = AuraSecondary,
-                    badgeBg = AuraSecondary.copy(alpha = 0.12f),
-                    iconContent = {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(AuraPrimary.copy(alpha = 0.15f))
-                                .border(1.dp, AuraPrimary.copy(alpha = 0.30f), RoundedCornerShape(12.dp)),
+                                .background(AuraPrimaryElectric.copy(alpha = 0.15f))
+                                .border(1.dp, AuraPrimaryElectric.copy(alpha = 0.30f), RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CenterFocusStrong,
                                 contentDescription = null,
                                 tint = AuraPrimary,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                    },
-                    title = "AI Portrait 4K",
-                    subtitle = "Crystal sharp face detail",
-                    onClick = { onToolSelected("portrait_4k") }
-                )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(AuraSecondary.copy(alpha = 0.12f))
+                                .border(1.dp, AuraSecondary.copy(alpha = 0.30f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "HD 4K",
+                                color = AuraSecondary,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = "AI Portrait 4K",
+                        color = AuraOnSurface,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Crystal sharp face detail",
+                        color = AuraOnSurfaceVariant,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
-                // Tool 2: Old Photo Restore
-                AuraBentoCard(
-                    modifier = Modifier.weight(1f),
-                    badgeText = "Vintage",
-                    badgeColor = AuraTertiary,
-                    badgeBg = AuraTertiaryContainer.copy(alpha = 0.20f),
-                    iconContent = {
+            // Tool 2: Old Photo Restore
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                    .clickable { onToolSelected("old_restore") }
+                    .padding(14.dp)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -1114,36 +1056,71 @@ private fun AuraPrecisionToolsSection(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(AuraPrimary.copy(alpha = 0.25f)),
+                                    .background(AuraPrimaryElectric.copy(alpha = 0.20f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.History,
                                     contentDescription = null,
                                     tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
-                    },
-                    title = "Old Photo Restore",
-                    subtitle = "Scratch removal & unblur",
-                    onClick = { onToolSelected("old_restore") }
-                )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(AuraTertiaryContainer.copy(alpha = 0.20f))
+                                .border(1.dp, AuraTertiaryContainer.copy(alpha = 0.30f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "Vintage",
+                                color = AuraTertiaryFixed,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = "Old Photo Restore",
+                        color = AuraOnSurface,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Scratch removal & unblur",
+                        color = AuraOnSurfaceVariant,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
+        }
 
-            // Row 2
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Tool 3: Despeckle & Denoise
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                    .clickable { onToolSelected("denoise") }
+                    .padding(14.dp)
             ) {
-                // Tool 3: Despeckle & Denoise
-                AuraBentoCard(
-                    modifier = Modifier.weight(1f),
-                    badgeText = "ISO Clean",
-                    badgeColor = AuraOnSurfaceVariant,
-                    badgeBg = Color.White.copy(alpha = 0.06f),
-                    iconContent = {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -1156,121 +1133,112 @@ private fun AuraPrecisionToolsSection(
                                 imageVector = Icons.Default.Grain,
                                 contentDescription = null,
                                 tint = AuraSecondary,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                    },
-                    title = "Despeckle & Denoise",
-                    subtitle = "Remove night noise",
-                    onClick = { onToolSelected("denoise") }
-                )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.White.copy(alpha = 0.08f))
+                                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "ISO Clean",
+                                color = AuraOnSurfaceVariant,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = "Despeckle & Denoise",
+                        color = AuraOnSurface,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Remove night noise",
+                        color = AuraOnSurfaceVariant,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
-                // Tool 4: Face Glow & Makeup
-                AuraBentoCard(
-                    modifier = Modifier.weight(1f),
-                    badgeText = "Beauty",
-                    badgeColor = AuraTertiary,
-                    badgeBg = AuraTertiaryContainer.copy(alpha = 0.20f),
-                    iconContent = {
+            // Tool 4: Face Glow & Makeup
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                    .clickable { onToolSelected("face_glow") }
+                    .padding(14.dp)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(AuraTertiaryContainer.copy(alpha = 0.20f))
-                                .border(1.dp, AuraTertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                                .border(1.dp, AuraTertiaryContainer.copy(alpha = 0.30f), RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Flare,
                                 contentDescription = null,
                                 tint = AuraTertiary,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                    },
-                    title = "Face Glow & Makeup",
-                    subtitle = "Studio radiance",
-                    onClick = { onToolSelected("face_glow") }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AuraBentoCard(
-    badgeText: String,
-    badgeColor: Color,
-    badgeBg: Color,
-    iconContent: @Composable () -> Unit,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.08f))
-                ),
-                shape = RoundedCornerShape(20.dp)
-            )
-            .clickable { onClick() }
-            .padding(14.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                iconContent()
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(badgeBg)
-                        .border(1.dp, badgeColor.copy(alpha = 0.30f), RoundedCornerShape(6.dp))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(AuraTertiaryContainer.copy(alpha = 0.20f))
+                                .border(1.dp, AuraTertiaryContainer.copy(alpha = 0.30f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "Beauty",
+                                color = AuraTertiary,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
                     Text(
-                        text = badgeText,
-                        color = badgeColor,
-                        fontSize = 10.sp,
+                        text = "Face Glow & Makeup",
+                        color = AuraOnSurface,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Studio radiance",
+                        color = AuraOnSurfaceVariant,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = title,
-                color = AuraOnSurface,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                color = AuraOnSurfaceVariant,
-                fontSize = 11.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }
 
-// -------------------------------------------------------------------------
-// Recent Restorations Horizontal Scroll
-// -------------------------------------------------------------------------
+// =========================================================================
+// SCREEN 1: Recent Restorations Horizontal Scroll
+// =========================================================================
 @Composable
 private fun AuraRecentRestorationsSection(
     sample1Drawable: DrawableResource,
@@ -1280,13 +1248,16 @@ private fun AuraRecentRestorationsSection(
     onBatchEnhance: () -> Unit,
     onOpenHistory: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = "Recent Restorations",
                     color = AuraOnSurface,
@@ -1302,21 +1273,20 @@ private fun AuraRecentRestorationsSection(
                     Text(
                         text = "3 photos",
                         color = AuraOnSurfaceVariant,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
+
             Text(
                 text = "History",
                 color = AuraPrimary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable { onOpenHistory() }
             )
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier
@@ -1324,41 +1294,177 @@ private fun AuraRecentRestorationsSection(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Card 1: Portrait 4K
-            AuraRecentPhotoCard(
-                imageDrawable = sample1Drawable,
-                topBadgeText = "4K ULTRA",
-                topBadgeColor = AuraSecondary,
-                pillIcon = Icons.Default.CheckCircle,
-                pillText = "Enhanced",
-                title = "Portrait_V2_4K.jpg",
-                timestamp = "Today, 2:15 PM",
-                onClick = onOpenSample1
-            )
+            // Card 1
+            Column(
+                modifier = Modifier
+                    .width(170.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                    .clickable { onOpenSample1() }
+                    .padding(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(170.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                ) {
+                    Image(
+                        painter = painterResource(sample1Drawable),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    // Top badge
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.Black.copy(alpha = 0.65f))
+                            .border(1.dp, AuraSecondary.copy(alpha = 0.40f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "4K ULTRA",
+                            color = AuraSecondary,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                    // Bottom badge
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(6.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Text(
+                            text = "Enhanced",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Portrait_V2_4K.jpg",
+                    color = AuraOnSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "Today, 2:15 PM",
+                    color = AuraOnSurfaceVariant,
+                    fontSize = 10.sp
+                )
+            }
 
-            // Card 2: Vintage Restored
-            AuraRecentPhotoCard(
-                imageDrawable = sample2Drawable,
-                topBadgeText = "RESTORED",
-                topBadgeColor = AuraPrimary,
-                pillIcon = Icons.Default.AutoFixHigh,
-                pillText = "Repaired",
-                title = "Family_Archive_1974.png",
-                timestamp = "Yesterday",
-                onClick = onOpenSample2
-            )
+            // Card 2
+            Column(
+                modifier = Modifier
+                    .width(170.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                    .clickable { onOpenSample2() }
+                    .padding(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(170.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                ) {
+                    Image(
+                        painter = painterResource(sample2Drawable),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    // Top badge
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.Black.copy(alpha = 0.65f))
+                            .border(1.dp, AuraPrimary.copy(alpha = 0.40f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "RESTORED",
+                            color = AuraPrimary,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                    // Bottom badge
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(6.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoFixHigh,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Text(
+                            text = "Repaired",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Family_Archive_1974.png",
+                    color = AuraOnSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "Yesterday",
+                    color = AuraOnSurfaceVariant,
+                    fontSize = 10.sp
+                )
+            }
 
-            // Card 3: Batch Enhance Trigger Card
+            // Card 3: Batch Enhance Upload Trigger Card
             Box(
                 modifier = Modifier
                     .width(140.dp)
-                    .height(210.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color.White.copy(alpha = 0.03f))
+                    .height(220.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = 0.04f))
                     .border(
-                        1.5.dp,
-                        Color.White.copy(alpha = 0.18f),
-                        RoundedCornerShape(20.dp)
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.18f),
+                        shape = RoundedCornerShape(18.dp)
                     )
                     .clickable { onBatchEnhance() }
                     .padding(14.dp),
@@ -1380,23 +1486,21 @@ private fun AuraRecentRestorationsSection(
                             imageVector = Icons.Default.AddPhotoAlternate,
                             contentDescription = null,
                             tint = AuraPrimary,
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Batch Enhance",
                         color = AuraOnSurface,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "Up to 20 files",
                         color = AuraOnSurfaceVariant,
-                        fontSize = 11.sp,
-                        textAlign = TextAlign.Center
+                        fontSize = 11.sp
                     )
                 }
             }
@@ -1404,111 +1508,9 @@ private fun AuraRecentRestorationsSection(
     }
 }
 
-@Composable
-private fun AuraRecentPhotoCard(
-    imageDrawable: DrawableResource,
-    topBadgeText: String,
-    topBadgeColor: Color,
-    pillIcon: androidx.compose.ui.graphics.vector.ImageVector,
-    pillText: String,
-    title: String,
-    timestamp: String,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .width(165.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(
-                1.dp,
-                Brush.verticalGradient(
-                    listOf(Color.White.copy(alpha = 0.25f), Color.White.copy(alpha = 0.08f))
-                ),
-                RoundedCornerShape(20.dp)
-            )
-            .clickable { onClick() }
-            .padding(8.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .clip(RoundedCornerShape(14.dp))
-            ) {
-                Image(
-                    painter = painterResource(imageDrawable),
-                    contentDescription = title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                // Top Badge
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color.Black.copy(alpha = 0.65f))
-                        .border(1.dp, topBadgeColor.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = topBadgeText,
-                        color = topBadgeColor,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                // Bottom Pill
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(6.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color.Black.copy(alpha = 0.60f))
-                        .padding(horizontal = 6.dp, vertical = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = pillIcon,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Text(
-                        text = pillText,
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = title,
-                color = AuraOnSurface,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = timestamp,
-                color = AuraOnSurfaceVariant,
-                fontSize = 10.sp
-            )
-        }
-    }
-}
-
-// -------------------------------------------------------------------------
-// Bottom Navigation Bar
-// -------------------------------------------------------------------------
+// =========================================================================
+// SCREEN 1: Floating Glass Bottom Navigation Bar
+// =========================================================================
 @Composable
 private fun AuraBottomNavBar(
     selectedTab: AuraBottomNavTab,
@@ -1519,43 +1521,49 @@ private fun AuraBottomNavBar(
         modifier = modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(AuraSurfaceContainer.copy(alpha = 0.88f))
-            .border(1.dp, AuraOutlineVariant.copy(alpha = 0.40f), CircleShape)
-            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .background(AuraSurfaceContainer.copy(alpha = 0.75f))
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    listOf(Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.08f))
+                ),
+                shape = CircleShape
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Tab 0: Home
             AuraNavTabItem(
-                icon = Icons.Default.Home,
                 label = "Home",
+                icon = Icons.Default.Home,
                 isSelected = selectedTab == AuraBottomNavTab.HOME,
                 onClick = { onTabSelected(AuraBottomNavTab.HOME) }
             )
 
             // Tab 1: Studio
             AuraNavTabItem(
-                icon = Icons.Default.Compare,
                 label = "Studio",
+                icon = Icons.Default.Compare,
                 isSelected = selectedTab == AuraBottomNavTab.STUDIO,
                 onClick = { onTabSelected(AuraBottomNavTab.STUDIO) }
             )
 
             // Tab 2: Restore
             AuraNavTabItem(
-                icon = Icons.Default.AutoFixHigh,
                 label = "Restore",
+                icon = Icons.Default.AutoFixHigh,
                 isSelected = selectedTab == AuraBottomNavTab.RESTORE,
                 onClick = { onTabSelected(AuraBottomNavTab.RESTORE) }
             )
 
             // Tab 3: Projects
             AuraNavTabItem(
-                icon = Icons.Default.FolderOpen,
                 label = "Projects",
+                icon = Icons.Default.FolderOpen,
                 isSelected = selectedTab == AuraBottomNavTab.PROJECTS,
                 onClick = { onTabSelected(AuraBottomNavTab.PROJECTS) }
             )
@@ -1565,537 +1573,493 @@ private fun AuraBottomNavBar(
 
 @Composable
 private fun AuraNavTabItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    if (isSelected) {
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(AuraPrimary.copy(alpha = 0.20f))
-                .clickable { onClick() }
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = AuraPrimary,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = label,
-                color = AuraPrimary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable { onClick() }
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = AuraOnSurfaceVariant.copy(alpha = 0.70f),
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = label,
-                color = AuraOnSurfaceVariant.copy(alpha = 0.70f),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}
-
-// -------------------------------------------------------------------------
-// Aura Processing Screen
-// -------------------------------------------------------------------------
-@Composable
-private fun AuraProcessingScreen(
-    stageProgress: PipelineStageProgress?,
-    onCancel: () -> Unit
-) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(AuraSurfaceLowest),
+            .clip(CircleShape)
+            .background(if (isSelected) AuraPrimaryElectric.copy(alpha = 0.22f) else Color.Transparent)
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            CircularProgressIndicator(
-                color = AuraPrimaryContainer,
-                strokeWidth = 4.dp,
-                modifier = Modifier.size(68.dp)
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = if (isSelected) AuraPrimary else AuraOnSurfaceVariant,
+                modifier = Modifier.size(20.dp)
             )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
             Text(
-                text = "Aura AI Neural Studio",
-                color = AuraOnSurface,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                text = label,
+                color = if (isSelected) AuraPrimary else AuraOnSurfaceVariant,
+                fontSize = 10.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stageProgress?.modelName ?: "Loading 4K Neural Models...",
-                color = AuraSecondary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = stageProgress?.stageDescription ?: "Synthesizing ultra-sharp facial features...",
-                color = AuraOnSurfaceVariant,
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            LinearProgressIndicator(
-                progress = { stageProgress?.progressFraction ?: 0.25f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = AuraTertiaryContainer,
-                trackColor = AuraSurfaceContainerHigh
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Text(
-                text = "Step ${stageProgress?.stepIndex ?: 1} of ${stageProgress?.totalSteps ?: 5}",
-                color = AuraOnSurfaceVariant,
-                fontSize = 11.sp
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            TextButton(onClick = onCancel) {
-                Text("Cancel", color = AuraOnSurfaceVariant)
-            }
         }
     }
 }
 
-// -------------------------------------------------------------------------
-// Dialogs: Credits, Settings, All Tools, Projects
-// -------------------------------------------------------------------------
+// =========================================================================
+// SCREEN 2: Enhancement Comparison Studio
+// Matches `enhancement_comparison_studio/code.html`
+// =========================================================================
 @Composable
-private fun AuraCreditsDialog(
-    credits: Int,
-    onClaimBonus: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    var claimed by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Bolt, contentDescription = null, tint = AuraSecondary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Aura AI Credits", color = AuraOnSurface, fontWeight = FontWeight.Bold)
-            }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(AuraSurfaceContainerHigh)
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Current Balance", color = AuraOnSurfaceVariant, fontSize = 12.sp)
-                        Text(
-                            text = "$credits Credits",
-                            color = AuraSecondary,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                        Text("Refills daily · 4K Pro Master Engine", color = AuraOnSurfaceVariant, fontSize = 11.sp)
-                    }
-                }
-
-                Text("Credit Consumption:", color = AuraOnSurface, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CreditRow("AI Portrait 4K Ultra", "1 Credit")
-                    CreditRow("Old Photo Scratch Repair", "1 Credit")
-                    CreditRow("Passport Studio (Suit & BG)", "2 Credits")
-                    CreditRow("Batch Enhance (Up to 20)", "5 Credits")
-                }
-
-                Button(
-                    onClick = {
-                        if (!claimed) {
-                            onClaimBonus()
-                            claimed = true
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (claimed) AuraSurfaceContainerHigh else AuraPrimaryContainer
-                    ),
-                    enabled = !claimed
-                ) {
-                    Text(if (claimed) "Claimed +10 Today!" else "Claim Free Daily Bonus (+10)")
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close", color = AuraPrimary)
-            }
-        },
-        containerColor = AuraSurfaceContainer
-    )
-}
-
-@Composable
-private fun CreditRow(feature: String, cost: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(feature, color = AuraOnSurfaceVariant, fontSize = 12.sp)
-        Text(cost, color = AuraOnSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-private fun AuraSettingsDialog(
-    onOpenArchitecture: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    var highPrecisionMesh by remember { mutableStateOf(true) }
-    var autoSaveToPhotos by remember { mutableStateOf(true) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Settings, contentDescription = null, tint = AuraPrimary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Aura AI Preferences", color = AuraOnSurface, fontWeight = FontWeight.Bold)
-            }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("4K Ultra Precision Mesh", color = AuraOnSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Dual-pass GPEN GAN high-frequency detail", color = AuraOnSurfaceVariant, fontSize = 11.sp)
-                    }
-                    Switch(
-                        checked = highPrecisionMesh,
-                        onCheckedChange = { highPrecisionMesh = it },
-                        colors = SwitchDefaults.colors(checkedThumbColor = AuraPrimary, checkedTrackColor = AuraPrimaryContainer)
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Auto-Save to Camera Roll", color = AuraOnSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Automatically export 1080p/4K master to Photos", color = AuraOnSurfaceVariant, fontSize = 11.sp)
-                    }
-                    Switch(
-                        checked = autoSaveToPhotos,
-                        onCheckedChange = { autoSaveToPhotos = it },
-                        colors = SwitchDefaults.colors(checkedThumbColor = AuraPrimary, checkedTrackColor = AuraPrimaryContainer)
-                    )
-                }
-
-                Button(
-                    onClick = onOpenArchitecture,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AuraSurfaceContainerHigh)
-                ) {
-                    Icon(Icons.Default.Info, contentDescription = null, tint = AuraSecondary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Inspect 5-Model Neural Architecture", color = AuraOnSurface, fontSize = 12.sp)
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Done", color = AuraPrimary)
-            }
-        },
-        containerColor = AuraSurfaceContainer
-    )
-}
-
-@Composable
-private fun AuraAllToolsDialog(
-    onSelectTool: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text("All Precision AI Tools", color = AuraOnSurface, fontWeight = FontWeight.Bold)
-        },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                AllToolItem(
-                    icon = Icons.Default.Badge,
-                    title = "Passport Photo Studio",
-                    desc = "Official US 2×2, Schengen, 10 Formal Coats & BG Swap",
-                    badge = "Featured Studio",
-                    badgeColor = AuraSecondary,
-                    onClick = { onSelectTool("passport") }
-                )
-                AllToolItem(
-                    icon = Icons.Default.CenterFocusStrong,
-                    title = "AI Portrait 4K Ultra",
-                    desc = "Crystal sharp iris gleam, pores and hair strands",
-                    badge = "HD 4K",
-                    badgeColor = AuraSecondary,
-                    onClick = { onSelectTool("portrait_4k") }
-                )
-                AllToolItem(
-                    icon = Icons.Default.History,
-                    title = "Old Photo Restore",
-                    desc = "Scratch removal, unblur & vintage tear repair",
-                    badge = "Vintage",
-                    badgeColor = AuraTertiary,
-                    onClick = { onSelectTool("old_restore") }
-                )
-                AllToolItem(
-                    icon = Icons.Default.Grain,
-                    title = "Despeckle & Denoise",
-                    desc = "Remove night ISO grain and low-light artifacts",
-                    badge = "ISO Clean",
-                    badgeColor = AuraOnSurfaceVariant,
-                    onClick = { onSelectTool("denoise") }
-                )
-                AllToolItem(
-                    icon = Icons.Default.Flare,
-                    title = "Face Glow & Makeup",
-                    desc = "Studio skin radiance, soft warmth & natural blush",
-                    badge = "Beauty",
-                    badgeColor = AuraTertiary,
-                    onClick = { onSelectTool("beauty") }
-                )
-                AllToolItem(
-                    icon = Icons.Default.PhotoLibrary,
-                    title = "Pick Custom Photo from Gallery",
-                    desc = "Upload any photo from your device library",
-                    badge = "Library",
-                    badgeColor = AuraPrimary,
-                    onClick = { onSelectTool("custom") }
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close", color = AuraPrimary)
-            }
-        },
-        containerColor = AuraSurfaceContainer
-    )
-}
-
-@Composable
-private fun AllToolItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    desc: String,
-    badge: String,
-    badgeColor: Color,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(AuraSurfaceContainerHigh)
-            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-            .clickable { onClick() }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(AuraSurfaceContainer)
-                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(10.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = badgeColor, modifier = Modifier.size(20.dp))
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, color = AuraOnSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.width(6.dp))
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(badgeColor.copy(alpha = 0.15f))
-                        .padding(horizontal = 4.dp, vertical = 1.dp)
-                ) {
-                    Text(badge, color = badgeColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(desc, color = AuraOnSurfaceVariant, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = AuraOnSurfaceVariant, modifier = Modifier.size(18.dp))
-    }
-}
-
-@Composable
-private fun AuraProjectsDialog(
-    onSelectProject: (Int) -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.FolderOpen, contentDescription = null, tint = AuraPrimary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Saved Projects & Restorations", color = AuraOnSurface, fontWeight = FontWeight.Bold)
-            }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                ProjectItemRow("Portrait_V2_4K.jpg", "Enhanced in 4K Ultra · Today", "4K UHD") { onSelectProject(0) }
-                ProjectItemRow("Family_Archive_1974.png", "Vintage Restored & Unblurred · Yesterday", "RESTORED") { onSelectProject(1) }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close", color = AuraPrimary)
-            }
-        },
-        containerColor = AuraSurfaceContainer
-    )
-}
-
-@Composable
-private fun ProjectItemRow(name: String, desc: String, badge: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(AuraSurfaceContainerHigh)
-            .clickable { onClick() }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(name, color = AuraOnSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-            Text(desc, color = AuraOnSurfaceVariant, fontSize = 11.sp)
-        }
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(AuraPrimary.copy(alpha = 0.15f))
-                .padding(horizontal = 6.dp, vertical = 2.dp)
-        ) {
-            Text(badge, color = AuraPrimary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-// -------------------------------------------------------------------------
-// Result & Share Screens
-// -------------------------------------------------------------------------
-@Composable
-private fun ReminiResultScreen(
+private fun AuraComparisonStudioScreen(
     beforeDrawable: DrawableResource,
     afterDrawable: DrawableResource,
-    customPickedBitmap: ImageBitmap?,
+    colorFilter: ColorFilter?,
     editParams: SkinEditParams,
-    telemetry: SkinAnalysisTelemetry,
-    showFineTuneSliders: Boolean,
-    settingsSavedConfirmation: Boolean,
-    hasCustomSavedSettings: Boolean,
-    isSaving: Boolean,
+    userCredits: Int,
     onBack: () -> Unit,
-    onToggleFineTuneSliders: () -> Unit,
-    onSelectPreset: (AestheticPreset) -> Unit,
-    onSelectLipShade: (LipShadePreset) -> Unit,
-    onSelectHairShade: (HairShadePreset) -> Unit,
-    onUpdateParams: ((SkinEditParams) -> SkinEditParams) -> Unit,
-    onSaveDefaultSettings: () -> Unit,
-    onOpenArchitecture: () -> Unit,
-    onSaveToGallery: () -> Unit,
-    onShare: () -> Unit
+    onNavigateToRetouchSuite: () -> Unit,
+    onRegenerate: () -> Unit,
+    onOpenExportModal: () -> Unit,
+    onUpdateIntensity: (Float) -> Unit
 ) {
-    val beforePainter: Painter = if (customPickedBitmap != null) {
-        remember(customPickedBitmap) { BitmapPainter(customPickedBitmap) }
-    } else {
-        painterResource(beforeDrawable)
-    }
-    val afterPainter: Painter = if (customPickedBitmap != null) {
-        remember(customPickedBitmap) { BitmapPainter(customPickedBitmap) }
-    } else {
-        painterResource(afterDrawable)
-    }
+    var isHoldCompareActive by remember { mutableStateOf(false) }
+    var zoomFactor by remember { mutableFloatStateOf(1.0f) }
+    var studioMode by remember { mutableStateOf("split") }
+    var intensityValue by remember { mutableFloatStateOf(editParams.facialClarity) }
 
-    val liveColorFilter = remember(editParams) {
-        val warmth = editParams.skinWarmth * editParams.preset.warmthBoost
-        val contrast = editParams.preset.contrastLift
-        val rMult = warmth * 1.02f
-        val gMult = 1.0f
-        val bMult = (2f - warmth) * 0.98f
-
-        ColorFilter.colorMatrix(
-            ColorMatrix(
-                floatArrayOf(
-                    rMult * contrast, 0f, 0f, 0f, (editParams.skinRadiance - 1f) * 20f,
-                    0f, gMult * contrast, 0f, 0f, (editParams.skinRadiance - 1f) * 15f,
-                    0f, 0f, bMult * contrast, 0f, (editParams.skinRadiance - 1f) * 10f,
-                    0f, 0f, 0f, 1f, 0f
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AuraSurfaceLowest)
+    ) {
+        // Retouch Studio HUD Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Exit Button
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Exit Studio",
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
                 )
+            }
+
+            // Center Feature Badge
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(AuraSurfaceContainerHigh.copy(alpha = 0.85f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = AuraSecondary,
+                        modifier = Modifier.size(15.dp)
+                    )
+                    Text(
+                        text = "AI Ultra Enhance",
+                        color = AuraOnSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "v4.2",
+                        color = AuraSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            // Quick Actions: Zoom & Hold-Compare
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Zoom Toggle Button
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(if (zoomFactor > 1.2f) AuraPrimaryElectric.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                        .clickable { zoomFactor = if (zoomFactor > 1.2f) 1.0f else 1.9f }
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ZoomIn,
+                            contentDescription = null,
+                            tint = if (zoomFactor > 1.2f) AuraPrimary else Color.White,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = if (zoomFactor > 1.2f) "100%" else "200%",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Hold to Compare Button
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(if (isHoldCompareActive) AuraSecondaryContainer else Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    isHoldCompareActive = true
+                                    tryAwaitRelease()
+                                    isHoldCompareActive = false
+                                }
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Compare,
+                        contentDescription = "Hold to compare",
+                        tint = if (isHoldCompareActive) AuraOnSecondaryContainer else Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+
+        // Main Comparison Canvas Viewport
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = 14.dp, vertical = 4.dp)
+        ) {
+            BeforeAfterSlider(
+                beforePainter = painterResource(beforeDrawable),
+                afterPainter = painterResource(afterDrawable),
+                beforeLabel = "BEFORE (720p)",
+                afterLabel = "AFTER (4K AI)",
+                colorFilter = colorFilter,
+                showTelemetry = true,
+                showLandmarks = studioMode == "magnifier",
+                isHoldCompareActive = isHoldCompareActive,
+                zoomFactor = zoomFactor,
+                onZoomToggle = { zoomFactor = if (zoomFactor > 1.2f) 1.0f else 1.9f },
+                modifier = Modifier.fillMaxSize()
             )
-        )
+        }
+
+        // Bottom Dock, Tools & CTAs
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                .background(AuraSurfaceContainer.copy(alpha = 0.85f))
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        listOf(Color.White.copy(alpha = 0.20f), Color.White.copy(alpha = 0.04f))
+                    ),
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                )
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Mode Segmented Selector
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), CircleShape)
+                    .padding(3.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Split View
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(CircleShape)
+                        .background(if (studioMode == "split") AuraPrimaryElectric.copy(alpha = 0.28f) else Color.Transparent)
+                        .clickable { studioMode = "split" }
+                        .padding(vertical = 7.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Compare,
+                            contentDescription = null,
+                            tint = if (studioMode == "split") AuraPrimary else AuraOnSurfaceVariant,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "Split View",
+                            color = if (studioMode == "split") Color.White else AuraOnSurfaceVariant,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Face Magnifier
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(CircleShape)
+                        .background(if (studioMode == "magnifier") AuraPrimaryElectric.copy(alpha = 0.28f) else Color.Transparent)
+                        .clickable {
+                            studioMode = "magnifier"
+                            zoomFactor = if (zoomFactor > 1.2f) 1.0f else 1.9f
+                        }
+                        .padding(vertical = 7.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CenterFocusStrong,
+                            contentDescription = null,
+                            tint = if (studioMode == "magnifier") AuraPrimary else AuraOnSurfaceVariant,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "Magnifier",
+                            color = if (studioMode == "magnifier") Color.White else AuraOnSurfaceVariant,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Pro Level (Switches to Retouch Suite)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(CircleShape)
+                        .clickable { onNavigateToRetouchSuite() }
+                        .padding(vertical = 7.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = null,
+                            tint = AuraOnSurfaceVariant,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "Pro Level",
+                            color = AuraOnSurfaceVariant,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                // Beauty
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(CircleShape)
+                        .clickable { onNavigateToRetouchSuite() }
+                        .padding(vertical = 7.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Flare,
+                            contentDescription = null,
+                            tint = AuraOnSurfaceVariant,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "Beauty",
+                            color = AuraOnSurfaceVariant,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+
+            // Quick Tuning Intensity Slider
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "INTENSITY",
+                    color = AuraOutline,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.6.sp
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Natural",
+                        color = AuraOnSurfaceVariant,
+                        fontSize = 11.sp
+                    )
+
+                    Slider(
+                        value = intensityValue,
+                        onValueChange = {
+                            intensityValue = it
+                            onUpdateIntensity(it)
+                        },
+                        valueRange = 0.2f..1.2f,
+                        modifier = Modifier.width(140.dp),
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color.White,
+                            activeTrackColor = AuraSecondary,
+                            inactiveTrackColor = Color.White.copy(alpha = 0.12f)
+                        )
+                    )
+
+                    Text(
+                        text = "Ultra 4K",
+                        color = AuraSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Primary Action Cluster
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Regenerate Button
+                IconButton(
+                    onClick = onRegenerate,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Regenerate",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Save & Export in 4K Button with Credit Pill
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .clip(CircleShape)
+                        .background(AuraExportButtonGradient)
+                        .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                        .clickable { onOpenExportModal() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(19.dp)
+                        )
+                        Text(
+                            text = "Save & Export in 4K",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.22f))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "⚡1 Credit",
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
+}
+
+// =========================================================================
+// SCREEN 3: AI Retouch & Restoration Suite
+// Matches `ai_retouch_restoration_suite/code.html`
+// =========================================================================
+@Composable
+private fun AuraRetouchSuiteScreen(
+    beforeDrawable: DrawableResource,
+    afterDrawable: DrawableResource,
+    colorFilter: ColorFilter?,
+    editParams: SkinEditParams,
+    userCredits: Int,
+    onBack: () -> Unit,
+    onNavigateToStudio: () -> Unit,
+    onUpdateParams: ((SkinEditParams) -> SkinEditParams) -> Unit,
+    onSelectPreset: (AestheticPreset) -> Unit,
+    onOpenExportModal: () -> Unit,
+    onOpenSettings: () -> Unit
+) {
+    var activeSuiteTab by remember { mutableStateOf(RetouchSuiteTab.RETOUCH) }
+    var zoomFactor by remember { mutableFloatStateOf(1.0f) }
 
     Column(
         modifier = Modifier
@@ -2106,245 +2070,421 @@ private fun ReminiResultScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Aura 4K Studio Result",
-                    color = AuraOnSurface,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Drag slider · Double-tap for 2× Zoom",
-                    color = AuraSecondary,
-                    fontSize = 11.sp
-                )
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onShare) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
-                        tint = Color.White
+                        imageVector = Icons.Default.ChevronLeft,
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-                IconButton(onClick = onSaveToGallery, enabled = !isSaving) {
-                    if (isSaving) {
-                        CircularProgressIndicator(
-                            color = AuraTertiary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = "Save",
-                            tint = AuraSecondary
+                Text(
+                    text = "Aura AI",
+                    color = AuraOnSurface,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(AuraSurfaceContainerHigh.copy(alpha = 0.85f))
+                    .border(1.dp, AuraOutlineVariant.copy(alpha = 0.40f), CircleShape)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(AuraSecondary)
+                    )
+                    Text(
+                        text = "RESTORATION 4K",
+                        color = AuraSecondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.6.sp
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = onOpenSettings,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = AuraOnSurfaceVariant,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+        }
+
+        // Upper Section: Retouch Canvas Preview with Landmark Detection
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1.05f)
+                .padding(horizontal = 14.dp, vertical = 4.dp)
+        ) {
+            BeforeAfterSlider(
+                beforePainter = painterResource(beforeDrawable),
+                afterPainter = painterResource(afterDrawable),
+                beforeLabel = "ORIGINAL RAW",
+                afterLabel = "AURA ENHANCED",
+                colorFilter = colorFilter,
+                showTelemetry = false,
+                showLandmarks = true,
+                zoomFactor = zoomFactor,
+                onZoomToggle = { zoomFactor = if (zoomFactor > 1.2f) 1.0f else 1.9f },
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // Live Preview Tag
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(12.dp)
+                    .clip(CircleShape)
+                    .background(AuraSurfaceLowest.copy(alpha = 0.75f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "LIVE PREVIEW • 60 FPS",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.5.sp
+                )
+            }
+
+            // Top Right Switch to Studio Button
+            IconButton(
+                onClick = onNavigateToStudio,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(AuraSurfaceLowest.copy(alpha = 0.75f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Compare,
+                    contentDescription = "Full Split View",
+                    tint = Color.White,
+                    modifier = Modifier.size(17.dp)
+                )
+            }
+        }
+
+        // Lower Section: Frosted Glass Adjustment Control Panel
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1.35f)
+                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                .background(AuraSurfaceContainer.copy(alpha = 0.90f))
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.04f))
+                    ),
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                )
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // 1. Mode Selector Pills (Segmented Glass Control)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), CircleShape)
+                    .padding(3.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RetouchSuiteTab.values().forEach { tab ->
+                    val isSelected = activeSuiteTab == tab
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(CircleShape)
+                            .background(
+                                if (isSelected) {
+                                    Brush.horizontalGradient(
+                                        listOf(AuraPrimaryElectric.copy(alpha = 0.35f), AuraSecondaryContainer.copy(alpha = 0.25f))
+                                    )
+                                } else {
+                                    Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                                }
+                            )
+                            .border(
+                                width = if (isSelected) 1.dp else 0.dp,
+                                color = if (isSelected) AuraSecondary.copy(alpha = 0.40f) else Color.Transparent,
+                                shape = CircleShape
+                            )
+                            .clickable { activeSuiteTab = tab }
+                            .padding(vertical = 7.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = tab.name.lowercase().replaceFirstChar { it.uppercase() },
+                            color = if (isSelected) Color.White else AuraOnSurfaceVariant,
+                            fontSize = 12.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                         )
                     }
                 }
             }
-        }
 
-        // Split Comparison Slider
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1.0f)
-                .padding(horizontal = 14.dp, vertical = 4.dp)
-        ) {
-            BeforeAfterSlider(
-                beforePainter = beforePainter,
-                afterPainter = afterPainter,
-                afterLabel = "4K Restored",
-                colorFilter = liveColorFilter,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+            // 2. Fine-Tuning Intensity Sliders Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        tint = AuraPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "Fine-Tuning Parameters",
+                        color = AuraOnSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
-        // Bottom Controls Container
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1.15f)
-                .background(AuraSurfaceContainer)
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 20.dp)
-        ) {
-            SkinTelemetryBar(telemetry = telemetry, onOpenArchitecture = onOpenArchitecture)
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(AuraSecondaryContainer.copy(alpha = 0.15f))
+                        .border(1.dp, AuraSecondary.copy(alpha = 0.25f), CircleShape)
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "Neural Engine v4.2",
+                        color = AuraSecondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
 
-            // Aesthetic Presets Row
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
-                Text(
-                    text = "Aesthetic Styles",
-                    color = AuraOnSurface,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
+            // Sliders Container
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Slider 1: AI Denoise & Unblur
+                AuraTuningSliderCard(
+                    title = "AI Denoise & Unblur",
+                    icon = Icons.Default.BlurOff,
+                    accentColor = AuraSecondary,
+                    value = editParams.facialClarity,
+                    valueText = "${(editParams.facialClarity * 100).toInt()}%",
+                    onValueChange = { onUpdateParams { p -> p.copy(facialClarity = it) } }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                // Slider 2: Skin Texture & Pores
+                AuraTuningSliderCard(
+                    title = "Skin Texture & Pores",
+                    icon = Icons.Default.Face,
+                    accentColor = AuraPrimary,
+                    value = editParams.skinSmoothness,
+                    valueText = "${(editParams.skinSmoothness * 100).toInt()}% (Natural)",
+                    onValueChange = { onUpdateParams { p -> p.copy(skinSmoothness = it) } }
+                )
+
+                // Slider 3: Eye Iris Brightness
+                AuraTuningSliderCard(
+                    title = "Eye Iris Brightness",
+                    icon = Icons.Default.Visibility,
+                    accentColor = AuraSecondary,
+                    value = editParams.skinRadiance - 0.5f,
+                    valueText = "${((editParams.skinRadiance - 0.5f) * 100).toInt().coerceIn(0, 100)}%",
+                    onValueChange = { onUpdateParams { p -> p.copy(skinRadiance = it + 0.5f) } }
+                )
+
+                // Slider 4: Lighting Boost & HDR
+                AuraTuningSliderCard(
+                    title = "Lighting Boost & HDR",
+                    icon = Icons.Default.WbSunny,
+                    accentColor = AuraTertiaryHotMagenta,
+                    value = editParams.skinWarmth - 0.5f,
+                    valueText = "${((editParams.skinWarmth - 0.5f) * 100).toInt().coerceIn(0, 100)}%",
+                    onValueChange = { onUpdateParams { p -> p.copy(skinWarmth = it + 0.5f) } }
+                )
+            }
+
+            // 3. AI Restyle Presets (Horizontal Scroll Bento)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "AI Restyle Presets",
+                        color = AuraOnSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Tap to apply",
+                        color = AuraOnSurfaceVariant,
+                        fontSize = 11.sp
+                    )
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    AestheticPreset.entries.forEach { preset ->
+                    AestheticPreset.values().forEach { preset ->
                         val isSelected = editParams.preset == preset
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) AuraPrimaryContainer else AuraSurfaceContainerHigh)
+                                .width(120.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    if (isSelected) {
+                                        Brush.linearGradient(
+                                            listOf(AuraSecondary.copy(alpha = 0.18f), AuraPrimaryElectric.copy(alpha = 0.12f))
+                                        )
+                                    } else {
+                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.03f)))
+                                    }
+                                )
                                 .border(
-                                    width = 1.dp,
-                                    color = if (isSelected) AuraPrimary else Color.White.copy(alpha = 0.10f),
-                                    shape = RoundedCornerShape(12.dp)
+                                    width = if (isSelected) 1.5.dp else 1.dp,
+                                    color = if (isSelected) AuraSecondary else Color.White.copy(alpha = 0.10f),
+                                    shape = RoundedCornerShape(16.dp)
                                 )
                                 .clickable { onSelectPreset(preset) }
-                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                                .padding(10.dp)
                         ) {
-                            Text(
-                                text = preset.title,
-                                color = if (isSelected) Color.White else AuraOnSurfaceVariant,
-                                fontSize = 12.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
+                            Column {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(50.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(AuraSurfaceContainerHigh.copy(alpha = 0.70f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        tint = if (isSelected) AuraSecondary else AuraOnSurfaceVariant,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    if (isSelected) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(6.dp)
+                                                .size(6.dp)
+                                                .clip(CircleShape)
+                                                .background(AuraSecondary)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = preset.title,
+                                    color = if (isSelected) Color.White else AuraOnSurface,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = if (isSelected) "Active Profile" else "Preset",
+                                    color = if (isSelected) AuraSecondary else AuraOutline,
+                                    fontSize = 10.sp
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            // Fine-tune Expander Button
-            Row(
+            // Bottom CTA: Apply & Export in 4K
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(AuraSurfaceContainerHigh)
-                    .clickable { onToggleFineTuneSliders() }
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .height(50.dp)
+                    .clip(CircleShape)
+                    .background(AuraExportButtonGradient)
+                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                    .clickable { onOpenExportModal() },
+                contentAlignment = Alignment.Center
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Tune,
-                        contentDescription = null,
-                        tint = AuraSecondary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (showFineTuneSliders) "Hide Fine-Tune Adjustments" else "Show Fine-Tune Adjustments",
-                        color = AuraOnSurface,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = AuraOnSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-
-            AnimatedVisibility(visible = showFineTuneSliders) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    CompactSliderRow(
-                        title = "Skin Warmth",
-                        value = editParams.skinWarmth,
-                        range = 0.8f..1.2f,
-                        displayValue = "${(editParams.skinWarmth * 100).roundToInt()}%",
-                        onValueChange = { v -> onUpdateParams { it.copy(skinWarmth = v) } }
-                    )
-                    CompactSliderRow(
-                        title = "Radiance & Glow",
-                        value = editParams.skinRadiance,
-                        range = 0.8f..1.3f,
-                        displayValue = "${(editParams.skinRadiance * 100).roundToInt()}%",
-                        onValueChange = { v -> onUpdateParams { it.copy(skinRadiance = v) } }
-                    )
-                    CompactSliderRow(
-                        title = "Texture Sharpness",
-                        value = editParams.facialClarity,
-                        range = 0.5f..1.2f,
-                        displayValue = "${(editParams.facialClarity * 100).roundToInt()}%",
-                        onValueChange = { v -> onUpdateParams { it.copy(facialClarity = v) } }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Action Buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Button(
-                    onClick = onSaveToGallery,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AuraPrimaryContainer),
-                    enabled = !isSaving
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Download,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(19.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isSaving) "Saving 4K..." else "Save to Photos",
+                        text = "Apply & Export in 4K",
                         color = Color.White,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
-                }
-
-                Button(
-                    onClick = onShare,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AuraSurfaceContainerHigh),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.14f))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Share Photo",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.22f))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "⚡1 Credit",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
                 }
             }
         }
@@ -2352,78 +2492,168 @@ private fun ReminiResultScreen(
 }
 
 @Composable
-private fun SkinTelemetryBar(
-    telemetry: SkinAnalysisTelemetry,
-    onOpenArchitecture: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(AuraSurfaceContainerHigh)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF22C55E))
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "3840×2160 4K UHD · ${telemetry.inferenceTimeMs}ms · 5 AI Models Active",
-                color = AuraSecondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        Text(
-            text = "Details",
-            color = AuraPrimary,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.clickable { onOpenArchitecture() }
-        )
-    }
-}
-
-@Composable
-private fun CompactSliderRow(
+private fun AuraTuningSliderCard(
     title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    accentColor: Color,
     value: Float,
-    range: ClosedFloatingPointRange<Float>,
-    displayValue: String,
+    valueText: String,
     onValueChange: (Float) -> Unit
 ) {
-    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.04f))
+            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(title, color = AuraOnSurfaceVariant, fontSize = 12.sp)
-            Text(displayValue, color = AuraOnSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(15.dp)
+                )
+                Text(
+                    text = title,
+                    color = AuraOnSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Text(
+                text = valueText,
+                color = accentColor,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
+
         Slider(
-            value = value,
+            value = value.coerceIn(0f, 1f),
             onValueChange = onValueChange,
-            valueRange = range,
+            modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
-                thumbColor = AuraPrimary,
-                activeTrackColor = AuraPrimary,
+                thumbColor = Color.White,
+                activeTrackColor = accentColor,
                 inactiveTrackColor = Color.White.copy(alpha = 0.12f)
-            ),
-            modifier = Modifier.height(28.dp)
+            )
         )
     }
 }
 
+// =========================================================================
+// SCREEN 4: Aura Neural Processing HUD
+// Matches DESIGN.md component 6
+// =========================================================================
 @Composable
-private fun ReminiShareScreen(
+private fun AuraProcessingScreen(
+    stageProgress: PipelineStageProgress?,
+    onCancel: () -> Unit
+) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AuraSurfaceLowest),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            // Radial Progress Sweep
+            Box(
+                modifier = Modifier.size(110.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // Background Track
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.08f),
+                        radius = size.width * 0.45f,
+                        style = Stroke(width = 6.dp.toPx())
+                    )
+                }
+
+                // Active Gradient Arc
+                CircularProgressIndicator(
+                    progress = { stageProgress?.progressFraction ?: 0.5f },
+                    strokeWidth = 6.dp,
+                    color = AuraPrimaryElectric,
+                    trackColor = Color.Transparent,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = AuraSecondary,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            // Shimmering Status Text
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stageProgress?.modelName ?: "Neural Enhancement Engine",
+                    color = AuraOnSurface,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stageProgress?.stageDescription ?: "Processing high-frequency textures in 4K...",
+                    color = AuraOnSurfaceVariant,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Cancel Button
+            TextButton(
+                onClick = onCancel,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.06f))
+                    .padding(horizontal = 14.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = "Cancel",
+                    color = AuraOutline,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+// =========================================================================
+// SCREEN 5: Aura Export Success & Share Screen
+// =========================================================================
+@Composable
+private fun AuraSavedShareScreen(
     savedDrawable: DrawableResource,
     fileName: String,
     onBackToResult: () -> Unit,
@@ -2434,126 +2664,390 @@ private fun ReminiShareScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AuraSurfaceLowest)
-            .padding(24.dp),
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Box(
-            modifier = Modifier
-                .size(60.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF15803D).copy(alpha = 0.25f)),
-            contentAlignment = Alignment.Center
+        // Top Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
-                tint = Color(0xFF22C55E),
-                modifier = Modifier.size(36.dp)
-            )
+            IconButton(
+                onClick = onBackToResult,
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.08f))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(AuraSecondary.copy(alpha = 0.15f))
+                    .border(1.dp, AuraSecondary.copy(alpha = 0.35f), CircleShape)
+                    .padding(horizontal = 12.dp, vertical = 5.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = AuraSecondary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = "SAVED TO CAMERA ROLL",
+                        color = AuraSecondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.size(38.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Photo Restored in Ultra 4K!",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = "Saved to your camera roll & photos album",
-            color = AuraOnSurfaceVariant,
-            fontSize = 13.sp
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+        // Luxury Glass Framed Preview
         Box(
             modifier = Modifier
-                .size(240.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .border(2.dp, AuraPrimary, RoundedCornerShape(20.dp))
+                .fillMaxWidth(0.85f)
+                .aspectRatio(3f / 4f)
+                .clip(RoundedCornerShape(24.dp))
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        listOf(Color.White.copy(alpha = 0.35f), Color.White.copy(alpha = 0.05f))
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                )
         ) {
             Image(
                 painter = painterResource(savedDrawable),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentDescription = "Saved Portrait",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Button(
-            onClick = onShare,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AuraPrimaryContainer)
+        // Details & CTAs
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Icon(imageVector = Icons.Default.Share, contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Share 4K Portrait", color = Color.White, fontWeight = FontWeight.Bold)
-        }
+            Text(
+                text = fileName,
+                color = AuraOnSurface,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Exported in Ultra 4K • Studio Grade Finish",
+                color = AuraOnSurfaceVariant,
+                fontSize = 12.sp
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-        Button(
-            onClick = onEnhanceAnother,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AuraSurfaceContainerHigh)
-        ) {
-            Text("Enhance Another Photo", color = Color.White, fontWeight = FontWeight.SemiBold)
-        }
+            // Share Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .clip(CircleShape)
+                    .background(AuraHeroButtonGradient)
+                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                    .clickable { onShare() },
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(19.dp)
+                    )
+                    Text(
+                        text = "Share Masterpiece",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextButton(onClick = onBackToResult) {
-            Text("Back to Result", color = AuraOnSurfaceVariant)
+            // Enhance Another
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(46.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.06f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                    .clickable { onEnhanceAnother() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Enhance Another Photo",
+                    color = AuraOnSurface,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
 
+// =========================================================================
+// Dialogs: Credits, Settings, Tools, Projects, Architecture
+// =========================================================================
 @Composable
-private fun ModelArchitectureDialog(onDismiss: () -> Unit) {
+private fun AuraCreditsDialog(
+    credits: Int,
+    onClaimBonus: () -> Unit,
+    onDismiss: () -> Unit
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text("Aura AI 5-Model Neural Architecture", color = Color.White, fontWeight = FontWeight.Bold)
-        },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                ModelInfoItem("1. Real-ESRGAN x4v3 Ultra", "Super-resolves image to 3840×2160 UHD while preserving authentic edges.")
-                ModelInfoItem("2. BiSeNet 19-Class Semantic Parsing", "Deep parsing map separating skin, eyes, eyebrows, nose, and lips.")
-                ModelInfoItem("3. MediaPipe Full Body Sync", "Detects neck, collar, ears, and hands for uniform skin aesthetic blending.")
-                ModelInfoItem("4. GPEN-BFR-256 GAN Texture Synthesizer", "Blind face restoration restoring high-frequency pores, eye gleam, and hair strands.")
-                ModelInfoItem("5. Zero-DCE + YCrCb Tone Grading", "Non-destructive exposure correction and studio radiance curve synthesis.")
-            }
-        },
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text("Close", color = AuraPrimary)
             }
         },
-        containerColor = AuraSurfaceContainer
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Bolt,
+                    contentDescription = null,
+                    tint = AuraSecondary
+                )
+                Text("Aura AI Credits Balance", color = AuraOnSurface, fontWeight = FontWeight.Bold)
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "You currently have $credits neural processing credits available for 4K & 8K exports.",
+                    color = AuraOnSurfaceVariant
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(AuraSecondary.copy(alpha = 0.12f))
+                        .border(1.dp, AuraSecondary.copy(alpha = 0.30f), RoundedCornerShape(14.dp))
+                        .clickable { onClaimBonus() }
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "⚡ Claim Daily 10 Free Credits",
+                        color = AuraSecondary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                }
+            }
+        },
+        containerColor = AuraSurfaceContainerHigh
     )
 }
 
 @Composable
-private fun ModelInfoItem(name: String, desc: String) {
-    Column {
-        Text(name, color = AuraSecondary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        Text(desc, color = AuraOnSurfaceVariant, fontSize = 11.sp, lineHeight = 15.sp)
-    }
+private fun AuraSettingsDialog(
+    onOpenArchitecture: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Done", color = AuraPrimary)
+            }
+        },
+        title = {
+            Text("Settings & Engine", color = AuraOnSurface, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = "Aura AI Studio Version: 4.2.0 (Luminescent Glass Edition)",
+                    color = AuraOnSurfaceVariant,
+                    fontSize = 13.sp
+                )
+                Text(
+                    text = "On-Device Neural Engine: GPEN-BFR-256 + BiSeNet + Zero-DCE",
+                    color = AuraOutline,
+                    fontSize = 12.sp
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                        .clickable { onOpenArchitecture() }
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "View Neural Model Pipeline Spec",
+                        color = AuraSecondary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        },
+        containerColor = AuraSurfaceContainerHigh
+    )
+}
+
+@Composable
+private fun AuraAllToolsDialog(
+    onSelectTool: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = AuraOutline)
+            }
+        },
+        title = {
+            Text("All AI Creative Tools", color = AuraOnSurface, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    Triple("portrait_4k", "AI Portrait 4K Enhancer", "Reconstruct facial pores and iris catchlights"),
+                    Triple("passport", "AI Passport & Visa Studio", "Biometric ID standards, suits & backgrounds"),
+                    Triple("old_restore", "Old Photo Scratch Repair", "Vintage damage removal and color revive"),
+                    Triple("denoise", "Despeckle & Night Denoise", "Clean ISO grain while keeping sharp edges"),
+                    Triple("beauty", "Face Glow & Makeup Studio", "K-Beauty radiance and lip color tuning"),
+                    Triple("custom", "Upload from Device Gallery", "Pick any custom photo from device roll")
+                ).forEach { (id, title, desc) ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
+                            .clickable { onSelectTool(id) }
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            Text(text = title, color = AuraOnSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text(text = desc, color = AuraOnSurfaceVariant, fontSize = 11.sp)
+                        }
+                    }
+                }
+            }
+        },
+        containerColor = AuraSurfaceContainerHigh
+    )
+}
+
+@Composable
+private fun AuraProjectsDialog(
+    onSelectProject: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = AuraPrimary)
+            }
+        },
+        title = {
+            Text("Saved Projects & History", color = AuraOnSurface, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                listOf(
+                    Pair("Portrait_V2_4K.jpg", "Today, 2:15 PM · 4K UHD"),
+                    Pair("Family_Archive_1974.png", "Yesterday · Vintage Restored")
+                ).forEachIndexed { index, (name, date) ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
+                            .clickable { onSelectProject(index) }
+                            .padding(12.dp)
+                    ) {
+                        Column {
+                            Text(text = name, color = AuraOnSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text(text = date, color = AuraSecondary, fontSize = 11.sp)
+                        }
+                    }
+                }
+            }
+        },
+        containerColor = AuraSurfaceContainerHigh
+    )
+}
+
+@Composable
+private fun ModelArchitectureDialog(
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Got It", color = AuraPrimary)
+            }
+        },
+        title = {
+            Text("5-Stage Neural Pipeline Spec", color = AuraOnSurface, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    Pair("1. Real-ESRGAN x4v3", "Upscales input tensor to 4K UHD boundary with bicubic interpolation."),
+                    Pair("2. BiSeNet 19-Class Parser", "High-res 512x512 semantic segmentation of eyes, lips, skin dermis."),
+                    Pair("3. MediaPipe Multiclass Mask", "Separates background, clothes, hair, and foreground portrait dermis."),
+                    Pair("4. GPEN-BFR-256 GAN Engine", "Reconstructs crystal-clear eyes, eyelashes, teeth, and skin micro-pores."),
+                    Pair("5. Zero-DCE + YCrCb Rational", "Synthesizes studio radiance and calibrated regional tone balance.")
+                ).forEach { (name, desc) ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White.copy(alpha = 0.04f))
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            Text(text = name, color = AuraSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(text = desc, color = AuraOnSurfaceVariant, fontSize = 11.sp)
+                        }
+                    }
+                }
+            }
+        },
+        containerColor = AuraSurfaceContainerHigh
+    )
 }

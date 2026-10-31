@@ -72,6 +72,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -160,6 +163,7 @@ fun MainScreen(
     var selectedSample by remember { mutableStateOf<SamplePhotoItem?>(samplePhotos.firstOrNull()) }
     var activeBeforeDrawable by remember { mutableStateOf(samplePhotos[0].beforeDrawable) }
     var activeAfterDrawable by remember { mutableStateOf<DrawableResource?>(samplePhotos[0].reminiRefDrawable ?: samplePhotos[0].beforeDrawable) }
+    var customPickedBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
     var editParams by remember { mutableStateOf(PlatformSettings.loadSavedParams()) }
     var hasCustomSavedSettings by remember { mutableStateOf(PlatformSettings.hasCustomSavedSettings()) }
@@ -173,6 +177,7 @@ fun MainScreen(
     var telemetry by remember { mutableStateOf(SkinAnalysisTelemetry()) }
 
     fun startProcessing(before: DrawableResource, after: DrawableResource?) {
+        customPickedBitmap = null
         activeBeforeDrawable = before
         activeAfterDrawable = after ?: before
         mode = EditorScreenMode.PROCESSING
@@ -196,9 +201,28 @@ fun MainScreen(
         }
     }
 
-    val photoPickerLauncher = rememberPhotoPickerLauncher {
-        selectedSample = samplePhotos[0]
-        startProcessing(samplePhotos[0].beforeDrawable, samplePhotos[0].reminiRefDrawable)
+    val photoPickerLauncher = rememberPhotoPickerLauncher { picked ->
+        if (picked != null) {
+            customPickedBitmap = picked
+            mode = EditorScreenMode.PROCESSING
+            coroutineScope.launch {
+                val stages = listOf(
+                    PipelineStageProgress(1, 5, "Real-ESRGAN x4v3 1080p HD Upscaler", "Preparing 1080×1440 Full HD facial canvas...", 0.15f),
+                    PipelineStageProgress(2, 5, "BiSeNet 19-Class Facial Parsing", "Segmenting forehead, cheeks, nose, and lips...", 0.40f),
+                    PipelineStageProgress(3, 5, "MediaPipe Multi-Class Body Mask", "Isolating neck, ears, and hands for uniform skin sync...", 0.65f),
+                    PipelineStageProgress(4, 5, "GPEN-BFR-256 GAN Restoration", "Reconstructing high-frequency pores, brows & iris...", 0.85f),
+                    PipelineStageProgress(5, 5, "Zero-DCE + YCrCb Skin Tone Grading", "Synthesizing regional aesthetic & lip tints...", 1.00f)
+                )
+
+                for (stage in stages) {
+                    stageProgress = stage
+                    delay(300)
+                }
+                delay(150)
+                stageProgress = null
+                mode = EditorScreenMode.RESULT
+            }
+        }
     }
 
     PlatformBackHandler(enabled = mode != EditorScreenMode.HOME) {
@@ -240,6 +264,7 @@ fun MainScreen(
                 ReminiResultScreen(
                     beforeDrawable = activeBeforeDrawable,
                     afterDrawable = activeAfterDrawable ?: activeBeforeDrawable,
+                    customPickedBitmap = customPickedBitmap,
                     editParams = editParams,
                     telemetry = telemetry,
                     showFineTuneSliders = showFineTuneSliders,
@@ -286,6 +311,7 @@ fun MainScreen(
             EditorScreenMode.SAVED_SHARE -> {
                 ReminiShareScreen(
                     savedDrawable = activeAfterDrawable ?: activeBeforeDrawable,
+                    customPickedBitmap = customPickedBitmap,
                     fileName = savedFileName,
                     onBackToResult = { mode = EditorScreenMode.RESULT },
                     onEnhanceAnother = { mode = EditorScreenMode.HOME },
@@ -685,6 +711,7 @@ private fun ReminiProcessingScreen(
 private fun ReminiResultScreen(
     beforeDrawable: DrawableResource,
     afterDrawable: DrawableResource,
+    customPickedBitmap: ImageBitmap?,
     editParams: SkinEditParams,
     telemetry: SkinAnalysisTelemetry,
     showFineTuneSliders: Boolean,
@@ -702,8 +729,16 @@ private fun ReminiResultScreen(
     onSaveToGallery: () -> Unit,
     onShare: () -> Unit
 ) {
-    val beforePainter = painterResource(beforeDrawable)
-    val afterPainter = painterResource(afterDrawable)
+    val beforePainter: Painter = if (customPickedBitmap != null) {
+        remember(customPickedBitmap) { BitmapPainter(customPickedBitmap) }
+    } else {
+        painterResource(beforeDrawable)
+    }
+    val afterPainter: Painter = if (customPickedBitmap != null) {
+        remember(customPickedBitmap) { BitmapPainter(customPickedBitmap) }
+    } else {
+        painterResource(afterDrawable)
+    }
 
     // Compute live color matrix from selected AestheticPreset, LipShade, warmth & radiance
     val liveColorFilter = remember(editParams) {
@@ -1226,6 +1261,7 @@ private fun CompactSliderRow(
 @Composable
 private fun ReminiShareScreen(
     savedDrawable: DrawableResource,
+    customPickedBitmap: ImageBitmap?,
     fileName: String,
     onBackToResult: () -> Unit,
     onEnhanceAnother: () -> Unit,
@@ -1279,8 +1315,13 @@ private fun ReminiShareScreen(
                 .clip(RoundedCornerShape(20.dp))
                 .border(2.dp, ReminiRose, RoundedCornerShape(20.dp))
         ) {
+            val sharePainter: Painter = if (customPickedBitmap != null) {
+                remember(customPickedBitmap) { BitmapPainter(customPickedBitmap) }
+            } else {
+                painterResource(savedDrawable)
+            }
             Image(
-                painter = painterResource(savedDrawable),
+                painter = sharePainter,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

@@ -18,6 +18,10 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ReminiSkinAI requires access to your photo library to select portraits for AI skin enhancement and passport photo generation.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>ReminiSkinAI requires permission to save enhanced portraits and passport photos to your camera roll.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

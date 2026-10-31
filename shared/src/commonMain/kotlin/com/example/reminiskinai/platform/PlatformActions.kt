@@ -1,6 +1,7 @@
 package com.example.reminiskinai.platform
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.ImageBitmap
 
 expect object PlatformActions {
     fun saveImageToGallery(fileName: String, onResult: (Boolean, String?) -> Unit)
@@ -8,4 +9,4 @@ expect object PlatformActions {
 }
 
 @Composable
-expect fun rememberPhotoPickerLauncher(onPhotoPicked: () -> Unit): () -> Unit
+expect fun rememberPhotoPickerLauncher(onPhotoPicked: (ImageBitmap?) -> Unit): () -> Unit

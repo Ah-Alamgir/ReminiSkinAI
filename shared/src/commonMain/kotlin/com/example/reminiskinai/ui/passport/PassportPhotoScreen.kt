@@ -69,6 +69,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -139,6 +142,7 @@ fun PassportPhotoScreen(
     var mode by remember { mutableStateOf(PassportScreenMode.UPLOAD_HOME) }
     var activeTab by remember { mutableStateOf(PassportStudioTab.COATS) }
     var activePortraitDrawable by remember { mutableStateOf(samplePhotos[0].beforeDrawable) }
+    var customPickedBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     var editParams by remember { mutableStateOf(PassportEditParams()) }
     var stageProgress by remember { mutableStateOf<PipelineStageProgress?>(null) }
     var showAiInfoDialog by remember { mutableStateOf(false) }
@@ -146,6 +150,7 @@ fun PassportPhotoScreen(
     var savedFileName by remember { mutableStateOf("") }
 
     fun startPassportProcessing(drawable: DrawableResource) {
+        customPickedBitmap = null
         activePortraitDrawable = drawable
         mode = PassportScreenMode.PROCESSING
 
@@ -167,8 +172,27 @@ fun PassportPhotoScreen(
         }
     }
 
-    val photoPicker = rememberPhotoPickerLauncher {
-        startPassportProcessing(samplePhotos[0].beforeDrawable)
+    val photoPicker = rememberPhotoPickerLauncher { picked ->
+        if (picked != null) {
+            customPickedBitmap = picked
+            mode = PassportScreenMode.PROCESSING
+            coroutineScope.launch {
+                val stages = listOf(
+                    PipelineStageProgress(1, 4, "Hivision MODNet AI Matte", "Isolating subject from background with alpha feathering...", 0.25f),
+                    PipelineStageProgress(2, 4, "BiSeNet 19-Class Biometrics", "Extracting head center, chin contour, and eye line...", 0.50f),
+                    PipelineStageProgress(3, 4, "MediaPipe Multi-Class Mask", "Detecting collar alignment anchor points...", 0.75f),
+                    PipelineStageProgress(4, 4, "Biometric Standard Composer", "Fitting ICAO frame & studio lighting...", 1.00f)
+                )
+
+                for (stage in stages) {
+                    stageProgress = stage
+                    delay(280)
+                }
+                delay(120)
+                stageProgress = null
+                mode = PassportScreenMode.STUDIO_EDITOR
+            }
+        }
     }
 
     PlatformBackHandler(enabled = true) {
@@ -201,6 +225,7 @@ fun PassportPhotoScreen(
             PassportScreenMode.STUDIO_EDITOR -> {
                 PassportStudioEditor(
                     portraitDrawable = activePortraitDrawable,
+                    customPickedBitmap = customPickedBitmap,
                     coatTemplates = coatTemplates,
                     editParams = editParams,
                     activeTab = activeTab,
@@ -224,6 +249,7 @@ fun PassportPhotoScreen(
             PassportScreenMode.SAVED_EXPORT -> {
                 PassportSavedExport(
                     portraitDrawable = activePortraitDrawable,
+                    customPickedBitmap = customPickedBitmap,
                     coatTemplates = coatTemplates,
                     editParams = editParams,
                     fileName = savedFileName,
@@ -435,6 +461,7 @@ private fun PassportProcessingView(
 @Composable
 private fun PassportStudioEditor(
     portraitDrawable: DrawableResource,
+    customPickedBitmap: ImageBitmap?,
     coatTemplates: List<CoatTemplateItem>,
     editParams: PassportEditParams,
     activeTab: PassportStudioTab,
@@ -447,6 +474,12 @@ private fun PassportStudioEditor(
 ) {
     val selectedCoat = remember(editParams.selectedCoatId) {
         coatTemplates.firstOrNull { it.id == editParams.selectedCoatId }
+    }
+
+    val portraitPainter: Painter = if (customPickedBitmap != null) {
+        remember(customPickedBitmap) { BitmapPainter(customPickedBitmap) }
+    } else {
+        painterResource(portraitDrawable)
     }
 
     Column(
@@ -508,7 +541,7 @@ private fun PassportStudioEditor(
             ) {
                 // Portrait Layer
                 Image(
-                    painter = painterResource(portraitDrawable),
+                    painter = portraitPainter,
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
@@ -1010,6 +1043,7 @@ private fun CountrySizePanel(
 @Composable
 private fun PassportSavedExport(
     portraitDrawable: DrawableResource,
+    customPickedBitmap: ImageBitmap?,
     coatTemplates: List<CoatTemplateItem>,
     editParams: PassportEditParams,
     fileName: String,
@@ -1019,6 +1053,12 @@ private fun PassportSavedExport(
 ) {
     val selectedCoat = remember(editParams.selectedCoatId) {
         coatTemplates.firstOrNull { it.id == editParams.selectedCoatId }
+    }
+
+    val portraitPainter: Painter = if (customPickedBitmap != null) {
+        remember(customPickedBitmap) { BitmapPainter(customPickedBitmap) }
+    } else {
+        painterResource(portraitDrawable)
     }
 
     Column(
@@ -1055,7 +1095,7 @@ private fun PassportSavedExport(
                 .border(2.dp, Color(0xFF38BDF8), RoundedCornerShape(12.dp))
         ) {
             Image(
-                painter = painterResource(portraitDrawable),
+                painter = portraitPainter,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

@@ -39,6 +39,7 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.activity.compose)
         }
         iosMain.dependencies {
         }

@@ -23,17 +23,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.reminiskinai.theme.ReminiGold
@@ -41,16 +44,36 @@ import com.example.reminiskinai.theme.ReminiRose
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-/**
- * Multiplatform Remini-style Before/After Split Comparison View with HD Zoom toggle (1x / 2x).
- * Left of the divider shows [beforeImage], right of the divider shows [afterImage],
- * with a draggable circular `< >` handle matching Remini's Result screen.
- */
 @Composable
 fun BeforeAfterSlider(
     beforeImage: ImageBitmap,
     afterImage: ImageBitmap,
     afterLabel: String = "After",
+    colorFilter: ColorFilter? = null,
+    modifier: Modifier = Modifier
+) {
+    val beforePainter = remember(beforeImage) { BitmapPainter(beforeImage) }
+    val afterPainter = remember(afterImage) { BitmapPainter(afterImage) }
+    BeforeAfterSlider(
+        beforePainter = beforePainter,
+        afterPainter = afterPainter,
+        afterLabel = afterLabel,
+        colorFilter = colorFilter,
+        modifier = modifier
+    )
+}
+
+/**
+ * Multiplatform Remini-style Before/After Split Comparison View with HD Zoom toggle (1x / 2x).
+ * Left of the divider shows [beforePainter], right of the divider shows [afterPainter],
+ * with a draggable circular `< >` handle matching Remini's Result screen.
+ */
+@Composable
+fun BeforeAfterSlider(
+    beforePainter: Painter,
+    afterPainter: Painter,
+    afterLabel: String = "After",
+    colorFilter: ColorFilter? = null,
     modifier: Modifier = Modifier
 ) {
     var splitFraction by remember { mutableFloatStateOf(0.18f) }
@@ -84,8 +107,9 @@ fun BeforeAfterSlider(
         Canvas(modifier = Modifier.fillMaxSize()) {
             val canvasW = size.width
             val canvasH = size.height
-            val imgW = afterImage.width.toFloat().coerceAtLeast(1f)
-            val imgH = afterImage.height.toFloat().coerceAtLeast(1f)
+            val intrinsicSize = afterPainter.intrinsicSize
+            val imgW = if (intrinsicSize.width.isFinite() && intrinsicSize.width > 0f) intrinsicSize.width else canvasW
+            val imgH = if (intrinsicSize.height.isFinite() && intrinsicSize.height > 0f) intrinsicSize.height else canvasH
 
             val baseScale = min(canvasW / imgW, canvasH / imgH)
             val scale = baseScale * zoomFactor
@@ -98,29 +122,28 @@ fun BeforeAfterSlider(
                 ((canvasH - drawH) * 0.5f).roundToInt()
             }
 
-            val dstOffset = IntOffset(leftOff, topOff)
-            val dstSize = IntSize(drawW, drawH)
-
             val visibleLeft = leftOff.toFloat().coerceAtLeast(0f)
             val visibleRight = (leftOff + drawW).toFloat().coerceAtMost(canvasW)
             val splitX = (visibleLeft + (visibleRight - visibleLeft) * splitFraction)
                 .coerceIn(visibleLeft, visibleRight)
 
+            val drawSize = Size(drawW.toFloat(), drawH.toFloat())
+
             clipRect(left = 0f, top = 0f, right = canvasW, bottom = canvasH) {
-                // Draw After image on the full canvas
-                drawImage(
-                    image = afterImage,
-                    dstOffset = dstOffset,
-                    dstSize = dstSize
-                )
+                // Draw After image on full canvas
+                translate(left = leftOff.toFloat(), top = topOff.toFloat()) {
+                    with(afterPainter) {
+                        draw(size = drawSize, colorFilter = colorFilter)
+                    }
+                }
 
                 // Clip left side [0 .. splitX] to draw Before image
                 clipRect(left = 0f, top = 0f, right = splitX, bottom = canvasH) {
-                    drawImage(
-                        image = beforeImage,
-                        dstOffset = dstOffset,
-                        dstSize = dstSize
-                    )
+                    translate(left = leftOff.toFloat(), top = topOff.toFloat()) {
+                        with(beforePainter) {
+                            draw(size = drawSize)
+                        }
+                    }
                 }
             }
 
@@ -145,8 +168,8 @@ fun BeforeAfterSlider(
             val handleRadius = 18.dp.toPx()
 
             drawCircle(
-                color = Color.Black.copy(alpha = 0.40f),
-                radius = handleRadius + 2.dp.toPx(),
+                color = Color.Black.copy(alpha = 0.45f),
+                radius = handleRadius + 1.5.dp.toPx(),
                 center = Offset(splitX, handleY + 1.5.dp.toPx())
             )
             drawCircle(
@@ -231,7 +254,7 @@ fun BeforeAfterSlider(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "${afterImage.width}×${afterImage.height} HD",
+                    text = "1080p HD",
                     color = if (zoomFactor > 1.1f) Color.White else ReminiGold,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold

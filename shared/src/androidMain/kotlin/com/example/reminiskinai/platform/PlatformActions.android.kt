@@ -110,7 +110,7 @@ actual fun rememberPhotoPickerLauncher(onPhotoPicked: (ImageBitmap?) -> Unit): (
     }
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
             val bitmap = try {
@@ -119,7 +119,7 @@ actual fun rememberPhotoPickerLauncher(onPhotoPicked: (ImageBitmap?) -> Unit): (
                     val boundsOpts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                     BitmapFactory.decodeStream(boundsStream, null, boundsOpts)
                     val maxDim = max(boundsOpts.outWidth, boundsOpts.outHeight)
-                    while (maxDim / (sampleSize * 2) >= 1440) {
+                    while (maxDim / (sampleSize * 2) >= 1200) {
                         sampleSize *= 2
                     }
                 }
@@ -141,6 +141,10 @@ actual fun rememberPhotoPickerLauncher(onPhotoPicked: (ImageBitmap?) -> Unit): (
     }
 
     return {
-        launcher.launch("image/*")
+        launcher.launch(
+            androidx.activity.result.PickVisualMediaRequest(
+                ActivityResultContracts.PickVisualMedia.ImageOnly
+            )
+        )
     }
 }

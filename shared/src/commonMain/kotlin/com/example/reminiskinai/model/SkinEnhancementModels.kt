@@ -8,44 +8,74 @@ import org.jetbrains.compose.resources.DrawableResource
 enum class AestheticPreset(
     val title: String,
     val subtitle: String,
+    val swatchColor: Long,
     val warmthBoost: Float,
     val contrastLift: Float,
     val saturationBoost: Float
 ) {
     REMINI_NATURAL(
         title = "Remini Natural",
-        subtitle = "Original Remini natural skin & rosy lip balance",
+        subtitle = "Signature studio clarity & healthy rosy-peach glow (Default)",
+        swatchColor = 0xFFF5D0C0,
         warmthBoost = 1.00f,
-        contrastLift = 1.00f,
+        contrastLift = 1.03f,
         saturationBoost = 1.00f
     ),
-    BANGLADESHI(
-        title = "Bangladeshi",
-        subtitle = "South Asian warm golden-wheat glow & natural rose lips",
-        warmthBoost = 1.06f,
+    AMERICAN(
+        title = "American Fair White",
+        subtitle = "Fair creamy-white porcelain with neutral undertones",
+        swatchColor = 0xFFFCEFE4,
+        warmthBoost = 1.00f,
         contrastLift = 1.02f,
-        saturationBoost = 1.04f
+        saturationBoost = 1.00f
     ),
     KOREAN(
-        title = "Korean",
-        subtitle = "K-Beauty luminous peach glass skin & coral-pink lips",
-        warmthBoost = 0.88f,
-        contrastLift = 0.98f,
-        saturationBoost = 0.96f
-    ),
-    AMERICAN(
-        title = "American",
-        subtitle = "Sun-kissed warm neutral tan & berry-rose lips",
-        warmthBoost = 1.12f,
-        contrastLift = 1.04f,
-        saturationBoost = 1.06f
+        title = "Korean Glass Skin",
+        subtitle = "K-Beauty translucent ivory & luminous peach highlight",
+        swatchColor = 0xFFFFF1EB,
+        warmthBoost = 0.96f,
+        contrastLift = 1.02f,
+        saturationBoost = 1.00f
     ),
     AFRICAN(
-        title = "African",
-        subtitle = "Rich melanin-preserving bronze glow & warm berry lips",
-        warmthBoost = 1.16f,
+        title = "African Deep Melanin",
+        subtitle = "Authentic rich black/ebony with velvety luster",
+        swatchColor = 0xFF4A3026,
+        warmthBoost = 1.00f,
         contrastLift = 1.06f,
-        saturationBoost = 1.08f
+        saturationBoost = 1.02f
+    ),
+    BANGLADESHI(
+        title = "South Asian Golden",
+        subtitle = "Warm golden-wheat glow & rich amber undertones",
+        swatchColor = 0xFFC68A5E,
+        warmthBoost = 1.05f,
+        contrastLift = 1.03f,
+        saturationBoost = 1.02f
+    ),
+    LATINA_OLIVE(
+        title = "Latina Olive Bronze",
+        subtitle = "Sun-kissed warm olive & radiant honey bronze",
+        swatchColor = 0xFFD29B6C,
+        warmthBoost = 1.06f,
+        contrastLift = 1.04f,
+        saturationBoost = 1.04f
+    ),
+    NORDIC_FAIR(
+        title = "Nordic Alabaster",
+        subtitle = "Ultra-bright cool alabaster & crystal clarity",
+        swatchColor = 0xFFFFF5F0,
+        warmthBoost = 0.98f,
+        contrastLift = 1.02f,
+        saturationBoost = 1.00f
+    ),
+    MEDITERRANEAN(
+        title = "Mediterranean Sun",
+        subtitle = "Golden warm terracotta & sunlit radiance",
+        swatchColor = 0xFFDC9E75,
+        warmthBoost = 1.07f,
+        contrastLift = 1.04f,
+        saturationBoost = 1.03f
     )
 }
 

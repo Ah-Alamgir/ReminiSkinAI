@@ -3,11 +3,15 @@ package com.example.reminiskinai.ui.main
 import com.example.reminiskinai.processor.SkinToneProcessor
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -239,6 +243,7 @@ fun MainScreen(
     var showAllToolsDialog by remember { mutableStateOf(false) }
     var showProjectsDialog by remember { mutableStateOf(false) }
     var showModelArchitectureSheet by remember { mutableStateOf(false) }
+    var showSkinToneDialog by remember { mutableStateOf(false) }
 
     // Export Feedback
     var isSaving by remember { mutableStateOf(false) }
@@ -287,8 +292,12 @@ fun MainScreen(
 
     val photoPickerLauncher = rememberPhotoPickerLauncher { picked ->
         if (picked != null) {
+            mode = EditorScreenMode.PROCESSING
+            stageProgress = PipelineStageProgress(1, 5, "Face Reconstruction v4.2", "Upscaling facial canvas to Ultra 4K UHD...", 0.20f)
             coroutineScope.launch(Dispatchers.Default) {
+                stageProgress = PipelineStageProgress(2, 5, "BiSeNet Dermis Segmentation", "Isolating skin tones & preserving background...", 0.45f)
                 val enhanced = SkinToneProcessor.enhancePhoto(picked)
+                stageProgress = PipelineStageProgress(4, 5, "Remini Color Radiance Engine", "Synthesizing authentic skin tone & micro-texture...", 0.80f)
                 val graded = SkinToneProcessor.applySkinToneGrading(
                     source = enhanced,
                     preset = pendingPreset,
@@ -297,17 +306,15 @@ fun MainScreen(
                     smoothness = editParams.skinSmoothness,
                     clarity = editParams.facialClarity
                 )
+                stageProgress = PipelineStageProgress(5, 5, "Finalizing 4K Ultra Canvas", "Ready for Studio View...", 1.0f)
+                delay(120)
                 withContext(Dispatchers.Main) {
                     userCustomOriginalBitmap = picked
                     userCustomEnhancedBitmap = enhanced
                     userCustomGradedBitmap = graded
                     editParams = editParams.copy(preset = pendingPreset)
-                    startProcessing(
-                        before = samplePhotos[0].beforeDrawable,
-                        after = samplePhotos[0].reminiRefDrawable,
-                        targetMode = pendingTargetMode,
-                        presetMode = pendingPreset
-                    )
+                    stageProgress = null
+                    mode = pendingTargetMode
                 }
             }
         }
@@ -331,6 +338,7 @@ fun MainScreen(
     ) {
         val base = userCustomEnhancedBitmap
         if (base != null) {
+            delay(60)
             withContext(Dispatchers.Default) {
                 val graded = SkinToneProcessor.applySkinToneGrading(
                     source = base,
@@ -535,7 +543,8 @@ fun MainScreen(
                     onOpenExportModal = { showExportModal = true },
                     onUpdateIntensity = { intensity ->
                         editParams = editParams.copy(facialClarity = intensity)
-                    }
+                    },
+                    onOpenSkinTones = { showSkinToneDialog = true }
                 )
             }
 
@@ -696,6 +705,18 @@ fun MainScreen(
         if (showModelArchitectureSheet) {
             ModelArchitectureDialog(
                 onDismiss = { showModelArchitectureSheet = false }
+            )
+        }
+
+        // Biological Skin Tone Dialog
+        if (showSkinToneDialog) {
+            AuraSkinToneDialog(
+                selectedPreset = editParams.preset,
+                onSelectPreset = { selected ->
+                    editParams = editParams.copy(preset = selected)
+                    showSkinToneDialog = false
+                },
+                onDismiss = { showSkinToneDialog = false }
             )
         }
     }
@@ -932,19 +953,17 @@ private fun AuraHeroFeatureCard(
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Interactive Simulated Before & After Split Canvas
+        // Fast Static High-Definition Preview
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
                 .clip(RoundedCornerShape(18.dp))
         ) {
-            BeforeAfterSlider(
-                beforePainter = painterResource(beforeDrawable),
-                afterPainter = painterResource(afterDrawable),
-                beforeLabel = "ORIGINAL BLURRY",
-                afterLabel = "4K RESTORED",
-                showTelemetry = false,
+            Image(
+                painter = painterResource(afterDrawable),
+                contentDescription = "4K Restored Preview",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
 
@@ -975,6 +994,23 @@ private fun AuraHeroFeatureCard(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
+            }
+
+            // Top Right 4K Remini badge
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(10.dp)
+                    .clip(CircleShape)
+                    .background(AuraPrimaryElectric.copy(alpha = 0.85f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "4K ULTRA HD",
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
             }
         }
 
@@ -1722,7 +1758,8 @@ private fun AuraComparisonStudioScreen(
     onNavigateToRetouchSuite: () -> Unit,
     onRegenerate: () -> Unit,
     onOpenExportModal: () -> Unit,
-    onUpdateIntensity: (Float) -> Unit
+    onUpdateIntensity: (Float) -> Unit,
+    onOpenSkinTones: () -> Unit = {}
 ) {
     var isHoldCompareActive by remember { mutableStateOf(false) }
     var zoomFactor by remember { mutableFloatStateOf(1.0f) }
@@ -1734,14 +1771,14 @@ private fun AuraComparisonStudioScreen(
             .fillMaxSize()
             .background(AuraSurfaceLowest)
     ) {
-        // Retouch Studio HUD Header
+        // Retouch Studio HUD Header (Horizontally scrollable with Back button)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(top = 8.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)
+                .horizontalScroll(rememberScrollState()),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Exit Button
             IconButton(
@@ -1781,75 +1818,136 @@ private fun AuraComparisonStudioScreen(
                     Text(
                         text = "AI Ultra Enhance",
                         color = AuraOnSurface,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "v4.2",
                         color = AuraSecondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            // Quick Skin Tone Pill (Opens Skin Tone Grid)
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color(editParams.preset.swatchColor).copy(alpha = 0.25f))
+                    .border(1.dp, Color(editParams.preset.swatchColor).copy(alpha = 0.6f), CircleShape)
+                    .clickable { onOpenSkinTones() }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(11.dp)
+                            .clip(CircleShape)
+                            .background(Color(editParams.preset.swatchColor))
+                    )
+                    Text(
+                        text = editParams.preset.title,
+                        color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
 
-            // Quick Actions: Zoom & Hold-Compare
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // Zoom Toggle Button
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(if (zoomFactor > 1.2f) AuraPrimaryElectric.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                    .clickable { zoomFactor = if (zoomFactor > 1.2f) 1.0f else 1.9f }
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center
             ) {
-                // Zoom Toggle Button
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(if (zoomFactor > 1.2f) AuraPrimaryElectric.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                        .clickable { zoomFactor = if (zoomFactor > 1.2f) 1.0f else 1.9f }
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                    contentAlignment = Alignment.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ZoomIn,
-                            contentDescription = null,
-                            tint = if (zoomFactor > 1.2f) AuraPrimary else Color.White,
-                            modifier = Modifier.size(15.dp)
-                        )
-                        Text(
-                            text = if (zoomFactor > 1.2f) "100%" else "200%",
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                    Icon(
+                        imageVector = Icons.Default.ZoomIn,
+                        contentDescription = null,
+                        tint = if (zoomFactor > 1.2f) AuraPrimary else Color.White,
+                        modifier = Modifier.size(15.dp)
+                    )
+                    Text(
+                        text = if (zoomFactor > 1.2f) "100%" else "200%",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Hold to Compare Button
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(if (isHoldCompareActive) AuraSecondaryContainer else Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = {
+                                isHoldCompareActive = true
+                                tryAwaitRelease()
+                                isHoldCompareActive = false
+                            }
                         )
                     }
-                }
-
-                // Hold to Compare Button
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(if (isHoldCompareActive) AuraSecondaryContainer else Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = {
-                                    isHoldCompareActive = true
-                                    tryAwaitRelease()
-                                    isHoldCompareActive = false
-                                }
-                            )
-                        },
-                    contentAlignment = Alignment.Center
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Compare,
                         contentDescription = "Hold to compare",
                         tint = if (isHoldCompareActive) AuraOnSecondaryContainer else Color.White,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(15.dp)
+                    )
+                    Text(
+                        text = "Compare",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            // Retouch Suite Pro Shortcut
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(AuraPrimaryElectric.copy(alpha = 0.18f))
+                    .border(1.dp, AuraPrimaryElectric.copy(alpha = 0.45f), CircleShape)
+                    .clickable { onNavigateToRetouchSuite() }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        tint = AuraPrimary,
+                        modifier = Modifier.size(15.dp)
+                    )
+                    Text(
+                        text = "Retouch Suite",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
@@ -1895,30 +1993,30 @@ private fun AuraComparisonStudioScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Mode Segmented Selector
+            // Mode Segmented Selector (Horizontally Scrollable)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(CircleShape)
+                    .clip(RoundedCornerShape(20.dp))
                     .background(Color.White.copy(alpha = 0.05f))
-                    .border(1.dp, Color.White.copy(alpha = 0.10f), CircleShape)
-                    .padding(3.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(20.dp))
+                    .padding(4.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Split View
                 Box(
                     modifier = Modifier
-                        .weight(1f)
                         .clip(CircleShape)
                         .background(if (studioMode == "split") AuraPrimaryElectric.copy(alpha = 0.28f) else Color.Transparent)
                         .clickable { studioMode = "split" }
-                        .padding(vertical = 7.dp),
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Compare,
@@ -1929,7 +2027,7 @@ private fun AuraComparisonStudioScreen(
                         Text(
                             text = "Split View",
                             color = if (studioMode == "split") Color.White else AuraOnSurfaceVariant,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -1938,19 +2036,18 @@ private fun AuraComparisonStudioScreen(
                 // Face Magnifier
                 Box(
                     modifier = Modifier
-                        .weight(1f)
                         .clip(CircleShape)
                         .background(if (studioMode == "magnifier") AuraPrimaryElectric.copy(alpha = 0.28f) else Color.Transparent)
                         .clickable {
                             studioMode = "magnifier"
                             zoomFactor = if (zoomFactor > 1.2f) 1.0f else 1.9f
                         }
-                        .padding(vertical = 7.dp),
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.CenterFocusStrong,
@@ -1961,7 +2058,7 @@ private fun AuraComparisonStudioScreen(
                         Text(
                             text = "Magnifier",
                             color = if (studioMode == "magnifier") Color.White else AuraOnSurfaceVariant,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -1970,55 +2067,53 @@ private fun AuraComparisonStudioScreen(
                 // Pro Level (Switches to Retouch Suite)
                 Box(
                     modifier = Modifier
-                        .weight(1f)
                         .clip(CircleShape)
                         .clickable { onNavigateToRetouchSuite() }
-                        .padding(vertical = 7.dp),
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Tune,
                             contentDescription = null,
-                            tint = AuraOnSurfaceVariant,
+                            tint = AuraSecondary,
                             modifier = Modifier.size(15.dp)
                         )
                         Text(
-                            text = "Pro Level",
+                            text = "Pro Studio",
                             color = AuraOnSurfaceVariant,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
 
-                // Beauty
+                // Skin Tones Quick Swatch Button
                 Box(
                     modifier = Modifier
-                        .weight(1f)
                         .clip(CircleShape)
-                        .clickable { onNavigateToRetouchSuite() }
-                        .padding(vertical = 7.dp),
+                        .clickable { onOpenSkinTones() }
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Flare,
-                            contentDescription = null,
-                            tint = AuraOnSurfaceVariant,
-                            modifier = Modifier.size(15.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(Color(editParams.preset.swatchColor))
                         )
                         Text(
-                            text = "Beauty",
-                            color = AuraOnSurfaceVariant,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
+                            text = "Skin Tones (${editParams.preset.title})",
+                            color = AuraSecondary,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -2172,41 +2267,36 @@ private fun AuraRetouchSuiteScreen(
             .fillMaxSize()
             .background(AuraSurfaceLowest)
     ) {
-        // Top App Bar
+        // Top HUD Bar (Horizontally scrollable with Back button)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(top = 8.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)
+                .horizontalScroll(rememberScrollState()),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
             ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronLeft,
-                        contentDescription = "Back",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Text(
-                    text = "Aura AI",
-                    color = AuraOnSurface,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
                 )
             }
+            Text(
+                text = "Retouch Suite",
+                color = AuraOnSurface,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
 
             Box(
                 modifier = Modifier
@@ -2231,6 +2321,34 @@ private fun AuraRetouchSuiteScreen(
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.6.sp
+                    )
+                }
+            }
+
+            // Quick Studio Return
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(AuraPrimaryElectric.copy(alpha = 0.18f))
+                    .border(1.dp, AuraPrimaryElectric.copy(alpha = 0.45f), CircleShape)
+                    .clickable { onNavigateToStudio() }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Compare,
+                        contentDescription = null,
+                        tint = AuraPrimary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = "Studio Split",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
@@ -2459,99 +2577,42 @@ private fun AuraRetouchSuiteScreen(
                 )
             }
 
-            // 3. AI Restyle Presets (Horizontal Scroll Bento)
+            // 3. Biological Skin Tone Grid
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Face,
+                            contentDescription = null,
+                            tint = AuraSecondary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "Biological Skin Tones",
+                            color = AuraOnSurface,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                     Text(
-                        text = "AI Restyle Presets",
-                        color = AuraOnSurface,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Tap to apply",
-                        color = AuraOnSurfaceVariant,
-                        fontSize = 11.sp
+                        text = "Selective dermis only",
+                        color = AuraSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    AestheticPreset.values().forEach { preset ->
-                        val isSelected = editParams.preset == preset
-                        Box(
-                            modifier = Modifier
-                                .width(120.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(
-                                    if (isSelected) {
-                                        Brush.linearGradient(
-                                            listOf(AuraSecondary.copy(alpha = 0.18f), AuraPrimaryElectric.copy(alpha = 0.12f))
-                                        )
-                                    } else {
-                                        Brush.linearGradient(listOf(Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.03f)))
-                                    }
-                                )
-                                .border(
-                                    width = if (isSelected) 1.5.dp else 1.dp,
-                                    color = if (isSelected) AuraSecondary else Color.White.copy(alpha = 0.10f),
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                                .clickable { onSelectPreset(preset) }
-                                .padding(10.dp)
-                        ) {
-                            Column {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(50.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(AuraSurfaceContainerHigh.copy(alpha = 0.70f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = if (isSelected) AuraSecondary else AuraOnSurfaceVariant,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    if (isSelected) {
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.TopEnd)
-                                                .padding(6.dp)
-                                                .size(6.dp)
-                                                .clip(CircleShape)
-                                                .background(AuraSecondary)
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = preset.title,
-                                    color = if (isSelected) Color.White else AuraOnSurface,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = if (isSelected) "Active Profile" else "Preset",
-                                    color = if (isSelected) AuraSecondary else AuraOutline,
-                                    fontSize = 10.sp
-                                )
-                            }
-                        }
-                    }
-                }
+                AuraSkinToneGrid(
+                    selectedPreset = editParams.preset,
+                    onSelectPreset = onSelectPreset
+                )
             }
 
             // Bottom CTA: Apply & Export in 4K
@@ -2609,6 +2670,8 @@ private fun AuraTuningSliderCard(
     valueText: String,
     onValueChange: (Float) -> Unit
 ) {
+    var localSliderPos by remember(value) { mutableFloatStateOf(value.coerceIn(0f, 1f)) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -2648,8 +2711,11 @@ private fun AuraTuningSliderCard(
         }
 
         Slider(
-            value = value.coerceIn(0f, 1f),
-            onValueChange = onValueChange,
+            value = localSliderPos,
+            onValueChange = {
+                localSliderPos = it
+                onValueChange(it)
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
                 thumbColor = Color.White,
@@ -2674,9 +2740,21 @@ private fun AuraProcessingScreen(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1800),
+            animation = tween(1200, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         )
+    )
+    val pulse by infiniteTransition.animateFloat(
+        initialValue = 0.90f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+    val animatedProgress by animateFloatAsState(
+        targetValue = stageProgress?.progressFraction ?: 0.35f,
+        animationSpec = tween(300)
     )
 
     Box(
@@ -2687,37 +2765,62 @@ private fun AuraProcessingScreen(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(22.dp),
             modifier = Modifier.padding(32.dp)
         ) {
-            // Radial Progress Sweep
+            // Smooth Rotating Glow Orb & Progress
             Box(
-                modifier = Modifier.size(110.dp),
+                modifier = Modifier.size(120.dp),
                 contentAlignment = Alignment.Center
             ) {
                 // Background Track
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     drawCircle(
                         color = Color.White.copy(alpha = 0.08f),
-                        radius = size.width * 0.45f,
+                        radius = size.width * 0.44f,
                         style = Stroke(width = 6.dp.toPx())
                     )
                 }
 
-                // Active Gradient Arc
+                // Smooth Rotating Outer Accent Arc
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .rotate(rotation)
+                ) {
+                    drawArc(
+                        brush = Brush.sweepGradient(
+                            listOf(
+                                AuraPrimaryElectric.copy(alpha = 0.1f),
+                                AuraSecondary,
+                                AuraTertiaryHotMagenta,
+                                AuraPrimaryElectric
+                            )
+                        ),
+                        startAngle = 0f,
+                        sweepAngle = 270f,
+                        useCenter = false,
+                        style = Stroke(width = 5.dp.toPx())
+                    )
+                }
+
+                // Active Smooth Progress Indicator
                 CircularProgressIndicator(
-                    progress = { stageProgress?.progressFraction ?: 0.5f },
+                    progress = { animatedProgress },
                     strokeWidth = 6.dp,
                     color = AuraPrimaryElectric,
                     trackColor = Color.Transparent,
                     modifier = Modifier.fillMaxSize()
                 )
 
+                // Pulsing Center Sparkle
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
                     tint = AuraSecondary,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier
+                        .size(34.dp)
+                        .scale(pulse)
                 )
             }
 
@@ -2730,7 +2833,7 @@ private fun AuraProcessingScreen(
                     fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = stageProgress?.stageDescription ?: "Processing high-frequency textures in 4K...",
                     color = AuraOnSurfaceVariant,
@@ -2745,7 +2848,8 @@ private fun AuraProcessingScreen(
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.06f))
-                    .padding(horizontal = 14.dp, vertical = 2.dp)
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), CircleShape)
+                    .padding(horizontal = 16.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = "Cancel",
@@ -3165,5 +3269,189 @@ private fun ModelArchitectureDialog(
             }
         },
         containerColor = AuraSurfaceContainerHigh
+    )
+}
+
+// =========================================================================
+// SCREEN 6: Biological Skin Tone Grid & Dialog
+// Remini-Style Dermis-Gated Selection
+// =========================================================================
+@Composable
+private fun AuraSkinToneGrid(
+    selectedPreset: AestheticPreset,
+    onSelectPreset: (AestheticPreset) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        val presets = AestheticPreset.values()
+        for (i in presets.indices step 2) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                for (j in 0..1) {
+                    val index = i + j
+                    if (index < presets.size) {
+                        val preset = presets[index]
+                        val isSelected = selectedPreset == preset
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    if (isSelected) {
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color(preset.swatchColor).copy(alpha = 0.28f),
+                                                AuraPrimaryElectric.copy(alpha = 0.15f)
+                                            )
+                                        )
+                                    } else {
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color.White.copy(alpha = 0.05f),
+                                                Color.White.copy(alpha = 0.03f)
+                                            )
+                                        )
+                                    }
+                                )
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) Color(preset.swatchColor) else Color.White.copy(alpha = 0.10f),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .clickable { onSelectPreset(preset) }
+                                .padding(12.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Circular Swatch
+                                    Box(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(preset.swatchColor))
+                                            .border(1.5.dp, Color.White.copy(alpha = 0.4f), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = "Selected",
+                                                tint = if (preset == AestheticPreset.AFRICAN) Color.White else Color.Black,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+
+                                    if (preset == AestheticPreset.REMINI_NATURAL) {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .background(AuraSecondaryContainer.copy(alpha = 0.35f))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = "DEFAULT",
+                                                color = AuraSecondary,
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Column {
+                                    Text(
+                                        text = preset.title,
+                                        color = if (isSelected) Color.White else AuraOnSurface,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = preset.subtitle,
+                                        color = if (isSelected) AuraSecondary else AuraOnSurfaceVariant,
+                                        fontSize = 10.sp,
+                                        lineHeight = 13.sp,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AuraSkinToneDialog(
+    selectedPreset: AestheticPreset,
+    onSelectPreset: (AestheticPreset) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = AuraSurfaceContainerHighest,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = null,
+                    tint = AuraSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "Select Biological Skin Tone",
+                    color = AuraOnSurface,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "Choose your desired authentic tone. Non-skin areas (hair, background, clothes) will remain 100% untouched.",
+                    color = AuraOnSurfaceVariant,
+                    fontSize = 12.sp
+                )
+                AuraSkinToneGrid(
+                    selectedPreset = selectedPreset,
+                    onSelectPreset = onSelectPreset
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "Done",
+                    color = AuraSecondary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
     )
 }

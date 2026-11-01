@@ -20,18 +20,48 @@ import platform.UIKit.UINavigationControllerDelegateProtocol
 import platform.darwin.NSObject
 import platform.posix.memcpy
 
+import androidx.compose.ui.graphics.asSkiaBitmap
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import org.jetbrains.skia.EncodedImageFormat
+import platform.Foundation.dataWithBytes
+import platform.UIKit.UIImageWriteToSavedPhotosAlbum
+
 actual object PlatformActions {
     actual fun saveImageToGallery(fileName: String, onResult: (Boolean, String?) -> Unit) {
         saveImageToGallery(null, fileName, onResult)
     }
 
+    @OptIn(ExperimentalForeignApi::class)
     actual fun saveImageToGallery(
         image: ImageBitmap?,
         fileName: String,
         onResult: (Boolean, String?) -> Unit
     ) {
-        // iOS Photos saving confirmation
-        onResult(true, "Saved to Photos album successfully")
+        try {
+            val uiImage: UIImage? = if (image != null) {
+                val skiaBitmap = image.asSkiaBitmap()
+                val skiaImage = Image.makeFromBitmap(skiaBitmap)
+                val data = skiaImage.encodeToData(EncodedImageFormat.JPEG, 98)
+                val bytes = data?.bytes
+                if (bytes != null && bytes.isNotEmpty()) {
+                    val nsData: NSData = bytes.usePinned { pinned ->
+                        NSData.dataWithBytes(pinned.addressOf(0), bytes.size.toULong())
+                    }
+                    UIImage.imageWithData(nsData)
+                } else null
+            } else null
+
+            if (uiImage != null) {
+                UIImageWriteToSavedPhotosAlbum(uiImage, null, null, null)
+                val actualName = if (fileName.contains(".")) fileName else "$fileName.jpg"
+                onResult(true, actualName)
+            } else {
+                onResult(false, "Could not convert image to save")
+            }
+        } catch (e: Exception) {
+            onResult(false, e.message ?: "Failed to save photo to iOS Photos")
+        }
     }
 
     actual fun shareImage(text: String) {

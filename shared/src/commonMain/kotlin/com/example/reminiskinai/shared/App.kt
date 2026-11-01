@@ -2,7 +2,6 @@ package com.example.reminiskinai.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,17 +34,13 @@ fun App() {
                 AppScreen.MAIN -> {
                     MainScreen(
                         onNavigateToPassport = { currentScreen = AppScreen.PASSPORT_STUDIO },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .safeDrawingPadding()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
                 AppScreen.PASSPORT_STUDIO -> {
                     PassportPhotoScreen(
                         onBackToMain = { currentScreen = AppScreen.MAIN },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .safeDrawingPadding()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }

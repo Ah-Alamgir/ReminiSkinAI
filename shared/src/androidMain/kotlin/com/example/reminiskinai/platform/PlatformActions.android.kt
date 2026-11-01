@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import kotlin.math.max
 
 actual object PlatformActions {
     var appContext: Context? = null
@@ -38,8 +39,13 @@ actual object PlatformActions {
 
         try {
             val bitmap = image?.asAndroidBitmap() ?: run {
-                // Fallback: create a blank 1080p canvas if image is null
-                Bitmap.createBitmap(1080, 1440, Bitmap.Config.ARGB_8888)
+                try {
+                    ctx.assets.open("composeResources/reminiskinai.shared.generated.resources/drawable/sample_1_remini_ref.webp").use {
+                        BitmapFactory.decodeStream(it)
+                    }
+                } catch (_: Throwable) {
+                    Bitmap.createBitmap(1080, 1440, Bitmap.Config.ARGB_8888)
+                }
             }
 
             val actualFileName = if (fileName.contains(".")) fileName else "${fileName}_${System.currentTimeMillis()}.jpg"
@@ -108,13 +114,24 @@ actual fun rememberPhotoPickerLauncher(onPhotoPicked: (ImageBitmap?) -> Unit): (
     ) { uri ->
         if (uri != null) {
             val bitmap = try {
+                var sampleSize = 1
+                context.contentResolver.openInputStream(uri)?.use { boundsStream ->
+                    val boundsOpts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                    BitmapFactory.decodeStream(boundsStream, null, boundsOpts)
+                    val maxDim = max(boundsOpts.outWidth, boundsOpts.outHeight)
+                    while (maxDim / (sampleSize * 2) >= 1440) {
+                        sampleSize *= 2
+                    }
+                }
+
                 context.contentResolver.openInputStream(uri)?.use { stream ->
                     val opts = BitmapFactory.Options().apply {
+                        inSampleSize = sampleSize
                         inPreferredConfig = Bitmap.Config.ARGB_8888
                     }
                     BitmapFactory.decodeStream(stream, null, opts)?.asImageBitmap()
                 }
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
                 null
             }
             onPhotoPicked(bitmap)

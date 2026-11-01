@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -150,6 +151,8 @@ import com.example.reminiskinai.ui.components.Export4kModal
 import com.example.reminiskinai.ui.components.ExportResolution
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import reminiskinai.shared.generated.resources.Res
@@ -284,24 +287,28 @@ fun MainScreen(
 
     val photoPickerLauncher = rememberPhotoPickerLauncher { picked ->
         if (picked != null) {
-            coroutineScope.launch {
+            coroutineScope.launch(Dispatchers.Default) {
                 val enhanced = SkinToneProcessor.enhancePhoto(picked)
                 val graded = SkinToneProcessor.applySkinToneGrading(
                     source = enhanced,
                     preset = pendingPreset,
                     warmth = editParams.skinWarmth,
-                    radiance = editParams.skinRadiance
+                    radiance = editParams.skinRadiance,
+                    smoothness = editParams.skinSmoothness,
+                    clarity = editParams.facialClarity
                 )
-                userCustomOriginalBitmap = picked
-                userCustomEnhancedBitmap = enhanced
-                userCustomGradedBitmap = graded
-                editParams = editParams.copy(preset = pendingPreset)
-                startProcessing(
-                    before = samplePhotos[0].beforeDrawable,
-                    after = samplePhotos[0].reminiRefDrawable,
-                    targetMode = pendingTargetMode,
-                    presetMode = pendingPreset
-                )
+                withContext(Dispatchers.Main) {
+                    userCustomOriginalBitmap = picked
+                    userCustomEnhancedBitmap = enhanced
+                    userCustomGradedBitmap = graded
+                    editParams = editParams.copy(preset = pendingPreset)
+                    startProcessing(
+                        before = samplePhotos[0].beforeDrawable,
+                        after = samplePhotos[0].reminiRefDrawable,
+                        targetMode = pendingTargetMode,
+                        presetMode = pendingPreset
+                    )
+                }
             }
         }
     }
@@ -312,17 +319,31 @@ fun MainScreen(
         photoPickerLauncher()
     }
 
-    // Dynamic Skin-Gated Tone Grading: When user tweaks preset, warmth, or radiance,
+    // Dynamic Skin-Gated Tone Grading: When user tweaks preset, warmth, radiance, smoothness, or clarity,
     // recalculate graded dermis tones selectively without tinting clothes, hair, or background!
-    LaunchedEffect(editParams.preset, editParams.skinWarmth, editParams.skinRadiance, userCustomEnhancedBitmap) {
+    LaunchedEffect(
+        editParams.preset,
+        editParams.skinWarmth,
+        editParams.skinRadiance,
+        editParams.skinSmoothness,
+        editParams.facialClarity,
+        userCustomEnhancedBitmap
+    ) {
         val base = userCustomEnhancedBitmap
         if (base != null) {
-            userCustomGradedBitmap = SkinToneProcessor.applySkinToneGrading(
-                source = base,
-                preset = editParams.preset,
-                warmth = editParams.skinWarmth,
-                radiance = editParams.skinRadiance
-            )
+            withContext(Dispatchers.Default) {
+                val graded = SkinToneProcessor.applySkinToneGrading(
+                    source = base,
+                    preset = editParams.preset,
+                    warmth = editParams.skinWarmth,
+                    radiance = editParams.skinRadiance,
+                    smoothness = editParams.skinSmoothness,
+                    clarity = editParams.facialClarity
+                )
+                withContext(Dispatchers.Main) {
+                    userCustomGradedBitmap = graded
+                }
+            }
         }
     }
 
@@ -441,12 +462,18 @@ fun MainScreen(
                                 sample1Drawable = Res.drawable.sample_1_remini_ref,
                                 sample2Drawable = Res.drawable.sample_2_remini_ref,
                                 onOpenSample1 = {
+                                    userCustomOriginalBitmap = null
+                                    userCustomEnhancedBitmap = null
+                                    userCustomGradedBitmap = null
                                     selectedSample = samplePhotos[0]
                                     activeBeforeDrawable = samplePhotos[0].beforeDrawable
                                     activeAfterDrawable = samplePhotos[0].reminiRefDrawable
                                     mode = EditorScreenMode.COMPARISON_STUDIO
                                 },
                                 onOpenSample2 = {
+                                    userCustomOriginalBitmap = null
+                                    userCustomEnhancedBitmap = null
+                                    userCustomGradedBitmap = null
                                     selectedSample = samplePhotos[1]
                                     activeBeforeDrawable = samplePhotos[1].beforeDrawable
                                     activeAfterDrawable = samplePhotos[1].reminiRefDrawable
@@ -545,9 +572,15 @@ fun MainScreen(
             EditorScreenMode.SAVED_SHARE -> {
                 AuraSavedShareScreen(
                     savedDrawable = activeAfterDrawable ?: activeBeforeDrawable,
+                    savedBitmap = userCustomGradedBitmap ?: userCustomEnhancedBitmap,
                     fileName = savedFileName,
                     onBackToResult = { mode = EditorScreenMode.COMPARISON_STUDIO },
-                    onEnhanceAnother = { mode = EditorScreenMode.HOME },
+                    onEnhanceAnother = {
+                        userCustomOriginalBitmap = null
+                        userCustomEnhancedBitmap = null
+                        userCustomGradedBitmap = null
+                        mode = EditorScreenMode.HOME
+                    },
                     onShare = {
                         PlatformActions.shareImage("Check out my ultra-sharp 4K restored portrait enhanced with Aura AI!")
                     }
@@ -773,7 +806,8 @@ private fun AuraHeroHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 36.dp)
+            .statusBarsPadding()
+            .padding(top = 10.dp)
     ) {
         // Floating Top Utility Row: Credits Pill & Settings Button
         Row(
@@ -1704,7 +1738,8 @@ private fun AuraComparisonStudioScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -2141,7 +2176,8 @@ private fun AuraRetouchSuiteScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -2728,6 +2764,7 @@ private fun AuraProcessingScreen(
 @Composable
 private fun AuraSavedShareScreen(
     savedDrawable: DrawableResource,
+    savedBitmap: ImageBitmap? = null,
     fileName: String,
     onBackToResult: () -> Unit,
     onEnhanceAnother: () -> Unit,
@@ -2737,7 +2774,8 @@ private fun AuraSavedShareScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AuraSurfaceLowest)
-            .padding(20.dp),
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -2805,8 +2843,13 @@ private fun AuraSavedShareScreen(
                     shape = RoundedCornerShape(24.dp)
                 )
         ) {
+            val painter: Painter = if (savedBitmap != null) {
+                remember(savedBitmap) { BitmapPainter(savedBitmap) }
+            } else {
+                painterResource(savedDrawable)
+            }
             Image(
-                painter = painterResource(savedDrawable),
+                painter = painter,
                 contentDescription = "Saved Portrait",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

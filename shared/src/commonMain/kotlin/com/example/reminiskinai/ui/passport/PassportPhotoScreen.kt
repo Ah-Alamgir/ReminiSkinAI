@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -234,7 +235,7 @@ fun PassportPhotoScreen(
                     onBack = { mode = PassportScreenMode.UPLOAD_HOME },
                     onExport = {
                         isSaving = true
-                        PlatformActions.saveImageToGallery("Passport_${editParams.countryStandard.name}.png") { _, fileName ->
+                        PlatformActions.saveImageToGallery(image = customPickedBitmap, fileName = "Passport_${editParams.countryStandard.name}.png") { _, fileName ->
                             isSaving = false
                             savedFileName = fileName ?: "Passport_Photo_300DPI.png"
                             mode = PassportScreenMode.SAVED_EXPORT
@@ -286,7 +287,8 @@ private fun PassportUploadHome(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .statusBarsPadding()
+                .padding(horizontal = 14.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -491,7 +493,8 @@ private fun PassportStudioEditor(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .statusBarsPadding()
+                .padding(horizontal = 14.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -1065,7 +1068,8 @@ private fun PassportSavedExport(
         modifier = Modifier
             .fillMaxSize()
             .background(ReminiBlack)
-            .padding(24.dp),
+            .statusBarsPadding()
+            .padding(horizontal = 24.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

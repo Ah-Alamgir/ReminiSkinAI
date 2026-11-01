@@ -12,7 +12,9 @@ expect object SkinToneProcessor {
         source: ImageBitmap,
         preset: AestheticPreset,
         warmth: Float = 1.0f,
-        radiance: Float = 1.0f
+        radiance: Float = 1.0f,
+        smoothness: Float = 0.85f,
+        clarity: Float = 0.82f
     ): ImageBitmap
 
     /**

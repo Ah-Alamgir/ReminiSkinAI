@@ -108,26 +108,32 @@ button {
   position: relative;
   width: 100%;
   height: 100dvh;
-  max-width: 460px;
+  max-width: 680px;
   margin: 0 auto;
   background-color: var(--aura-obsidian);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 0 80px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 0 90px rgba(0, 0, 0, 0.90);
 }
 
-@media (min-width: 500px) {
+@media (min-width: 640px) {
   body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 50% 20%, #1B182E 0%, #09090B 75%);
+    background: radial-gradient(circle at 50% 25%, #1F1A3A 0%, #09090B 80%);
   }
   .aura-app-shell {
-    height: min(94dvh, 932px);
-    border-radius: 38px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    height: min(96dvh, 960px);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+}
+
+@media (min-width: 1024px) {
+  .aura-app-shell {
+    max-width: 760px;
   }
 }
 
@@ -1218,8 +1224,9 @@ button {
 }
 
 .retouch-upper-viewport {
-  height: 41%;
-  min-height: 210px;
+  flex: 1.15;
+  min-height: 310px;
+  max-height: 48vh;
   padding: 2px 16px 8px;
   flex-shrink: 0;
 }

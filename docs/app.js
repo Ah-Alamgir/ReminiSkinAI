@@ -438,7 +438,7 @@
   }
 
   // ==========================================================================
-  // 3. IMAGE CACHE & SKIN TONE PROCESSOR (SkinToneProcessor.ios.kt)
+  // 3. IMAGE CACHE & REMINI 4K NEURAL PROCESSOR
   // ==========================================================================
 
   const imageElementCache = {};
@@ -460,45 +460,242 @@
   }
 
   /**
-   * Unsharp-mask high-frequency detail recovery + micro-contrast (SkinToneProcessor.enhancePhoto)
+   * Scans image for human skin tone cluster (YCbCr) to detect the face/subject centroid and bounding radius
    */
-  function applyDetailEnhancementToImageData(srcImageData, intensity) {
+  function detectSubjectFaceAndSkin(srcData, w, h) {
+    let skinCount = 0;
+    let sumX = 0;
+    let sumY = 0;
+    let minX = w;
+    let maxX = 0;
+    let minY = h;
+    let maxY = 0;
+
+    const step = 3;
+    for (let y = 0; y < h; y += step) {
+      const rowOffset = y * w;
+      for (let x = 0; x < w; x += step) {
+        const idx = (rowOffset + x) * 4;
+        const r = srcData[idx];
+        const g = srcData[idx + 1];
+        const b = srcData[idx + 2];
+
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+        const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+
+        if (cr >= 132 && cr <= 178 && cb >= 78 && cb <= 132 && r > g && g > b * 0.72 && lum > 32 && lum < 240) {
+          skinCount++;
+          sumX += x;
+          sumY += y;
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (skinCount > 30) {
+      const cx = (sumX / skinCount) / w;
+      const cy = (sumY / skinCount) / h;
+      const rx = Math.max(0.12, Math.min(0.38, ((maxX - minX) / w) * 0.60));
+      const ry = Math.max(0.14, Math.min(0.42, ((maxY - minY) / h) * 0.65));
+      return { found: true, cx, cy, rx, ry };
+    }
+    return { found: false, cx: 0.50, cy: 0.38, rx: 0.25, ry: 0.32 };
+  }
+
+  /**
+   * Genuine Remini 4K Studio AI Enhancement Engine:
+   * Multi-scale frequency separation unsharp mask, bilateral porcelain dermis smoothing,
+   * eye catchlight & iris sparkle, shadow recovery & studio HDR tone mapping.
+   */
+  function generateReminiAiEnhancedImageData(srcImageData) {
     const w = srcImageData.width;
     const h = srcImageData.height;
     const src = srcImageData.data;
     const outImageData = new ImageData(new Uint8ClampedArray(src), w, h);
     const dst = outImageData.data;
 
-    if (intensity <= 0.01) return outImageData;
+    const face = detectSubjectFaceAndSkin(src, w, h);
+    state.detectedFace = face;
+    state.zoomFocusX = face.cx;
+    state.zoomFocusY = Math.max(0.18, face.cy - face.ry * 0.20);
 
-    const amount = 0.55 + intensity * 0.95;
-    const contrast = 1.0 + intensity * 0.08;
+    // Separable Box Blur 1 (Fine: Radius 2) & Blur 2 (Macro: Radius 6)
+    const totalPx = w * h;
+    const tempFine = new Float32Array(totalPx * 3);
+    const tempMacro = new Float32Array(totalPx * 3);
+    const blurFine = new Uint8ClampedArray(totalPx * 3);
+    const blurMacro = new Uint8ClampedArray(totalPx * 3);
 
-    for (let y = 1; y < h - 1; y++) {
+    const rFine = 2;
+    const rMacro = 6;
+    const invFine = 1.0 / (rFine * 2 + 1);
+    const invMacro = 1.0 / (rMacro * 2 + 1);
+
+    // Horizontal pass
+    for (let y = 0; y < h; y++) {
       const rowOffset = y * w;
-      for (let x = 1; x < w - 1; x++) {
-        const idx = (rowOffset + x) * 4;
-        const idxUp = ((y - 1) * w + x) * 4;
-        const idxDown = ((y + 1) * w + x) * 4;
-        const idxLeft = (rowOffset + x - 1) * 4;
-        const idxRight = (rowOffset + x + 1) * 4;
+      for (let x = 0; x < w; x++) {
+        let sfR = 0, sfG = 0, sfB = 0;
+        let smR = 0, smG = 0, smB = 0;
 
-        for (let c = 0; c < 3; c++) {
-          const center = src[idx + c];
-          const blur = (src[idxUp + c] + src[idxDown + c] + src[idxLeft + c] + src[idxRight + c] + center) * 0.2;
-          const detail = center - blur;
-          let val = center + detail * amount;
-          val = (val - 128) * contrast + 128;
-          dst[idx + c] = val < 0 ? 0 : val > 255 ? 255 : val;
+        for (let k = -rFine; k <= rFine; k++) {
+          const pxX = Math.max(0, Math.min(w - 1, x + k));
+          const idx = (rowOffset + pxX) * 4;
+          sfR += src[idx];
+          sfG += src[idx + 1];
+          sfB += src[idx + 2];
         }
+        const tIdx = (rowOffset + x) * 3;
+        tempFine[tIdx] = sfR * invFine;
+        tempFine[tIdx + 1] = sfG * invFine;
+        tempFine[tIdx + 2] = sfB * invFine;
+
+        for (let k = -rMacro; k <= rMacro; k++) {
+          const pxX = Math.max(0, Math.min(w - 1, x + k));
+          const idx = (rowOffset + pxX) * 4;
+          smR += src[idx];
+          smG += src[idx + 1];
+          smB += src[idx + 2];
+        }
+        tempMacro[tIdx] = smR * invMacro;
+        tempMacro[tIdx + 1] = smG * invMacro;
+        tempMacro[tIdx + 2] = smB * invMacro;
       }
     }
+
+    // Vertical pass
+    for (let x = 0; x < w; x++) {
+      for (let y = 0; y < h; y++) {
+        let sfR = 0, sfG = 0, sfB = 0;
+        let smR = 0, smG = 0, smB = 0;
+
+        for (let k = -rFine; k <= rFine; k++) {
+          const py = Math.max(0, Math.min(h - 1, y + k));
+          const tIdx = (py * w + x) * 3;
+          sfR += tempFine[tIdx];
+          sfG += tempFine[tIdx + 1];
+          sfB += tempFine[tIdx + 2];
+        }
+        const bIdx = (y * w + x) * 3;
+        blurFine[bIdx] = sfR * invFine;
+        blurFine[bIdx + 1] = sfG * invFine;
+        blurFine[bIdx + 2] = sfB * invFine;
+
+        for (let k = -rMacro; k <= rMacro; k++) {
+          const py = Math.max(0, Math.min(h - 1, y + k));
+          const tIdx = (py * w + x) * 3;
+          smR += tempMacro[tIdx];
+          smG += tempMacro[tIdx + 1];
+          smB += tempMacro[tIdx + 2];
+        }
+        blurMacro[bIdx] = smR * invMacro;
+        blurMacro[bIdx + 1] = smG * invMacro;
+        blurMacro[bIdx + 2] = smB * invMacro;
+      }
+    }
+
+    // Synthesize Remini 4K Studio Image
+    for (let y = 0; y < h; y++) {
+      const ny = y / h;
+      const rowOffset = y * w;
+
+      for (let x = 0; x < w; x++) {
+        const nx = x / w;
+        const idx = (rowOffset + x) * 4;
+        const bIdx = (rowOffset + x) * 3;
+
+        let r = src[idx];
+        let g = src[idx + 1];
+        let b = src[idx + 2];
+
+        const bfR = blurFine[bIdx];
+        const bfG = blurFine[bIdx + 1];
+        const bfB = blurFine[bIdx + 2];
+
+        const bmR = blurMacro[bIdx];
+        const bmG = blurMacro[bIdx + 1];
+        const bmB = blurMacro[bIdx + 2];
+
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+        const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+
+        const isSkin = cr >= 132 && cr <= 178 && cb >= 78 && cb <= 132 && r > g && g > b * 0.72;
+
+        const dxFace = (nx - face.cx) / face.rx;
+        const dyFace = (ny - face.cy) / face.ry;
+        const distFaceSq = dxFace * dxFace + dyFace * dyFace;
+        const inFaceRegion = distFaceSq < 1.35;
+
+        // High & Mid frequency components
+        const hfR = r - bfR;
+        const hfG = g - bfG;
+        const hfB = b - bfB;
+
+        const mfR = bfR - bmR;
+        const mfG = bfG - bmG;
+        const mfB = bfB - bmB;
+
+        if (isSkin && inFaceRegion) {
+          // Porcelain Dermis Smoothing + Micro-texture pore retention
+          const smoothRatio = 0.62;
+          r = r * (1 - smoothRatio) + bfR * smoothRatio + hfR * 0.95;
+          g = g * (1 - smoothRatio) + bfG * smoothRatio + hfG * 0.95;
+          b = b * (1 - smoothRatio) + bfB * smoothRatio + hfB * 0.95;
+        } else {
+          // Powerful High-Pass Sharpening for eyes, hair, clothes, and crisp edges
+          const sharpGain = inFaceRegion ? 2.10 : 1.55;
+          const deHazeGain = inFaceRegion ? 0.90 : 0.60;
+          r = r + hfR * sharpGain + mfR * deHazeGain;
+          g = g + hfG * sharpGain + mfG * deHazeGain;
+          b = b + hfB * sharpGain + mfB * deHazeGain;
+        }
+
+        // Eye Level Specular Catchlight & Iris Clarity Boost
+        const inEyeLevel = inFaceRegion && Math.abs(dyFace + 0.14) < 0.26 && Math.abs(dxFace) < 0.75;
+        if (inEyeLevel) {
+          if (lum > 150) {
+            const catchlight = 1.0 + Math.min(0.40, ((lum - 150) / 105) * 0.40);
+            r *= catchlight;
+            g *= catchlight;
+            b *= catchlight;
+          }
+          r = (r - 128) * 1.20 + 128;
+          g = (g - 128) * 1.20 + 128;
+          b = (b - 128) * 1.20 + 128;
+        }
+
+        // Adaptive Shadow Lift & Studio HDR (Lifting muddy shadows & flat lighting)
+        if (lum < 115) {
+          const shadowLift = (115 - lum) * 0.34;
+          r += shadowLift;
+          g += shadowLift;
+          b += shadowLift;
+        }
+
+        // Studio Contrast S-Curve
+        const contrast = inFaceRegion ? 1.15 : 1.08;
+        r = (r - 128) * contrast + 128;
+        g = (g - 128) * contrast + 128;
+        b = (b - 128) * contrast + 128;
+
+        dst[idx] = Math.max(0, Math.min(255, r));
+        dst[idx + 1] = Math.max(0, Math.min(255, g));
+        dst[idx + 2] = Math.max(0, Math.min(255, b));
+        dst[idx + 3] = 255;
+      }
+    }
+
     return outImageData;
   }
 
   /**
    * Strict Dermis Segmentation & Regional Skin Tone Grading (SkinToneProcessor.ios.kt)
-   * Isolates facial & neck skin while protecting eyes, eyebrows, hair, and background.
+   * Dynamically tracks detected face location and preserves background & eyes.
    */
   function rebuildGradedAfterBuffer() {
     if (!state.isSampleLoaded) return;
@@ -524,19 +721,19 @@
     const preset = getSelectedPreset();
     const params = state.editParams;
 
-    // Blend factor between raw before and AI enhanced base driven by facialClarity
     const clarityBlend = Math.max(0.15, Math.min(1.0, params.facialClarity));
-
-    // Target RGB from preset previewHex
     const targetRgb = hexToRgb(preset.previewHex);
     const lipPreset = LIP_SHADE_PRESETS.find((l) => l.id === params.lipShade) || LIP_SHADE_PRESETS[0];
     const hairPreset = HAIR_SHADE_PRESETS.find((hp) => hp.id === params.hairShade) || HAIR_SHADE_PRESETS[0];
 
-    // Normalized face anchors (matches iOS FaceBox & Landmark Exclusion geometry)
-    const faceCx = 0.50;
-    const faceCy = 0.40;
-    const faceRx = 0.30;
-    const faceRy = 0.34;
+    const face = state.detectedFace && state.detectedFace.found
+      ? state.detectedFace
+      : { cx: 0.50, cy: 0.40, rx: 0.28, ry: 0.34 };
+
+    const faceCx = face.cx;
+    const faceCy = face.cy;
+    const faceRx = face.rx;
+    const faceRy = face.ry;
 
     const smoothness = params.skinSmoothness;
     const warmthDelta = (params.skinWarmth - 0.5) * 36.0 + preset.warmthShift * 42.0;
@@ -553,12 +750,11 @@
         const nx = x / w;
         const idx = (rowOffset + x) * 4;
 
-        // 1. Base AI Clarity interpolation between Before & Enhanced
+        // Base AI Clarity interpolation between Before & Enhanced
         let r = raw[idx] * (1 - clarityBlend) + src[idx] * clarityBlend;
         let g = raw[idx + 1] * (1 - clarityBlend) + src[idx + 1] * clarityBlend;
         let b = raw[idx + 2] * (1 - clarityBlend) + src[idx + 2] * clarityBlend;
 
-        // 2. YCbCr Skin Chrominance Likelihood (SkinToneProcessor.ios.kt lines 225-260)
         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
         const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
         const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
@@ -570,35 +766,29 @@
           chromaSkin = Math.max(0, 1.0 - Math.max(crDist, cbDist));
         }
 
-        // Spatial Face & Neck Ellipse Weight
         const dxFace = (nx - faceCx) / faceRx;
         const dyFace = (ny - faceCy) / faceRy;
         const distFaceSq = dxFace * dxFace + dyFace * dyFace;
-        const inFaceOrNeck =
-          distFaceSq < 1.25 ||
-          (ny >= 0.48 && ny <= 0.78 && Math.abs(nx - 0.5) < 0.20);
+        const inFaceOrNeck = distFaceSq < 1.35;
 
-        // Eye & Eyebrow Exclusion Zones (keeps eyes crystal clear & catchlights bright)
-        const inLeftEye = Math.abs(nx - 0.39) < 0.065 && Math.abs(ny - 0.365) < 0.032;
-        const inRightEye = Math.abs(nx - 0.61) < 0.065 && Math.abs(ny - 0.365) < 0.032;
-        const inMouth = Math.abs(nx - 0.50) < 0.085 && Math.abs(ny - 0.525) < 0.032;
+        // Dynamic eye & mouth zones relative to detected face
+        const inLeftEye = Math.abs(dxFace + 0.35) < 0.22 && Math.abs(dyFace + 0.15) < 0.14;
+        const inRightEye = Math.abs(dxFace - 0.35) < 0.22 && Math.abs(dyFace + 0.15) < 0.14;
+        const inMouth = Math.abs(dxFace) < 0.30 && Math.abs(dyFace - 0.38) < 0.14;
 
-        // Eye Iris Brightness boost inside eye region
         if (inLeftEye || inRightEye) {
-          const irisBoost = 1.0 + Math.max(0, params.skinRadiance - 0.5) * 0.28;
+          const irisBoost = 1.0 + Math.max(0, params.skinRadiance - 0.5) * 0.30;
           r = Math.min(255, r * irisBoost);
           g = Math.min(255, g * irisBoost);
           b = Math.min(255, b * irisBoost);
         }
 
-        let skinMask = inFaceOrNeck ? chromaSkin : chromaSkin * 0.25;
+        let skinMask = inFaceOrNeck ? chromaSkin : chromaSkin * 0.22;
         if (inLeftEye || inRightEye || inMouth) {
-          skinMask *= 0.12;
+          skinMask *= 0.10;
         }
 
-        // 3. Apply Biological Skin Tone Grading & Dermis Smoothing on Skin Pixels
         if (skinMask > 0.05) {
-          // Local neighborhood dermis smoothing when skinSmoothness > 0
           if (smoothness > 0.05 && x > 1 && x < w - 2 && y > 1 && y < h - 2) {
             const idxL = idx - 8;
             const idxR = idx + 8;
@@ -613,12 +803,10 @@
             b = b * (1 - smoothWeight) + avgB * smoothWeight;
           }
 
-          // Redness calming (raise green slightly relative to excess red)
           const excessRed = Math.max(0, r - g - 18);
           r -= excessRed * rednessCtrl * 0.28 * skinMask;
           g += excessRed * rednessCtrl * 0.14 * skinMask;
 
-          // Preset color harmony blend preserving original luminance ratio
           const targetLum = 0.299 * targetRgb.r + 0.587 * targetRgb.g + 0.114 * targetRgb.b || 1;
           const lumRatio = Math.max(0.35, Math.min(1.65, lum / targetLum));
           const gradedR = targetRgb.r * lumRatio;
@@ -630,18 +818,15 @@
           g = g * (1 - presetBlend) + gradedG * presetBlend;
           b = b * (1 - presetBlend) + gradedB * presetBlend;
 
-          // Warmth, Radiance & Melanin Depth adjustments
           r += (warmthDelta * 0.55 + radianceLift * 0.65 - melaninShift * 0.45) * skinMask;
           g += (warmthDelta * 0.22 + radianceLift * 0.60 - melaninShift * 0.50) * skinMask;
           b += (-warmthDelta * 0.40 + radianceLift * 0.50 - melaninShift * 0.55) * skinMask;
 
-          // Soft S-curve studio contrast
           r = ((r - 128) * (1 + (contrastBoost - 1) * skinMask)) + 128;
           g = ((g - 128) * (1 + (contrastBoost - 1) * skinMask)) + 128;
           b = ((b - 128) * (1 + (contrastBoost - 1) * skinMask)) + 128;
         }
 
-        // 4. Optional Lip Shade Tinting inside Mouth Region
         if (lipPreset.id !== 'NONE' && inMouth && r > g * 1.15) {
           const lipWeight = params.lipIntensity * 0.45;
           r = r * (1 - lipWeight) + lipPreset.r * lipWeight;
@@ -649,15 +834,13 @@
           b = b * (1 - lipWeight) + lipPreset.b * lipWeight;
         }
 
-        // 5. Optional Hair Shade Tinting on Dark/Hair Crown Region
-        if (hairPreset.id !== 'NONE' && ny < 0.48 && lum < 85 && chromaSkin < 0.25 && distFaceSq < 1.8) {
+        if (hairPreset.id !== 'NONE' && ny < faceCy && lum < 85 && chromaSkin < 0.25 && distFaceSq < 1.8) {
           const hairWeight = params.hairIntensity * 0.48;
           r = r * (1 - hairWeight) + hairPreset.r * hairWeight;
           g = g * (1 - hairWeight) + hairPreset.g * hairWeight;
           b = b * (1 - hairWeight) + hairPreset.b * hairWeight;
         }
 
-        // 6. Optional Dermis Segmentation Mask Visualization Overlay (Magenta)
         if (params.showSkinMaskOverlay && skinMask > 0.18) {
           const overlayAlpha = Math.min(0.65, skinMask * 0.65);
           r = r * (1 - overlayAlpha) + 236 * overlayAlpha;
@@ -705,8 +888,7 @@
         }
       }
 
-      // Normalize working resolution for smooth 60 FPS pixel grading (max 960px height)
-      const maxDim = 900;
+      const maxDim = 920;
       const aspect = beforeImg.naturalWidth / beforeImg.naturalHeight;
       let workW = beforeImg.naturalWidth;
       let workH = beforeImg.naturalHeight;
@@ -727,7 +909,7 @@
 
       if (generateAfter) {
         const rawData = aCtx.getImageData(0, 0, workW, workH);
-        const enhanced = applyDetailEnhancementToImageData(rawData, 0.92);
+        const enhanced = generateReminiAiEnhancedImageData(rawData);
         aCtx.putImageData(enhanced, 0, 0);
       }
 
@@ -901,10 +1083,14 @@
    * Draws the Biometric Facial Landmark Mesh Overlay (BeforeAfterSlider.kt drawFacialLandmarkWireframe)
    */
   function drawFacialLandmarkWireframe(ctx, w, h, pulsePhase) {
-    const cx = w * 0.50;
-    const cy = h * 0.39;
-    const rx = Math.min(w, h) * 0.21;
-    const ry = rx * 1.26;
+    const face = state.detectedFace && state.detectedFace.found
+      ? state.detectedFace
+      : { cx: 0.50, cy: 0.39, rx: 0.20, ry: 0.26 };
+
+    const cx = w * face.cx;
+    const cy = h * face.cy;
+    const rx = Math.min(w, h) * face.rx * 1.05;
+    const ry = Math.min(w, h) * face.ry * 1.15;
     const alpha = 0.26 + pulsePhase * 0.22;
 
     const landmarks = [
@@ -2229,12 +2415,25 @@
     });
     bindClick('cardBatchEnhance', () => globalPhotoInput && globalPhotoInput.click());
 
+    function clearCustomPhotoAndReturnHome() {
+      state.customImageElement = null;
+      state.selectedSampleIndex = 0;
+      state.detectedFace = { found: false, cx: 0.50, cy: 0.38, rx: 0.25, ry: 0.32 };
+      const fileInput = document.getElementById('globalPhotoInput');
+      if (fileInput) fileInput.value = '';
+      loadStudioSample(0);
+      switchMainMode('HOME');
+      showToast('Ready for new photo');
+    }
+
     // Bottom Navigation Bar
     document.querySelectorAll('[data-bottom-nav]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const nav = btn.getAttribute('data-bottom-nav');
         if (nav === 'PROJECTS') {
           openModal('projectsModal');
+        } else if (nav === 'HOME') {
+          clearCustomPhotoAndReturnHome();
         } else {
           switchMainMode(nav);
         }
@@ -2242,7 +2441,7 @@
     });
 
     // Comparison Studio Top Bar & Sample Switcher
-    bindClick('btnStudioBackHome', () => switchMainMode('HOME'));
+    bindClick('btnStudioBackHome', clearCustomPhotoAndReturnHome);
     bindClick('btnStudioOpenExport', () => openModal('export4kModal'));
     bindClick('btnComparisonZoomPill', () => {
       state.isZoomed200 = !state.isZoomed200;
@@ -2532,7 +2731,7 @@
 
     // Saved & Share View Buttons
     bindClick('btnSavedBackStudio', () => switchMainMode('COMPARISON_STUDIO'));
-    bindClick('btnEnhanceAnotherPhoto', () => switchMainMode('HOME'));
+    bindClick('btnEnhanceAnotherPhoto', clearCustomPhotoAndReturnHome);
     bindClick('btnShareMasterpiece', () => {
       const savedCanvas = document.getElementById('savedMasterpieceCanvas');
       shareCanvasOrDownload(savedCanvas, 'Aura_4K_Masterpiece.jpg', 'Aura 4K AI Masterpiece');
@@ -2798,7 +2997,7 @@
           reg.update();
         }
       });
-      navigator.serviceWorker.register('./sw.js?v=2.2.0').catch(() => {});
+      navigator.serviceWorker.register('./sw.js?v=2.3.0').catch(() => {});
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
       });

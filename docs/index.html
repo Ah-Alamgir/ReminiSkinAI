@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ReminiSkinAI - AI Photo Enhancer & Biometric Passport Studio</title>
+
+  <!-- PWA & Apple Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ReminiSkinAI">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0D0F14">
+  <meta name="format-detection" content="telephone=no">
+
+  <!-- SEO & Social Sharing Tags -->
+  <meta name="description" content="Free offline AI photo enhancer, skin tone grading, and biometric passport photo maker with formal suits. Works 100% offline without internet.">
+  <meta property="og:title" content="ReminiSkinAI - Photo Enhancer & Passport Studio">
+  <meta property="og:description" content="Enhance photos, calibrate regional skin tones, and generate biometric passport photos with formal suits. Works 100% offline.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="icons/icon-512.png">
+
+  <!-- Icons & Manifest -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- iOS Add to Home Screen Banner -->
+  <div id="iosInstallBanner" class="ios-banner hidden">
+    <div class="ios-banner-content">
+      <span class="ios-banner-icon">📲</span>
+      <div class="ios-banner-text">
+        <strong>Install App on iPhone:</strong>
+        <span>Tap <svg class="inline-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg> <strong>Share</strong> then <strong>"Add to Home Screen"</strong> for fullscreen offline mode!</span>
+      </div>
+      <button id="dismissIosBanner" class="ios-banner-close" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logo">
+        <span class="sparkle-dot"></span>
+        <svg viewBox="0 0 24 24" class="logo-icon"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 2 0zm-1-6.5a1.25 1.25 0 1 1 1.25-1.25A1.25 1.25 0 0 1 12 10z"/></svg>
+      </div>
+      <div class="brand-titles">
+        <h1 class="brand-name">ReminiSkinAI</h1>
+        <div class="brand-badges">
+          <span class="badge-offline" id="offlineStatusBadge">
+            <span class="status-dot"></span> Offline Ready
+          </span>
+          <span class="badge-pro">KMP Calibrated</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Switcher -->
+    <nav class="nav-tabs">
+      <button id="tabMainBtn" class="nav-tab active">
+        <svg viewBox="0 0 24 24" class="tab-icon"><path fill="currentColor" d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12z"/></svg>
+        <span>Skin Glow</span>
+      </button>
+      <button id="tabPassportBtn" class="nav-tab">
+        <svg viewBox="0 0 24 24" class="tab-icon"><path fill="currentColor" d="M4 4h16v16H4zm2 4h12V6H6zm0 4h12v-2H6zm0 4h8v-2H6z"/></svg>
+        <span>Passport Studio</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-content">
+
+    <!-- ==================== TAB 1: SKIN GLOW & REMINI ENHANCE ==================== -->
+    <section id="screenMain" class="screen-panel active">
+
+      <!-- Upload & Sample Bar -->
+      <div class="action-bar card">
+        <div class="upload-buttons">
+          <label class="btn btn-primary upload-label">
+            <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>Upload Photo</span>
+            <input type="file" id="imageInput" accept="image/*" class="hidden-input">
+          </label>
+          <button id="cameraBtn" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.5-9h-3.17L14.5 4h-5L7.67 6H4.5A2.5 2.5 0 0 0 2 8.5v9A2.5 2.5 0 0 0 4.5 20h15a2.5 2.5 0 0 0 2.5-2.5v-9A2.5 2.5 0 0 0 19.5 6z"/></svg>
+            <span>Camera</span>
+          </button>
+        </div>
+
+        <!-- Sample Switchers -->
+        <div class="sample-chips-row">
+          <span class="sample-label">Try sample:</span>
+          <button class="sample-chip" data-sample="sample_1_before.webp">Portrait 1</button>
+          <button class="sample-chip" data-sample="sample_2_before.webp">Portrait 2</button>
+          <button class="sample-chip" data-sample="sample_3_before.webp">Portrait 3</button>
+        </div>
+      </div>
+
+      <!-- Before / After Viewer Card -->
+      <div class="preview-card card">
+        <div class="comparison-container" id="comparisonContainer">
+          <canvas id="afterCanvas" class="canvas-layer canvas-after"></canvas>
+          <div class="before-wrapper" id="beforeWrapper">
+            <canvas id="beforeCanvas" class="canvas-layer canvas-before"></canvas>
+          </div>
+          <div class="split-divider" id="splitDivider">
+            <div class="split-handle">
+              <svg viewBox="0 0 24 24" class="split-arrow-icon"><path fill="currentColor" d="M8 7l-5 5 5 5V7zm8 0v10l5-5-5-5z"/></svg>
+            </div>
+          </div>
+          <!-- Badges -->
+          <span class="comp-badge badge-left">BEFORE</span>
+          <span class="comp-badge badge-right">ENHANCED</span>
+          <div id="processingIndicator" class="processing-overlay hidden">
+            <div class="spinner"></div>
+            <span>Calibrating Skin Dermis...</span>
+          </div>
+        </div>
+
+        <!-- Interactive zoom/view hints -->
+        <div class="preview-footer">
+          <span class="hint-text">⇄ Drag slider to inspect before & after clarity</span>
+          <button id="toggleAiEnhanceBtn" class="btn-pill active">
+            <span class="pill-dot"></span> AI Sharpness HD
+          </button>
+        </div>
+      </div>
+
+      <!-- Aesthetic Skin Tone Presets -->
+      <div class="card control-group">
+        <div class="section-title-row">
+          <h2 class="section-title">Regional Aesthetic Presets</h2>
+          <span class="preset-tag">Remini Calibrated</span>
+        </div>
+        <p class="section-desc">Preserves clothing, hair & background 100%. Only dermis skin receives regional tone calibration.</p>
+
+        <div class="presets-grid" id="presetsGrid">
+          <!-- Dynamically populated or rendered presets -->
+        </div>
+      </div>
+
+      <!-- Calibration Sliders -->
+      <div class="card control-group">
+        <div class="section-title-row">
+          <h2 class="section-title">Fine-Tuning Controls</h2>
+          <button id="resetSlidersBtn" class="btn-text">Reset</button>
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Warmth & Undertone</span>
+            <span class="slider-val" id="valWarmth">1.00×</span>
+          </div>
+          <input type="range" id="sliderWarmth" min="0.60" max="1.40" step="0.02" value="1.00" class="app-range">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Radiance Glow</span>
+            <span class="slider-val" id="valRadiance">1.00×</span>
+          </div>
+          <input type="range" id="sliderRadiance" min="0.50" max="1.80" step="0.05" value="1.00" class="app-range">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Skin Dermis Smoothing</span>
+            <span class="slider-val" id="valSmoothness">85%</span>
+          </div>
+          <input type="range" id="sliderSmoothness" min="0.0" max="1.0" step="0.05" value="0.85" class="app-range">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Micro-Texture Clarity</span>
+            <span class="slider-val" id="valClarity">82%</span>
+          </div>
+          <input type="range" id="sliderClarity" min="0.0" max="1.0" step="0.05" value="0.82" class="app-range">
+        </div>
+      </div>
+
+      <!-- Export Bar -->
+      <div class="export-bar">
+        <button id="exportModalBtn" class="btn btn-export">
+          <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          <span>Save & Export Photo (4K / HD)</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: BIOMETRIC PASSPORT STUDIO ==================== -->
+    <section id="screenPassport" class="screen-panel">
+
+      <!-- Country Standard Selector -->
+      <div class="card control-group">
+        <div class="section-title-row">
+          <h2 class="section-title">Country Standard & Biometrics</h2>
+          <span class="preset-tag">ICAO Compliant</span>
+        </div>
+        <select id="countryStandardSelect" class="app-select">
+          <option value="US_2X2">🇺🇸 United States (US) — 2×2 in (51×51 mm)</option>
+          <option value="UK_EU_35X45">🇪🇺 UK / EU / Schengen — 35×45 mm</option>
+          <option value="BANGLADESH_40X50">🇧🇩 Bangladesh Passport — 40×50 mm</option>
+          <option value="INDIA_2X2">🇮🇳 India Passport / OCI — 2×2 in (51×51 mm)</option>
+          <option value="JAPAN_35X45">🇯🇵 Japan Passport / Visa — 35×45 mm</option>
+          <option value="CANADA_50X70">🇨🇦 Canada Passport — 50×70 mm (2×2.75 in)</option>
+          <option value="CHINA_33X48">🇨🇳 China Passport / Visa — 33×48 mm</option>
+          <option value="AUSTRALIA_35X45">🇦🇺 Australia Passport — 35×45 mm</option>
+          <option value="UAE_SAUDI_40X60">🇦🇪 UAE / Saudi / Gulf — 40×60 mm</option>
+          <option value="MALAYSIA_SG_35X50">🇲🇾 Malaysia / Singapore — 35×50 mm</option>
+        </select>
+      </div>
+
+      <!-- Passport Live Preview Canvas -->
+      <div class="preview-card card passport-preview-card">
+        <div class="passport-viewport" id="passportViewport">
+          <canvas id="passportCanvas"></canvas>
+          <!-- Biometric Guide Overlay -->
+          <div id="biometricGuide" class="biometric-guide hidden">
+            <div class="guide-oval"></div>
+            <div class="guide-eye-line"></div>
+            <div class="guide-chin-line"></div>
+            <span class="guide-label-top">CROWN</span>
+            <span class="guide-label-eye">EYE LEVEL</span>
+            <span class="guide-label-chin">CHIN</span>
+          </div>
+        </div>
+
+        <div class="preview-footer passport-footer">
+          <button id="toggleGuidesBtn" class="btn-pill">
+            <span class="pill-dot"></span> Biometric Guides
+          </button>
+          <button id="resetTransformBtn" class="btn-text">Reset Fit</button>
+        </div>
+      </div>
+
+      <!-- Background Color Palette -->
+      <div class="card control-group">
+        <div class="section-title-row">
+          <h2 class="section-title">Background Replacement</h2>
+          <span id="currentBgLabel" class="selected-label">Pure White</span>
+        </div>
+        <div class="bg-palette" id="bgPalette">
+          <button class="bg-swatch active" data-color="#FFFFFF" title="Pure White" style="background: #FFFFFF;"></button>
+          <button class="bg-swatch" data-color="#F5F6F8" title="Studio Off-White" style="background: #F5F6F8;"></button>
+          <button class="bg-swatch" data-color="#CBE6FF" title="Passport Sky Blue" style="background: #CBE6FF;"></button>
+          <button class="bg-swatch" data-color="#438EDB" title="Official ID Blue" style="background: #438EDB;"></button>
+          <button class="bg-swatch" data-color="#1D4E89" title="Deep Navy Blue" style="background: #1D4E89;"></button>
+          <button class="bg-swatch" data-color="#E4E6EB" title="Biometric Grey" style="background: #E4E6EB;"></button>
+          <button class="bg-swatch" data-color="#D62828" title="Official ID Red" style="background: #D62828;"></button>
+          <button class="bg-swatch" data-color="#FDF7E7" title="Warm Cream" style="background: #FDF7E7;"></button>
+          <button class="bg-swatch bg-transparent" data-color="transparent" title="Transparent Background"></button>
+        </div>
+      </div>
+
+      <!-- 10 Formal Suits / Outfits Overlay -->
+      <div class="card control-group">
+        <div class="section-title-row">
+          <h2 class="section-title">Formal Suit & Outfit Overlay</h2>
+          <span class="preset-tag">10 Styles</span>
+        </div>
+
+        <!-- Gender Filter Chips -->
+        <div class="suit-filters">
+          <button class="suit-filter-btn active" data-filter="ALL">All (10)</button>
+          <button class="suit-filter-btn" data-filter="MEN">Men (5)</button>
+          <button class="suit-filter-btn" data-filter="WOMEN">Women (5)</button>
+        </div>
+
+        <!-- Suits Carousel -->
+        <div class="suit-grid" id="suitGrid">
+          <!-- Populated by app.js -->
+        </div>
+
+        <!-- Suit Position / Alignment adjustments -->
+        <div class="suit-adjustments" id="suitAdjustments">
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Suit Scale</span>
+              <span class="slider-val" id="valSuitScale">100%</span>
+            </div>
+            <input type="range" id="sliderSuitScale" min="0.70" max="1.50" step="0.02" value="1.00" class="app-range">
+          </div>
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Collar Height (Up/Down)</span>
+              <span class="slider-val" id="valSuitY">0px</span>
+            </div>
+            <input type="range" id="sliderSuitY" min="-120" max="120" step="2" value="0" class="app-range">
+          </div>
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Horizontal Center</span>
+              <span class="slider-val" id="valSuitX">0px</span>
+            </div>
+            <input type="range" id="sliderSuitX" min="-100" max="100" step="2" value="0" class="app-range">
+          </div>
+        </div>
+      </div>
+
+      <!-- Passport Export Options -->
+      <div class="export-bar dual-export">
+        <button id="exportSinglePassportBtn" class="btn btn-export">
+          <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span>Single 300 DPI Photo</span>
+        </button>
+        <button id="exportSheetBtn" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>
+          <span>4×6" Print Sheet (6 Copies)</span>
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Export Modal (4K & Format Selection) -->
+  <div id="exportModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Enhanced Photo</h3>
+        <button id="closeModalBtn" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Choose resolution and quality. All processing is rendered locally on your device.</p>
+        
+        <div class="export-options">
+          <label class="radio-option">
+            <input type="radio" name="exportRes" value="native" checked>
+            <div class="radio-label">
+              <strong>Native Resolution (Ultra Sharp)</strong>
+              <span>Full original sensor pixels preserved</span>
+            </div>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="exportRes" value="4k">
+            <div class="radio-label">
+              <strong>Ultra HD 4K (Upscaled)</strong>
+              <span>3840×2160 studio master format</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="export-options">
+          <label class="radio-option">
+            <input type="radio" name="exportFormat" value="png" checked>
+            <div class="radio-label">
+              <strong>PNG (Lossless Quality)</strong>
+              <span>Best for high-frequency skin textures</span>
+            </div>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="exportFormat" value="jpeg">
+            <div class="radio-label">
+              <strong>JPEG (Compact Size 98%)</strong>
+              <span>Standard for social media and sharing</span>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="confirmDownloadBtn" class="btn btn-export">Download Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,13 +1,13 @@
 {
-  "name": "ReminiSkinAI - Photo Enhancer & Passport Studio",
-  "short_name": "ReminiSkinAI",
-  "description": "AI Photo Enhancer, Skin Tone Grading, and Biometric Passport Studio with Formal Suits.",
+  "name": "Aura — 4K AI Photo Enhancer & Passport Studio",
+  "short_name": "Aura AI",
+  "description": "4K Neural Photo Enhancer, Biological Skin Tone Grading & ICAO Biometric Passport Studio with 10 Formal Suits.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0D0F14",
-  "theme_color": "#0D0F14",
+  "background_color": "#131315",
+  "theme_color": "#131315",
   "categories": ["photo", "utilities", "productivity"],
   "icons": [
     {

@@ -106,7 +106,7 @@ actual object SkinToneProcessor {
 
             val smoothStrength = smoothness.coerceIn(0f, 1f)
             val smoothedPixels = if (smoothStrength > 0.05f) {
-                val smoothed = pixels.clone()
+                val smoothed = pixels.copyOf()
                 val blendFactor = smoothStrength * 0.65f
 
                 for (y in 1 until height - 1) {

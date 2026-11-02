@@ -2791,9 +2791,17 @@
     await loadStudioSample(0);
     startLandmarkPulseLoop();
 
-    // Register Service Worker for offline PWA support
+    // Register Service Worker for offline PWA support with auto-update
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const reg of registrations) {
+          reg.update();
+        }
+      });
+      navigator.serviceWorker.register('./sw.js?v=2.2.0').catch(() => {});
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
     }
   }
 

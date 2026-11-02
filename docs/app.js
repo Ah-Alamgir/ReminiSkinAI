@@ -1,6 +1,6 @@
 /**
- * Aura AI - ReminiSkinAI 4K Web PWA Core
- * Exact match of Kotlin Multiplatform Compose UI & Design Tokens
+ * Aura AI — ReminiSkinAI 4K Web App Core
+ * Direct replication of Compose Multiplatform Native iOS UI & Core Math
  */
 
 (() => {
@@ -12,8 +12,8 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js', { scope: './' })
-        .then((reg) => console.log('[PWA] Registered:', reg.scope))
-        .catch((err) => console.warn('[PWA] Registration failed:', err));
+        .then((reg) => console.log('[Aura PWA] Registered:', reg.scope))
+        .catch((err) => console.warn('[Aura PWA] Registration error:', err));
     });
   }
 
@@ -95,39 +95,11 @@
     }
   ];
 
-  const PASSPORT_STANDARDS = {
-    US_2X2: { widthMm: 50.8, heightMm: 50.8, wPx: 600, hPx: 600, aspect: 1.0 },
-    UK_EU_35X45: { widthMm: 35, heightMm: 45, wPx: 413, hPx: 531, aspect: 35 / 45 },
-    BANGLADESH_40X50: { widthMm: 40, heightMm: 50, wPx: 472, hPx: 591, aspect: 40 / 50 },
-    INDIA_2X2: { widthMm: 50.8, heightMm: 50.8, wPx: 600, hPx: 600, aspect: 1.0 },
-    JAPAN_35X45: { widthMm: 35, heightMm: 45, wPx: 413, hPx: 531, aspect: 35 / 45 },
-    CANADA_50X70: { widthMm: 50, heightMm: 70, wPx: 591, hPx: 827, aspect: 50 / 70 },
-    CHINA_33X48: { widthMm: 33, heightMm: 48, wPx: 390, hPx: 567, aspect: 33 / 48 },
-    AUSTRALIA_35X45: { widthMm: 35, heightMm: 45, wPx: 413, hPx: 531, aspect: 35 / 45 },
-    UAE_SAUDI_40X60: { widthMm: 40, heightMm: 60, wPx: 472, hPx: 709, aspect: 40 / 60 },
-    MALAYSIA_SG_35X50: { widthMm: 35, heightMm: 50, wPx: 413, hPx: 591, aspect: 35 / 50 }
-  };
-
-  const SUIT_TEMPLATES = [
-    // Men
-    { id: 'men_1_navy_suit', title: 'Navy Tie Suit', gender: 'MEN', src: 'assets/men_1_navy_suit.png' },
-    { id: 'men_2_charcoal_suit', title: 'Executive Charcoal', gender: 'MEN', src: 'assets/men_2_charcoal_suit.png' },
-    { id: 'men_3_grey_blazer', title: 'Slate Grey Suit', gender: 'MEN', src: 'assets/men_3_grey_blazer.png' },
-    { id: 'men_4_black_formal', title: 'Classic Jet Black', gender: 'MEN', src: 'assets/men_4_black_formal.png' },
-    { id: 'men_5_brown_open_collar', title: 'Espresso Blazer', gender: 'MEN', src: 'assets/men_5_brown_open_collar.png' },
-    // Women
-    { id: 'women_1_navy_blazer', title: 'Navy V-Blazer', gender: 'WOMEN', src: 'assets/women_1_navy_blazer.png' },
-    { id: 'women_2_black_suit', title: 'Black Executive', gender: 'WOMEN', src: 'assets/women_2_black_suit.png' },
-    { id: 'women_3_beige_blazer', title: 'Cream Tailored', gender: 'WOMEN', src: 'assets/women_3_beige_blazer.png' },
-    { id: 'women_4_burgundy_blazer', title: 'Burgundy Formal', gender: 'WOMEN', src: 'assets/women_4_burgundy_blazer.png' },
-    { id: 'women_5_grey_blazer', title: 'Charcoal Lapel', gender: 'WOMEN', src: 'assets/women_5_grey_blazer.png' }
-  ];
-
   // ==========================================================================
-  // 3. Application State
+  // 3. Application State (Matches Compose State)
   // ==========================================================================
   const state = {
-    currentScreen: 'HOME', // HOME, COMPARISON_STUDIO, RETOUCH_SUITE, PASSPORT_STUDIO, PROCESSING, SAVED_SHARE
+    currentScreen: 'HOME', // HOME, COMPARISON_STUDIO, RETOUCH_SUITE, PROJECTS, PROCESSING, SAVED_SHARE
     targetScreenAfterProcessing: 'COMPARISON_STUDIO',
     userCredits: 48,
 
@@ -138,7 +110,7 @@
     sourceLoaded: false,
     savedDataUrl: null,
 
-    // Retouch & Calibration
+    // Retouch & Calibration Params
     selectedPresetId: 'REMINI_NATURAL',
     warmth: 1.0,
     radiance: 1.0,
@@ -149,26 +121,8 @@
     splitPos: 50,
     zoomFactor: 1.0,
     isHoldActive: false,
-
-    // Passport Studio
-    passportStandardKey: 'US_2X2',
-    passportBgColor: '#FFFFFF',
-    selectedSuitId: null,
-    suitFilter: 'ALL',
-    suitScale: 1.0,
-    suitOffsetX: 0,
-    suitOffsetY: 0,
-    showBiometricGuides: false,
-
-    loadedSuits: {}
+    showProHud: true
   };
-
-  // Preload suit images
-  SUIT_TEMPLATES.forEach(s => {
-    const img = new Image();
-    img.src = s.src;
-    img.onload = () => { state.loadedSuits[s.id] = img; };
-  });
 
   // ==========================================================================
   // 4. DOM Elements
@@ -177,7 +131,7 @@
   const viewHome = document.getElementById('viewHome');
   const viewComparison = document.getElementById('viewComparison');
   const viewRetouch = document.getElementById('viewRetouch');
-  const viewPassport = document.getElementById('viewPassport');
+  const viewProjects = document.getElementById('viewProjects');
   const viewProcessing = document.getElementById('viewProcessing');
   const viewSaved = document.getElementById('viewSaved');
   const mainBottomNav = document.getElementById('mainBottomNav');
@@ -210,9 +164,18 @@
   const studioRegenerateBtn = document.getElementById('studioRegenerateBtn');
   const studioExportBtn = document.getElementById('studioExportBtn');
 
+  // Mode Chips in Studio
+  const btnModeSplit = document.getElementById('btnModeSplit');
+  const btnModeMagnifier = document.getElementById('btnModeMagnifier');
+  const btnModePro = document.getElementById('btnModePro');
+  const btnModeSkinToneQuick = document.getElementById('btnModeSkinToneQuick');
+  const btnModeSwatchTiny = document.getElementById('btnModeSwatchTiny');
+  const btnModeToneLabel = document.getElementById('btnModeToneLabel');
+
   // Retouch Elements
   const retouchBackBtn = document.getElementById('retouchBackBtn');
-  const retouchExportBtn = document.getElementById('retouchExportBtn');
+  const retouchStudioSplitBtn = document.getElementById('retouchStudioSplitBtn');
+  const retouchSettingsBtn = document.getElementById('retouchSettingsBtn');
   const retouchCanvas = document.getElementById('retouchCanvas');
   const retouchPresetsContainer = document.getElementById('retouchPresetsContainer');
   const subtabTonesContent = document.getElementById('subtabTonesContent');
@@ -226,23 +189,8 @@
   const rValSmoothness = document.getElementById('rValSmoothness');
   const rValClarity = document.getElementById('rValClarity');
 
-  // Passport Elements
-  const passportBackBtn = document.getElementById('passportBackBtn');
-  const passportGuideToggleBtn = document.getElementById('passportGuideToggleBtn');
-  const passportCanvas = document.getElementById('passportCanvas');
-  const passportGuideOverlay = document.getElementById('passportGuideOverlay');
-  const passportStandardSelect = document.getElementById('passportStandardSelect');
-  const passportBgRow = document.getElementById('passportBgRow');
-  const passportBgName = document.getElementById('passportBgName');
-  const passportSuitCarousel = document.getElementById('passportSuitCarousel');
-  const pSliderCoatScale = document.getElementById('pSliderCoatScale');
-  const pSliderCoatY = document.getElementById('pSliderCoatY');
-  const pSliderCoatX = document.getElementById('pSliderCoatX');
-  const pValCoatScale = document.getElementById('pValCoatScale');
-  const pValCoatY = document.getElementById('pValCoatY');
-  const pValCoatX = document.getElementById('pValCoatX');
-  const passportExportSingleBtn = document.getElementById('passportExportSingleBtn');
-  const passportExportSheetBtn = document.getElementById('passportExportSheetBtn');
+  // Projects Elements
+  const projectsBackBtn = document.getElementById('projectsBackBtn');
 
   // Processing Elements
   const procStageStep = document.getElementById('procStageStep');
@@ -272,36 +220,37 @@
   const modalTonesGrid = document.getElementById('modalTonesGrid');
 
   // ==========================================================================
-  // 5. Screen Navigation Router
+  // 5. Screen Navigation Router (Matches Compose EditorScreenMode)
   // ==========================================================================
   function navigateTo(screen) {
     state.currentScreen = screen;
-    const views = [viewHome, viewComparison, viewRetouch, viewPassport, viewProcessing, viewSaved];
-    views.forEach(v => v.classList.remove('active'));
+    const views = [viewHome, viewComparison, viewRetouch, viewProjects, viewProcessing, viewSaved];
+    views.forEach(v => {
+      if (v) v.classList.remove('active');
+    });
 
-    // Show/hide bottom nav bar based on mode (like in Compose UI)
+    // Handle bottom navigation visibility (only visible on HOME)
     if (screen === 'HOME') {
-      viewHome.classList.add('active');
-      mainBottomNav.style.display = 'flex';
+      if (viewHome) viewHome.classList.add('active');
+      if (mainBottomNav) mainBottomNav.style.display = 'flex';
       updateNavHighlight('HOME');
     } else if (screen === 'COMPARISON_STUDIO') {
-      viewComparison.classList.add('active');
-      mainBottomNav.style.display = 'none';
+      if (viewComparison) viewComparison.classList.add('active');
+      if (mainBottomNav) mainBottomNav.style.display = 'none';
       renderStudioCanvas();
     } else if (screen === 'RETOUCH_SUITE') {
-      viewRetouch.classList.add('active');
-      mainBottomNav.style.display = 'none';
+      if (viewRetouch) viewRetouch.classList.add('active');
+      if (mainBottomNav) mainBottomNav.style.display = 'none';
       renderRetouchCanvas();
-    } else if (screen === 'PASSPORT_STUDIO') {
-      viewPassport.classList.add('active');
-      mainBottomNav.style.display = 'none';
-      renderPassportCanvas();
+    } else if (screen === 'PROJECTS') {
+      if (viewProjects) viewProjects.classList.add('active');
+      if (mainBottomNav) mainBottomNav.style.display = 'none';
     } else if (screen === 'PROCESSING') {
-      viewProcessing.classList.add('active');
-      mainBottomNav.style.display = 'none';
+      if (viewProcessing) viewProcessing.classList.add('active');
+      if (mainBottomNav) mainBottomNav.style.display = 'none';
     } else if (screen === 'SAVED_SHARE') {
-      viewSaved.classList.add('active');
-      mainBottomNav.style.display = 'none';
+      if (viewSaved) viewSaved.classList.add('active');
+      if (mainBottomNav) mainBottomNav.style.display = 'none';
     }
   }
 
@@ -311,18 +260,22 @@
     });
   }
 
-  // Bottom Navigation Clicks
+  // Floating Glass Bottom Navigation Bar Clicks (MainScreen.kt lines 505-520)
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
       const navKey = item.getAttribute('data-nav');
       if (navKey === 'HOME') {
         navigateTo('HOME');
       } else if (navKey === 'STUDIO') {
-        startProcessingPipeline(state.sourceBeforeSrc, state.sourceAfterSrc, 'COMPARISON_STUDIO');
-      } else if (navKey === 'RETOUCH') {
-        startProcessingPipeline(state.sourceBeforeSrc, state.sourceAfterSrc, 'RETOUCH_SUITE');
-      } else if (navKey === 'PASSPORT') {
-        navigateTo('PASSPORT_STUDIO');
+        if (!state.sourceLoaded) {
+          startProcessingPipeline('assets/sample_1_before.webp', 'assets/sample_1_remini_ref.webp', 'COMPARISON_STUDIO');
+        } else {
+          navigateTo('COMPARISON_STUDIO');
+        }
+      } else if (navKey === 'RESTORE' || navKey === 'RETOUCH') {
+        triggerImageUpload('RETOUCH_SUITE', 'REMINI_NATURAL');
+      } else if (navKey === 'PROJECTS') {
+        navigateTo('PROJECTS');
       }
     });
   });
@@ -351,15 +304,14 @@
     function runNextStage() {
       if (state.currentScreen !== 'PROCESSING') return;
       if (stageIdx >= PIPELINE_STAGES.length) {
-        // Complete
         loadImagesThenNavigate(beforeSrc, afterSrc, targetMode);
         return;
       }
       const st = PIPELINE_STAGES[stageIdx];
-      procStageStep.textContent = st.step;
-      procStageTitle.textContent = st.title;
-      procStageDesc.textContent = st.desc;
-      procProgressFill.style.width = `${st.pct}%`;
+      if (procStageStep) procStageStep.textContent = st.step;
+      if (procStageTitle) procStageTitle.textContent = st.title;
+      if (procStageDesc) procStageDesc.textContent = st.desc;
+      if (procProgressFill) procProgressFill.style.width = `${st.pct}%`;
       stageIdx++;
       pipelineTimer = setTimeout(runNextStage, 220);
     }
@@ -375,19 +327,26 @@
       navigateTo(targetMode);
     };
     img.onerror = () => {
-      navigateTo('HOME');
-      alert('Failed to load image.');
+      const fallback = new Image();
+      fallback.onload = () => {
+        state.sourceImage = fallback;
+        state.sourceLoaded = true;
+        navigateTo(targetMode);
+      };
+      fallback.src = beforeSrc;
     };
     img.src = afterSrc || beforeSrc;
   }
 
-  procCancelBtn.addEventListener('click', () => {
-    if (pipelineTimer) clearTimeout(pipelineTimer);
-    navigateTo('HOME');
-  });
+  if (procCancelBtn) {
+    procCancelBtn.addEventListener('click', () => {
+      if (pipelineTimer) clearTimeout(pipelineTimer);
+      navigateTo('HOME');
+    });
+  }
 
   // ==========================================================================
-  // 7. Core SkinToneProcessor (Identical Math to Kotlin)
+  // 7. Core SkinToneProcessor (Identical Math to Kotlin Multiplatform)
   // ==========================================================================
   function runSkinToneGrading(sourceData, width, height, preset, warmth, radiance, smoothness, clarity) {
     const data = sourceData.data;
@@ -501,18 +460,17 @@
         const rowAbove = (y - 1) * width;
         const rowBelow = (y + 1) * width;
         for (let x = 1; x < width - 1; x++) {
-          const idx = (row + x) * 4;
-          const r = outData[idx], g = outData[idx + 1], b = outData[idx + 2];
-          const top = (rowAbove + x) * 4, bot = (rowBelow + x) * 4;
-          const left = (row + x - 1) * 4, right = (row + x + 1) * 4;
-
-          const avgR = (outData[top] + outData[bot] + outData[left] + outData[right]) * 0.25;
-          const avgG = (outData[top + 1] + outData[bot + 1] + outData[left + 1] + outData[right + 1]) * 0.25;
-          const avgB = (outData[top + 2] + outData[bot + 2] + outData[left + 2] + outData[right + 2]) * 0.25;
-
-          enhanced[idx] = Math.min(255, Math.max(0, Math.round(r + (r - avgR) * sharpenAmount)));
-          enhanced[idx + 1] = Math.min(255, Math.max(0, Math.round(g + (g - avgG) * sharpenAmount)));
-          enhanced[idx + 2] = Math.min(255, Math.max(0, Math.round(b + (b - avgB) * sharpenAmount)));
+          const idx = row + x;
+          const pIdx = idx * 4;
+          for (let c = 0; c < 3; c++) {
+            const center = outData[pIdx + c];
+            const sumNeighbors = outData[(rowAbove + x) * 4 + c] +
+                                 outData[(rowBelow + x) * 4 + c] +
+                                 outData[(row + x - 1) * 4 + c] +
+                                 outData[(row + x + 1) * 4 + c];
+            const laplacian = center * 4 - sumNeighbors;
+            enhanced[pIdx + c] = Math.min(255, Math.max(0, Math.round(center + laplacian * sharpenAmount * 0.15)));
+          }
         }
       }
       return enhanced;
@@ -522,29 +480,34 @@
   }
 
   // ==========================================================================
-  // 8. Studio Canvas Rendering & Interactions
+  // 8. Studio Rendering & Split Slider (BeforeAfterSlider.kt)
   // ==========================================================================
   function renderStudioCanvas() {
     if (!state.sourceImage || !state.sourceLoaded) return;
     const img = state.sourceImage;
-
-    const maxW = 900;
-    const scale = Math.min(1.0, maxW / img.naturalWidth) * state.zoomFactor;
+    const maxW = 600;
+    const scale = Math.min(1.0, maxW / img.naturalWidth);
     const w = Math.round(img.naturalWidth * scale);
     const h = Math.round(img.naturalHeight * scale);
 
+    // Setup Canvas Before (Original / Unenhanced)
     canvasBefore.width = w;
     canvasBefore.height = h;
+    const ctxBefore = canvasBefore.getContext('2d');
+    const beforeImg = new Image();
+    beforeImg.crossOrigin = 'anonymous';
+    beforeImg.onload = () => {
+      ctxBefore.drawImage(beforeImg, 0, 0, w, h);
+    };
+    beforeImg.src = state.sourceBeforeSrc;
+
+    // Setup Canvas After (Enhanced + Graded)
     canvasAfter.width = w;
     canvasAfter.height = h;
+    const ctxAfter = canvasAfter.getContext('2d');
+    ctxAfter.drawImage(img, 0, 0, w, h);
 
-    const ctxB = canvasBefore.getContext('2d');
-    ctxB.drawImage(img, 0, 0, w, h);
-
-    const ctxA = canvasAfter.getContext('2d');
-    ctxA.drawImage(img, 0, 0, w, h);
-
-    const imgData = ctxA.getImageData(0, 0, w, h);
+    const imgData = ctxAfter.getImageData(0, 0, w, h);
     const preset = AESTHETIC_PRESETS.find(p => p.id === state.selectedPresetId) || AESTHETIC_PRESETS[0];
 
     const processed = runSkinToneGrading(
@@ -555,97 +518,151 @@
       state.smoothness,
       state.clarity
     );
+    ctxAfter.putImageData(new ImageData(processed, w, h), 0, 0);
 
-    ctxA.putImageData(new ImageData(processed, w, h), 0, 0);
-
-    // Update HUD Pill
-    hudSwatchMini.style.background = preset.swatch;
-    hudPresetTitle.textContent = preset.title;
+    // Update HUD preset details
+    if (hudSwatchMini) hudSwatchMini.style.background = preset.swatch;
+    if (hudPresetTitle) hudPresetTitle.textContent = preset.title;
+    if (btnModeSwatchTiny) btnModeSwatchTiny.style.background = preset.swatch;
+    if (btnModeToneLabel) btnModeToneLabel.textContent = preset.title.split(' ')[0];
 
     updateSplitSliderPos(state.isHoldActive ? 100 : state.splitPos);
   }
 
-  function updateSplitSliderPos(pct) {
-    const val = Math.max(0, Math.min(100, pct));
-    canvasBeforeWrapper.style.width = `${val}%`;
-    studioDivider.style.left = `${val}%`;
+  function updateSplitSliderPos(percent) {
+    const clamped = Math.min(100, Math.max(0, percent));
+    if (canvasBeforeWrapper) {
+      canvasBeforeWrapper.style.width = `${clamped}%`;
+    }
+    if (studioDivider) {
+      studioDivider.style.left = `${clamped}%`;
+    }
   }
 
-  // Split Dragging
+  // Interactive Split Slider Dragging
   let isDraggingSplit = false;
-  function handleSplitMove(clientX) {
+  function handleSplitPointer(e) {
+    if (!studioCanvasContainer) return;
     const rect = studioCanvasContainer.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const x = clientX - rect.left;
     const pct = (x / rect.width) * 100;
-    state.splitPos = pct;
-    updateSplitSliderPos(pct);
+    state.splitPos = Math.min(99, Math.max(1, pct));
+    updateSplitSliderPos(state.splitPos);
   }
 
-  studioCanvasContainer.addEventListener('mousedown', (e) => {
-    isDraggingSplit = true;
-    handleSplitMove(e.clientX);
-  });
+  if (studioDivider) {
+    studioDivider.addEventListener('mousedown', () => { isDraggingSplit = true; });
+    studioDivider.addEventListener('touchstart', () => { isDraggingSplit = true; }, { passive: true });
+  }
+
   window.addEventListener('mousemove', (e) => {
-    if (isDraggingSplit) handleSplitMove(e.clientX);
+    if (isDraggingSplit) handleSplitPointer(e);
   });
   window.addEventListener('mouseup', () => { isDraggingSplit = false; });
-
-  studioCanvasContainer.addEventListener('touchstart', (e) => {
-    isDraggingSplit = true;
-    handleSplitMove(e.touches[0].clientX);
-  }, { passive: true });
   window.addEventListener('touchmove', (e) => {
-    if (isDraggingSplit) handleSplitMove(e.touches[0].clientX);
+    if (isDraggingSplit) handleSplitPointer(e);
   }, { passive: true });
   window.addEventListener('touchend', () => { isDraggingSplit = false; });
 
   // Zoom Toggle (100% / 200%)
-  studioZoomBtn.addEventListener('click', () => {
-    state.zoomFactor = state.zoomFactor > 1.2 ? 1.0 : 1.9;
-    hudZoomText.textContent = state.zoomFactor > 1.2 ? '200%' : '100%';
-    studioZoomBtn.style.background = state.zoomFactor > 1.2 ? 'rgba(139, 92, 246, 0.35)' : 'rgba(255, 255, 255, 0.08)';
-    renderStudioCanvas();
-  });
+  if (studioZoomBtn) {
+    studioZoomBtn.addEventListener('click', () => {
+      state.zoomFactor = state.zoomFactor > 1.2 ? 1.0 : 1.9;
+      if (hudZoomText) hudZoomText.textContent = state.zoomFactor > 1.2 ? '200%' : '100%';
+      studioZoomBtn.style.background = state.zoomFactor > 1.2 ? 'rgba(139, 92, 246, 0.35)' : 'rgba(255, 255, 255, 0.08)';
+      if (studioCanvasContainer) {
+        studioCanvasContainer.style.transform = `scale(${state.zoomFactor})`;
+        studioCanvasContainer.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+      }
+    });
+  }
 
   // Hold to Compare
   function setHoldCompare(active) {
     state.isHoldActive = active;
     updateSplitSliderPos(active ? 100 : state.splitPos);
-    studioHoldBtn.style.background = active ? 'var(--aura-secondary-container)' : 'rgba(255, 255, 255, 0.08)';
+    if (studioHoldBtn) {
+      studioHoldBtn.style.background = active ? 'var(--aura-secondary-container)' : 'rgba(255, 255, 255, 0.08)';
+    }
   }
-  studioHoldBtn.addEventListener('mousedown', () => setHoldCompare(true));
-  studioHoldBtn.addEventListener('mouseup', () => setHoldCompare(false));
-  studioHoldBtn.addEventListener('mouseleave', () => setHoldCompare(false));
-  studioHoldBtn.addEventListener('touchstart', (e) => { e.preventDefault(); setHoldCompare(true); });
-  studioHoldBtn.addEventListener('touchend', () => setHoldCompare(false));
+  if (studioHoldBtn) {
+    studioHoldBtn.addEventListener('mousedown', () => setHoldCompare(true));
+    studioHoldBtn.addEventListener('mouseup', () => setHoldCompare(false));
+    studioHoldBtn.addEventListener('mouseleave', () => setHoldCompare(false));
+    studioHoldBtn.addEventListener('touchstart', (e) => { e.preventDefault(); setHoldCompare(true); });
+    studioHoldBtn.addEventListener('touchend', () => setHoldCompare(false));
+  }
 
   // Exit Studio
-  studioExitBtn.addEventListener('click', () => navigateTo('HOME'));
+  if (studioExitBtn) {
+    studioExitBtn.addEventListener('click', () => navigateTo('HOME'));
+  }
 
   // Retouch Shortcut
-  studioRetouchShortcutBtn.addEventListener('click', () => navigateTo('RETOUCH_SUITE'));
+  if (studioRetouchShortcutBtn) {
+    studioRetouchShortcutBtn.addEventListener('click', () => navigateTo('RETOUCH_SUITE'));
+  }
 
   // Studio Intensity Slider
-  dockIntensitySlider.addEventListener('input', (e) => {
-    const val = parseInt(e.target.value, 10);
-    state.clarity = val / 100;
-    dockIntensityVal.textContent = `${val}%`;
-    renderStudioCanvas();
-  });
+  if (dockIntensitySlider) {
+    dockIntensitySlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      state.clarity = val / 100;
+      if (dockIntensityVal) dockIntensityVal.textContent = `${val}%`;
+      renderStudioCanvas();
+    });
+  }
 
-  studioRegenerateBtn.addEventListener('click', () => {
-    startProcessingPipeline(state.sourceBeforeSrc, state.sourceAfterSrc, 'COMPARISON_STUDIO');
-  });
+  if (studioRegenerateBtn) {
+    studioRegenerateBtn.addEventListener('click', () => {
+      startProcessingPipeline(state.sourceBeforeSrc, state.sourceAfterSrc, 'COMPARISON_STUDIO');
+    });
+  }
 
-  studioExportBtn.addEventListener('click', () => {
-    modalExport4k.classList.remove('hidden');
-  });
+  if (studioExportBtn) {
+    studioExportBtn.addEventListener('click', () => {
+      if (modalExport4k) modalExport4k.classList.remove('hidden');
+    });
+  }
+
+  // Studio Mode Chips
+  if (btnModeSplit) {
+    btnModeSplit.addEventListener('click', () => {
+      document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
+      btnModeSplit.classList.add('active');
+      state.splitPos = 50;
+      updateSplitSliderPos(50);
+    });
+  }
+
+  if (btnModeMagnifier) {
+    btnModeMagnifier.addEventListener('click', () => {
+      if (studioZoomBtn) studioZoomBtn.click();
+    });
+  }
+
+  if (btnModePro) {
+    btnModePro.addEventListener('click', () => {
+      state.showProHud = !state.showProHud;
+      btnModePro.classList.toggle('active', state.showProHud);
+      const hudPill = document.querySelector('.studio-telemetry-chip');
+      if (hudPill) hudPill.style.display = state.showProHud ? 'flex' : 'none';
+    });
+  }
+
+  if (btnModeSkinToneQuick) {
+    btnModeSkinToneQuick.addEventListener('click', () => {
+      populateModalTones();
+      if (modalSkinTones) modalSkinTones.classList.remove('hidden');
+    });
+  }
 
   // ==========================================================================
   // 9. Retouch Suite Rendering
   // ==========================================================================
   function renderRetouchCanvas() {
-    if (!state.sourceImage || !state.sourceLoaded) return;
+    if (!state.sourceImage || !state.sourceLoaded || !retouchCanvas) return;
     const img = state.sourceImage;
     const maxW = 600;
     const scale = Math.min(1.0, maxW / img.naturalWidth);
@@ -671,8 +688,8 @@
     ctx.putImageData(new ImageData(processed, w, h), 0, 0);
   }
 
-  // Populate Retouch Presets
   function populateRetouchPresets() {
+    if (!retouchPresetsContainer) return;
     retouchPresetsContainer.innerHTML = '';
     AESTHETIC_PRESETS.forEach(p => {
       const card = document.createElement('div');
@@ -694,8 +711,17 @@
     });
   }
 
-  retouchBackBtn.addEventListener('click', () => navigateTo('HOME'));
-  retouchExportBtn.addEventListener('click', () => modalExport4k.classList.remove('hidden'));
+  if (retouchBackBtn) {
+    retouchBackBtn.addEventListener('click', () => navigateTo('HOME'));
+  }
+  if (retouchStudioSplitBtn) {
+    retouchStudioSplitBtn.addEventListener('click', () => navigateTo('COMPARISON_STUDIO'));
+  }
+  if (retouchSettingsBtn) {
+    retouchSettingsBtn.addEventListener('click', () => {
+      if (modalSettings) modalSettings.classList.remove('hidden');
+    });
+  }
 
   // Retouch Sub-tabs
   document.querySelectorAll('.retouch-subtab').forEach(btn => {
@@ -704,204 +730,63 @@
       btn.classList.add('active');
       const tab = btn.getAttribute('data-subtab');
       if (tab === 'TONES') {
-        subtabTonesContent.style.display = 'flex';
-        subtabCalibrationContent.style.display = 'none';
+        if (subtabTonesContent) subtabTonesContent.style.display = 'flex';
+        if (subtabCalibrationContent) subtabCalibrationContent.style.display = 'none';
       } else {
-        subtabTonesContent.style.display = 'none';
-        subtabCalibrationContent.style.display = 'flex';
+        if (subtabTonesContent) subtabTonesContent.style.display = 'none';
+        if (subtabCalibrationContent) subtabCalibrationContent.style.display = 'flex';
       }
     });
   });
 
   // Retouch Calibration Sliders
-  rSliderWarmth.addEventListener('input', (e) => {
-    state.warmth = parseFloat(e.target.value);
-    rValWarmth.textContent = `${state.warmth.toFixed(2)}×`;
-    renderRetouchCanvas();
-  });
-  rSliderRadiance.addEventListener('input', (e) => {
-    state.radiance = parseFloat(e.target.value);
-    rValRadiance.textContent = `${state.radiance.toFixed(2)}×`;
-    renderRetouchCanvas();
-  });
-  rSliderSmoothness.addEventListener('input', (e) => {
-    state.smoothness = parseFloat(e.target.value);
-    rValSmoothness.textContent = `${Math.round(state.smoothness * 100)}%`;
-    renderRetouchCanvas();
-  });
-  rSliderClarity.addEventListener('input', (e) => {
-    state.clarity = parseFloat(e.target.value);
-    rValClarity.textContent = `${Math.round(state.clarity * 100)}%`;
-    renderRetouchCanvas();
-  });
-
-  // ==========================================================================
-  // 10. Passport Studio Rendering & Outfits
-  // ==========================================================================
-  function renderPassportCanvas() {
-    if (!state.sourceImage || !state.sourceLoaded) return;
-    const std = PASSPORT_STANDARDS[state.passportStandardKey] || PASSPORT_STANDARDS.US_2X2;
-    const w = std.wPx;
-    const h = std.hPx;
-
-    passportCanvas.width = w;
-    passportCanvas.height = h;
-    const ctx = passportCanvas.getContext('2d');
-
-    // 1. Background Fill
-    if (state.passportBgColor === 'transparent') {
-      ctx.clearRect(0, 0, w, h);
-    } else {
-      ctx.fillStyle = state.passportBgColor;
-      ctx.fillRect(0, 0, w, h);
-    }
-
-    // 2. Draw Portrait
-    const img = state.sourceImage;
-    const imgAspect = img.naturalWidth / img.naturalHeight;
-    const canvasAspect = w / h;
-    let sW = img.naturalWidth, sH = img.naturalHeight, sX = 0, sY = 0;
-
-    if (imgAspect > canvasAspect) {
-      sW = img.naturalHeight * canvasAspect;
-      sX = (img.naturalWidth - sW) / 2;
-    } else {
-      sH = img.naturalWidth / canvasAspect;
-      sY = (img.naturalHeight - sH) / 4;
-    }
-    ctx.drawImage(img, sX, sY, sW, sH, 0, 0, w, h);
-
-    // 3. Draw Suit Overlay
-    if (state.selectedSuitId && state.loadedSuits[state.selectedSuitId]) {
-      const suit = state.loadedSuits[state.selectedSuitId];
-      const suitAspect = suit.naturalWidth / suit.naturalHeight;
-      const bW = w * 1.05 * state.suitScale;
-      const bH = bW / suitAspect;
-      const pX = (w - bW) / 2 + state.suitOffsetX;
-      const pY = (h - bH * 0.78) + state.suitOffsetY;
-      ctx.drawImage(suit, pX, pY, bW, bH);
-    }
-  }
-
-  function populatePassportSuits() {
-    passportSuitCarousel.innerHTML = '';
-
-    // None Option
-    const noneCard = document.createElement('div');
-    noneCard.className = `suit-card-item ${state.selectedSuitId === null ? 'active' : ''}`;
-    noneCard.innerHTML = `<span style="font-size:26px;margin:20px 0;">🚫</span><span class="suit-name-text">No Outfit</span>`;
-    noneCard.addEventListener('click', () => {
-      state.selectedSuitId = null;
-      populatePassportSuits();
-      renderPassportCanvas();
+  if (rSliderWarmth) {
+    rSliderWarmth.addEventListener('input', (e) => {
+      state.warmth = parseFloat(e.target.value);
+      if (rValWarmth) rValWarmth.textContent = `${state.warmth.toFixed(2)}×`;
+      renderRetouchCanvas();
     });
-    passportSuitCarousel.appendChild(noneCard);
-
-    const filtered = SUIT_TEMPLATES.filter(s => state.suitFilter === 'ALL' || s.gender === state.suitFilter);
-    filtered.forEach(s => {
-      const card = document.createElement('div');
-      card.className = `suit-card-item ${state.selectedSuitId === s.id ? 'active' : ''}`;
-      card.innerHTML = `
-        <img src="${s.src}" alt="${s.title}" class="suit-thumb-img">
-        <span class="suit-name-text">${s.title}</span>
-      `;
-      card.addEventListener('click', () => {
-        state.selectedSuitId = s.id;
-        populatePassportSuits();
-        renderPassportCanvas();
-      });
-      passportSuitCarousel.appendChild(card);
+  }
+  if (rSliderRadiance) {
+    rSliderRadiance.addEventListener('input', (e) => {
+      state.radiance = parseFloat(e.target.value);
+      if (rValRadiance) rValRadiance.textContent = `${state.radiance.toFixed(2)}×`;
+      renderRetouchCanvas();
+    });
+  }
+  if (rSliderSmoothness) {
+    rSliderSmoothness.addEventListener('input', (e) => {
+      state.smoothness = parseFloat(e.target.value);
+      if (rValSmoothness) rValSmoothness.textContent = `${Math.round(state.smoothness * 100)}%`;
+      renderRetouchCanvas();
+    });
+  }
+  if (rSliderClarity) {
+    rSliderClarity.addEventListener('input', (e) => {
+      state.clarity = parseFloat(e.target.value);
+      if (rValClarity) rValClarity.textContent = `${Math.round(state.clarity * 100)}%`;
+      renderRetouchCanvas();
     });
   }
 
-  passportBackBtn.addEventListener('click', () => navigateTo('HOME'));
+  // ==========================================================================
+  // 10. Projects View Actions
+  // ==========================================================================
+  if (projectsBackBtn) {
+    projectsBackBtn.addEventListener('click', () => navigateTo('HOME'));
+  }
 
-  passportGuideToggleBtn.addEventListener('click', () => {
-    state.showBiometricGuides = !state.showBiometricGuides;
-    passportGuideOverlay.classList.toggle('hidden', !state.showBiometricGuides);
-    passportGuideToggleBtn.style.background = state.showBiometricGuides ? 'rgba(76, 215, 246, 0.25)' : 'rgba(255, 255, 255, 0.08)';
-  });
-
-  passportStandardSelect.addEventListener('change', (e) => {
-    state.passportStandardKey = e.target.value;
-    renderPassportCanvas();
-  });
-
-  passportBgRow.querySelectorAll('.bg-circle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      passportBgRow.querySelectorAll('.bg-circle').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.passportBgColor = btn.getAttribute('data-color');
-      passportBgName.textContent = btn.getAttribute('title');
-      renderPassportCanvas();
-    });
-  });
-
-  document.querySelectorAll('.gender-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.gender-chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.suitFilter = btn.getAttribute('data-filter');
-      populatePassportSuits();
-    });
-  });
-
-  pSliderCoatScale.addEventListener('input', (e) => {
-    state.suitScale = parseFloat(e.target.value);
-    pValCoatScale.textContent = `${Math.round(state.suitScale * 100)}%`;
-    renderPassportCanvas();
-  });
-  pSliderCoatY.addEventListener('input', (e) => {
-    state.suitOffsetY = parseInt(e.target.value, 10);
-    pValCoatY.textContent = `${state.suitOffsetY}px`;
-    renderPassportCanvas();
-  });
-  pSliderCoatX.addEventListener('input', (e) => {
-    state.suitOffsetX = parseInt(e.target.value, 10);
-    pValCoatX.textContent = `${state.suitOffsetX}px`;
-    renderPassportCanvas();
-  });
-
-  // Single Passport Download
-  passportExportSingleBtn.addEventListener('click', () => {
-    renderPassportCanvas();
-    const url = passportCanvas.toDataURL('image/jpeg', 0.98);
-    const fname = `Biometric_Passport_${state.passportStandardKey}_${Date.now()}.jpg`;
-    showSavedScreen(url, fname);
-  });
-
-  // 4x6" Sheet Download
-  passportExportSheetBtn.addEventListener('click', () => {
-    renderPassportCanvas();
-    const sheetCanvas = document.createElement('canvas');
-    sheetCanvas.width = 1800;
-    sheetCanvas.height = 1200;
-    const sCtx = sheetCanvas.getContext('2d');
-    sCtx.fillStyle = '#FFFFFF';
-    sCtx.fillRect(0, 0, 1800, 1200);
-
-    const cols = 3, rows = 2;
-    const pW = passportCanvas.width, pH = passportCanvas.height;
-    const cellW = 1800 / cols, cellH = 1200 / rows;
-    const scale = Math.min((cellW * 0.88) / pW, (cellH * 0.88) / pH);
-    const dW = pW * scale, dH = pH * scale;
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const cx = c * cellW + (cellW - dW) / 2;
-        const cy = r * cellH + (cellH - dH) / 2;
-        sCtx.drawImage(passportCanvas, cx, cy, dW, dH);
-        sCtx.strokeStyle = 'rgba(160, 160, 160, 0.45)';
-        sCtx.lineWidth = 1;
-        sCtx.strokeRect(cx, cy, dW, dH);
+  document.querySelectorAll('.project-item-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const sample = card.getAttribute('data-sample');
+      if (sample === '1') {
+        startProcessingPipeline('assets/sample_1_before.webp', 'assets/sample_1_remini_ref.webp', 'COMPARISON_STUDIO', 'REMINI_NATURAL');
+      } else if (sample === '2') {
+        startProcessingPipeline('assets/sample_2_before.webp', 'assets/sample_2_remini_ref.webp', 'COMPARISON_STUDIO', 'REMINI_NATURAL');
+      } else {
+        startProcessingPipeline('assets/sample_3_before.webp', 'assets/sample_3_before.webp', 'COMPARISON_STUDIO', 'MEDITERRANEAN');
       }
-    }
-    sCtx.fillStyle = '#94A3B8';
-    sCtx.font = '20px -apple-system, sans-serif';
-    sCtx.fillText('ReminiSkinAI — Standard 4×6" (10×15 cm) 300 DPI Biometric Lab Print Sheet', 40, 1175);
-
-    const url = sheetCanvas.toDataURL('image/jpeg', 0.98);
-    showSavedScreen(url, `Passport_4x6_Sheet_${Date.now()}.jpg`);
+    });
   });
 
   // ==========================================================================
@@ -909,27 +794,34 @@
   // ==========================================================================
   function showSavedScreen(dataUrl, filename) {
     state.savedDataUrl = dataUrl;
-    savedResultImg.src = dataUrl;
-    savedFileName.textContent = filename;
+    if (savedResultImg) savedResultImg.src = dataUrl;
+    if (savedFileName) savedFileName.textContent = filename;
     navigateTo('SAVED_SHARE');
   }
 
-  savedShareBtn.addEventListener('click', () => {
-    if (navigator.share && state.savedDataUrl) {
-      fetch(state.savedDataUrl)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], savedFileName.textContent, { type: blob.type });
-          navigator.share({ files: [file], title: 'Aura AI 4K Portrait', text: 'Enhanced with Aura AI ReminiSkinAI!' })
-            .catch(() => triggerDirectDownload(state.savedDataUrl, savedFileName.textContent));
-        })
-        .catch(() => triggerDirectDownload(state.savedDataUrl, savedFileName.textContent));
-    } else {
-      triggerDirectDownload(state.savedDataUrl, savedFileName.textContent);
-    }
-  });
+  if (savedShareBtn) {
+    savedShareBtn.addEventListener('click', () => {
+      if (navigator.share && state.savedDataUrl) {
+        fetch(state.savedDataUrl)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], savedFileName.textContent, { type: blob.type });
+            navigator.share({
+              files: [file],
+              title: 'Aura AI Ultra 4K Photo',
+              text: 'Enhanced with ReminiSkinAI 4K Luminescent Glass Engine'
+            });
+          })
+          .catch(() => triggerDirectDownload(state.savedDataUrl, savedFileName.textContent));
+      } else {
+        triggerDirectDownload(state.savedDataUrl, savedFileName.textContent);
+      }
+    });
+  }
 
-  savedAnotherBtn.addEventListener('click', () => navigateTo('HOME'));
+  if (savedAnotherBtn) {
+    savedAnotherBtn.addEventListener('click', () => navigateTo('HOME'));
+  }
 
   function triggerDirectDownload(url, filename) {
     const a = document.createElement('a');
@@ -943,8 +835,11 @@
   // ==========================================================================
   // 12. Modals Handling (Export 4K, Credits, Settings, Tone Quick Modal)
   // ==========================================================================
-  // 4K Export Modal
-  closeExportModalBtn.addEventListener('click', () => modalExport4k.classList.add('hidden'));
+  if (closeExportModalBtn) {
+    closeExportModalBtn.addEventListener('click', () => {
+      if (modalExport4k) modalExport4k.classList.add('hidden');
+    });
+  }
 
   document.querySelectorAll('.modal-radio-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -960,70 +855,99 @@
     });
   });
 
-  modalConfirmSaveBtn.addEventListener('click', () => {
-    modalExport4k.classList.add('hidden');
-    const is4k = document.querySelector('input[name="modalResOption"]:checked').value === '4k';
-    const isPng = document.querySelector('input[name="modalFmtOption"]:checked').value === 'png';
+  if (modalConfirmSaveBtn) {
+    modalConfirmSaveBtn.addEventListener('click', () => {
+      if (modalExport4k) modalExport4k.classList.add('hidden');
+      const is4kEl = document.querySelector('input[name="modalResOption"]:checked');
+      const isPngEl = document.querySelector('input[name="modalFmtOption"]:checked');
+      const is4k = is4kEl ? is4kEl.value === '4k' : true;
+      const isPng = isPngEl ? isPngEl.value === 'png' : false;
 
-    const img = state.sourceImage;
-    let targetW = img.naturalWidth, targetH = img.naturalHeight;
-    if (is4k) {
-      const scale = Math.max(3840 / targetW, 2160 / targetH);
-      targetW = Math.round(targetW * scale);
-      targetH = Math.round(targetH * scale);
-    }
+      const img = state.sourceImage;
+      if (!img) return;
 
-    const expCanvas = document.createElement('canvas');
-    expCanvas.width = targetW;
-    expCanvas.height = targetH;
-    const ctx = expCanvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, targetW, targetH);
+      let targetW = img.naturalWidth, targetH = img.naturalHeight;
+      if (is4k) {
+        const scale = Math.max(3840 / targetW, 2160 / targetH);
+        targetW = Math.round(targetW * scale);
+        targetH = Math.round(targetH * scale);
+      }
 
-    const imgData = ctx.getImageData(0, 0, targetW, targetH);
-    const preset = AESTHETIC_PRESETS.find(p => p.id === state.selectedPresetId) || AESTHETIC_PRESETS[0];
+      const expCanvas = document.createElement('canvas');
+      expCanvas.width = targetW;
+      expCanvas.height = targetH;
+      const ctx = expCanvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, targetW, targetH);
 
-    const processed = runSkinToneGrading(
-      imgData, targetW, targetH,
-      preset,
-      state.warmth,
-      state.radiance,
-      state.smoothness,
-      state.clarity
-    );
-    ctx.putImageData(new ImageData(processed, targetW, targetH), 0, 0);
+      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const preset = AESTHETIC_PRESETS.find(p => p.id === state.selectedPresetId) || AESTHETIC_PRESETS[0];
 
-    const mime = isPng ? 'image/png' : 'image/jpeg';
-    const ext = isPng ? 'png' : 'jpg';
-    const url = expCanvas.toDataURL(mime, 0.98);
-    const fname = `AuraAI_${preset.id}_4K_${Date.now()}.${ext}`;
-    showSavedScreen(url, fname);
-  });
+      const processed = runSkinToneGrading(
+        imgData, targetW, targetH,
+        preset,
+        state.warmth,
+        state.radiance,
+        state.smoothness,
+        state.clarity
+      );
+      ctx.putImageData(new ImageData(processed, targetW, targetH), 0, 0);
+
+      const mime = isPng ? 'image/png' : 'image/jpeg';
+      const ext = isPng ? 'png' : 'jpg';
+      const url = expCanvas.toDataURL(mime, 0.98);
+      const fname = `AuraAI_${preset.id}_4K_${Date.now()}.${ext}`;
+      showSavedScreen(url, fname);
+    });
+  }
 
   // Credits Modal
-  creditsBtn.addEventListener('click', () => {
-    creditsDialogBalance.textContent = state.userCredits;
-    modalCredits.classList.remove('hidden');
-  });
-  closeCreditsModalBtn.addEventListener('click', () => modalCredits.classList.add('hidden'));
-  claimBonusCreditsBtn.addEventListener('click', () => {
-    state.userCredits += 10;
-    creditsCountText.textContent = `${state.userCredits} Credits`;
-    creditsDialogBalance.textContent = state.userCredits;
-    modalCredits.classList.add('hidden');
-  });
+  if (creditsBtn) {
+    creditsBtn.addEventListener('click', () => {
+      if (creditsDialogBalance) creditsDialogBalance.textContent = state.userCredits;
+      if (modalCredits) modalCredits.classList.remove('hidden');
+    });
+  }
+  if (closeCreditsModalBtn) {
+    closeCreditsModalBtn.addEventListener('click', () => {
+      if (modalCredits) modalCredits.classList.add('hidden');
+    });
+  }
+  if (claimBonusCreditsBtn) {
+    claimBonusCreditsBtn.addEventListener('click', () => {
+      state.userCredits += 10;
+      if (creditsCountText) creditsCountText.textContent = `${state.userCredits} Credits`;
+      if (creditsDialogBalance) creditsDialogBalance.textContent = state.userCredits;
+      if (modalCredits) modalCredits.classList.add('hidden');
+    });
+  }
 
   // Settings Modal
-  settingsBtn.addEventListener('click', () => modalSettings.classList.remove('hidden'));
-  closeSettingsModalBtn.addEventListener('click', () => modalSettings.classList.add('hidden'));
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      if (modalSettings) modalSettings.classList.remove('hidden');
+    });
+  }
+  if (closeSettingsModalBtn) {
+    closeSettingsModalBtn.addEventListener('click', () => {
+      if (modalSettings) modalSettings.classList.add('hidden');
+    });
+  }
 
   // Skin Tone Quick Modal
-  studioSkinToneBtn.addEventListener('click', () => {
-    populateModalTones();
-    modalSkinTones.classList.remove('hidden');
-  });
-  closeSkinTonesModalBtn.addEventListener('click', () => modalSkinTones.classList.add('hidden'));
+  if (studioSkinToneBtn) {
+    studioSkinToneBtn.addEventListener('click', () => {
+      populateModalTones();
+      if (modalSkinTones) modalSkinTones.classList.remove('hidden');
+    });
+  }
+  if (closeSkinTonesModalBtn) {
+    closeSkinTonesModalBtn.addEventListener('click', () => {
+      if (modalSkinTones) modalSkinTones.classList.add('hidden');
+    });
+  }
 
   function populateModalTones() {
+    if (!modalTonesGrid) return;
     modalTonesGrid.innerHTML = '';
     AESTHETIC_PRESETS.forEach(p => {
       const card = document.createElement('div');
@@ -1037,7 +961,7 @@
       `;
       card.addEventListener('click', () => {
         state.selectedPresetId = p.id;
-        modalSkinTones.classList.add('hidden');
+        if (modalSkinTones) modalSkinTones.classList.add('hidden');
         renderStudioCanvas();
       });
       modalTonesGrid.appendChild(card);
@@ -1045,31 +969,35 @@
   }
 
   // ==========================================================================
-  // 13. Home Actions & Photo Pickers
+  // 13. Home Actions & Native Photo Picker
   // ==========================================================================
   let pendingTargetMode = 'COMPARISON_STUDIO';
   function triggerImageUpload(targetMode, presetId) {
     pendingTargetMode = targetMode;
     if (presetId) state.selectedPresetId = presetId;
-    globalImageInput.click();
+    if (globalImageInput) globalImageInput.click();
   }
 
-  globalImageInput.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        startProcessingPipeline(evt.target.result, evt.target.result, pendingTargetMode);
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+  if (globalImageInput) {
+    globalImageInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          startProcessingPipeline(evt.target.result, evt.target.result, pendingTargetMode);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 
-  heroEnhanceBtn.addEventListener('click', () => {
-    triggerImageUpload('COMPARISON_STUDIO', 'REMAINI_NATURAL');
-  });
+  if (heroEnhanceBtn) {
+    heroEnhanceBtn.addEventListener('click', () => {
+      triggerImageUpload('COMPARISON_STUDIO', 'REMINI_NATURAL');
+    });
+  }
 
-  // Precision Tools clicks
+  // Precision Tools clicks (MainScreen.kt lines 450-465)
   document.querySelectorAll('.bento-card').forEach(card => {
     card.addEventListener('click', () => {
       const tool = card.getAttribute('data-tool');
@@ -1085,7 +1013,7 @@
     });
   });
 
-  // Recent Restorations clicks
+  // Recent Restorations clicks (MainScreen.kt lines 472-490)
   document.querySelectorAll('.recent-card').forEach(card => {
     card.addEventListener('click', () => {
       const s = card.getAttribute('data-sample');
@@ -1099,14 +1027,15 @@
     });
   });
 
-  viewAllToolsBtn.addEventListener('click', () => navigateTo('PASSPORT_STUDIO'));
-  recentHistoryBtn.addEventListener('click', () => {
-    startProcessingPipeline('assets/sample_1_before.webp', 'assets/sample_1_remini_ref.webp', 'COMPARISON_STUDIO');
-  });
+  if (viewAllToolsBtn) {
+    viewAllToolsBtn.addEventListener('click', () => navigateTo('PROJECTS'));
+  }
+  if (recentHistoryBtn) {
+    recentHistoryBtn.addEventListener('click', () => navigateTo('PROJECTS'));
+  }
 
   // Initial load
   populateRetouchPresets();
-  populatePassportSuits();
   loadImagesThenNavigate('assets/sample_1_before.webp', 'assets/sample_1_remini_ref.webp', 'HOME');
 
 })();

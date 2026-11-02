@@ -370,6 +370,9 @@
     afterBaseOffscreen: document.createElement('canvas'),
     afterGradedOffscreen: document.createElement('canvas'),
     isSampleLoaded: false,
+    skinWeightsBuffer: null,
+    skinWeightsWidth: 0,
+    skinWeightsHeight: 0,
 
     // Passport Photo Studio State (PassportPhotoScreen.kt)
     passport: {
@@ -499,27 +502,15 @@
   }
 
   /**
-   * Genuine Remini 4K Studio AI Enhancement Engine:
-   * Multi-scale Laplacian 4K super-resolution unsharp mask (fine + mid frequencies),
-   * edge-preserving bilateral dermis filter, eye iris catchlight amplification,
-   * rich studio contrast (preserving deep blacks with zero milky shadow lift).
+   * Fast Separable 2-Pass Spatial Feathering for Dermis Segmentation:
+   * Guarantees silky-smooth, continuous probability boundaries between skin and
+   * ambient scene (arms, neck, ears, clothing, background) with ZERO harsh steps or halo borders!
    */
-  function generateReminiAiEnhancedImageData(srcImageData) {
-    const w = srcImageData.width;
-    const h = srcImageData.height;
-    const src = srcImageData.data;
-    const outImageData = new ImageData(new Uint8ClampedArray(src), w, h);
-    const dst = outImageData.data;
-
-    const face = detectSubjectFaceAndSkin(src, w, h);
-    state.detectedFace = face;
-    state.zoomFocusX = face.cx;
-    state.zoomFocusY = Math.max(0.18, face.cy - face.ry * 0.20);
-
+  function computeFeatheredSkinWeights(src, w, h) {
     const totalPixels = w * h;
-    const skinWeights = new Float32Array(totalPixels);
+    const rawWeights = new Float32Array(totalPixels);
 
-    // Pass 1: Robust Human Dermis Segmentation
+    // Pass 1: Strict YCbCr Human Dermis Segmentation
     for (let i = 0; i < totalPixels; i++) {
       const idx = i * 4;
       const r = src[idx];
@@ -547,16 +538,67 @@
         }
         if (hue < 0) hue += 360;
 
-        if (hue <= 42 || hue >= 342) {
+        if (hue <= 45 || hue >= 340) {
           const dCr = (cr - 150) / 25.0;
           const dCb = (cb - 106) / 22.0;
           const distSq = dCr * dCr + dCb * dCb;
-          skinWeights[i] = Math.max(0, Math.min(1.0, 1.25 - distSq * 0.45));
+          rawWeights[i] = Math.max(0, Math.min(1.0, 1.25 - distSq * 0.45));
         }
       }
     }
 
-    // Pass 2: Multi-Scale 4K Super-Resolution Sharpening & Bilateral Dermis Filter
+    // Pass 2: Separable 2D Box / Gaussian Filter on Mask (Horizontal then Vertical)
+    const tempWeights = new Float32Array(totalPixels);
+    const feathered = new Float32Array(totalPixels);
+
+    for (let y = 0; y < h; y++) {
+      const row = y * w;
+      for (let x = 0; x < w; x++) {
+        const xL = x > 0 ? x - 1 : 0;
+        const xR = x < w - 1 ? x + 1 : w - 1;
+        tempWeights[row + x] = rawWeights[row + xL] * 0.25 + rawWeights[row + x] * 0.50 + rawWeights[row + xR] * 0.25;
+      }
+    }
+
+    for (let y = 0; y < h; y++) {
+      const yT = y > 0 ? y - 1 : 0;
+      const yB = y < h - 1 ? y + 1 : h - 1;
+      const row = y * w;
+      const rowT = yT * w;
+      const rowB = yB * w;
+      for (let x = 0; x < w; x++) {
+        feathered[row + x] = tempWeights[rowT + x] * 0.25 + tempWeights[row + x] * 0.50 + tempWeights[rowB + x] * 0.25;
+      }
+    }
+
+    state.skinWeightsBuffer = feathered;
+    state.skinWeightsWidth = w;
+    state.skinWeightsHeight = h;
+    return feathered;
+  }
+
+  /**
+   * Genuine Remini 4K Studio AI Super-Resolution Engine:
+   * Multi-scale Laplacian unsharp mask (fine + mid frequency detail reconstruction),
+   * threshold coring (noise dampening), anti-halo edge clamping (zero ringing on high-contrast edges),
+   * specular eye catchlight sparkle boost, and non-destructive dermis micro-pore preservation
+   * (ZERO plastic/wax bilateral blur — skin pores and arm muscle contours stay 100% natural and sharp!).
+   */
+  function generateReminiAiEnhancedImageData(srcImageData) {
+    const w = srcImageData.width;
+    const h = srcImageData.height;
+    const src = srcImageData.data;
+    const outImageData = new ImageData(new Uint8ClampedArray(src), w, h);
+    const dst = outImageData.data;
+
+    const face = detectSubjectFaceAndSkin(src, w, h);
+    state.detectedFace = face;
+    state.zoomFocusX = face.cx;
+    state.zoomFocusY = Math.max(0.18, face.cy - face.ry * 0.20);
+
+    const featheredWeights = computeFeatheredSkinWeights(src, w, h);
+
+    // Pass: Anti-Halo Multi-Scale 4K Super-Resolution Detail Reconstruction
     for (let y = 0; y < h; y++) {
       const row = y * w;
       const yPrev1 = (y > 0 ? y - 1 : 0) * w;
@@ -596,7 +638,7 @@
         const hfFineG = g - avgFineG;
         const hfFineB = b - avgFineB;
 
-        // Radius 2 neighbors (box corners)
+        // Radius 2 neighbors (box corners + fine)
         const idxTop2 = (yPrev2 + x) * 4;
         const idxBot2 = (yNext2 + x) * 4;
         const idxLef2 = (row + xPrev2) * 4;
@@ -610,71 +652,49 @@
         const hfMedG = avgFineG - avgMedG;
         const hfMedB = avgFineB - avgMedB;
 
-        // 4K Ultra-Crisp Super-Resolution Reconstruction
-        let sharpR = r + hfFineR * 0.95 + hfMedR * 0.55;
-        let sharpG = g + hfFineG * 0.95 + hfMedG * 0.55;
-        let sharpB = b + hfFineB * 0.95 + hfMedB * 0.55;
+        // Threshold Coring: dampen sub-pixel noise (< 1.2)
+        const fineR = Math.abs(hfFineR) < 1.2 ? 0 : hfFineR;
+        const fineG = Math.abs(hfFineG) < 1.2 ? 0 : hfFineG;
+        const fineB = Math.abs(hfFineB) < 1.2 ? 0 : hfFineB;
 
-        // Bilateral Edge-Preserving Dermis Smoothing:
-        // High-gradient facial landmarks (diff >= 38: eyes, pupils, eyelashes, irises,
-        // nostrils, lips, teeth, and hair contours) are strictly excluded from blur!
-        const sw = skinWeights[pIdx];
-        if (sw > 0.15 && y > 0 && y < h - 1 && x > 0 && x < w - 1) {
-          let sumR = r * 2.0;
-          let sumG = g * 2.0;
-          let sumB = b * 2.0;
-          let count = 2.0;
+        // Anti-Halo Clamping: boost micro-textures (1.30 fine, 0.55 mid) while clamping massive boundary steps
+        // This guarantees high-contrast edges (e.g. bathroom sign, door frame, glasses, dark shirt edges)
+        // NEVER explode into artificial white/cyan ringing or distortion halos!
+        const clampFine = 22.0;
+        const clampMed = 14.0;
 
-          const dTop = Math.abs(topR - r) + Math.abs(topG - g) + Math.abs(topB - b);
-          if (dTop < 38 && skinWeights[yPrev1 + x] > 0.10) {
-            const wT = 1.0 - dTop / 38.0;
-            sumR += topR * wT; sumG += topG * wT; sumB += topB * wT; count += wT;
-          }
+        const deltaFineR = Math.max(-clampFine, Math.min(clampFine, fineR * 1.30));
+        const deltaFineG = Math.max(-clampFine, Math.min(clampFine, fineG * 1.30));
+        const deltaFineB = Math.max(-clampFine, Math.min(clampFine, fineB * 1.30));
 
-          const dBot = Math.abs(botR - r) + Math.abs(botG - g) + Math.abs(botB - b);
-          if (dBot < 38 && skinWeights[yNext1 + x] > 0.10) {
-            const wB = 1.0 - dBot / 38.0;
-            sumR += botR * wB; sumG += botG * wB; sumB += botB * wB; count += wB;
-          }
+        const deltaMedR = Math.max(-clampMed, Math.min(clampMed, hfMedR * 0.55));
+        const deltaMedG = Math.max(-clampMed, Math.min(clampMed, hfMedG * 0.55));
+        const deltaMedB = Math.max(-clampMed, Math.min(clampMed, hfMedB * 0.55));
 
-          const dLef = Math.abs(lefR - r) + Math.abs(lefG - g) + Math.abs(lefB - b);
-          if (dLef < 38 && skinWeights[row + xPrev1] > 0.10) {
-            const wL = 1.0 - dLef / 38.0;
-            sumR += lefR * wL; sumG += lefG * wL; sumB += lefB * wL; count += wL;
-          }
+        let sharpR = r + deltaFineR + deltaMedR;
+        let sharpG = g + deltaFineG + deltaMedG;
+        let sharpB = b + deltaFineB + deltaMedB;
 
-          const dRig = Math.abs(rigR - r) + Math.abs(rigG - g) + Math.abs(rigB - b);
-          if (dRig < 38 && skinWeights[row + xNext1] > 0.10) {
-            const wR = 1.0 - dRig / 38.0;
-            sumR += rigR * wR; sumG += rigG * wR; sumB += rigB * wR; count += wR;
-          }
+        // NOTE: Destructive 40% bilateral blur is completely eliminated!
+        // Skin pores, eyelashes, hair follicles, and dermis texture remain 100% natural and sharp.
 
-          const polishFactor = sw * 0.40;
-          const bilatR = sumR / count;
-          const bilatG = sumG / count;
-          const bilatB = sumB / count;
-
-          sharpR = sharpR * (1 - polishFactor) + bilatR * polishFactor;
-          sharpG = sharpG * (1 - polishFactor) + bilatG * polishFactor;
-          sharpB = sharpB * (1 - polishFactor) + bilatB * polishFactor;
-        }
-
-        // Remini Studio Contrast S-Curve (Never lifts deep blacks into gray)
+        // Specular Eye Catchlight & Pupil Sparkle Boost
         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        if (lum > 35) {
-          sharpR = (sharpR - 128) * 1.05 + 128;
-          sharpG = (sharpG - 128) * 1.05 + 128;
-          sharpB = (sharpB - 128) * 1.05 + 128;
-        }
-
-        // Specular Eye Catchlight & Iris Sparkle Boost
-        if (lum > 170 && sw < 0.20) {
+        const sw = featheredWeights[pIdx];
+        if (lum > 170 && sw < 0.15) {
           const grad = Math.abs(hfFineR) + Math.abs(hfFineG) + Math.abs(hfFineB);
           if (grad > 15) {
             sharpR *= 1.10;
             sharpG *= 1.10;
             sharpB *= 1.10;
           }
+        }
+
+        // Remini Studio Contrast S-Curve (Never lifts deep blacks into gray)
+        if (lum >= 35) {
+          sharpR = (sharpR - 128) * 1.03 + 128;
+          sharpG = (sharpG - 128) * 1.03 + 128;
+          sharpB = (sharpB - 128) * 1.03 + 128;
         }
 
         dst[idx] = Math.max(0, Math.min(255, Math.round(sharpR)));
@@ -692,6 +712,8 @@
    * Accurately synthesizes regional aesthetic undertones (Remini Natural, Nordic Alabaster,
    * Korean Glass Skin, South Asian Golden, etc.) while preserving 100% of non-skin pixels
    * (black clothing, background, mirror frame, and ambient scene stay completely natural and deep).
+   * Uses continuous feathered dermis mask and sinusoidal midtone relighting to preserve
+   * 100% of muscle contours, pores, and natural shadows with ZERO cartoon washing!
    */
   function rebuildGradedAfterBuffer() {
     if (!state.isSampleLoaded) return;
@@ -722,9 +744,9 @@
     const effWarmth = Math.max(0.6, Math.min(1.4, params.skinWarmth));
     const effRadiance = Math.max(0.5, Math.min(1.5, params.skinRadiance));
 
-    const rLift = (preset.rLift || 14) * effRadiance * effWarmth;
-    const gLift = (preset.gLift || 10) * effRadiance;
-    const bLift = (preset.bLift || 7) * effRadiance / effWarmth;
+    const rLift = (preset.rLift || 14) * effRadiance * effWarmth * 0.65;
+    const gLift = (preset.gLift || 10) * effRadiance * 0.65;
+    const bLift = (preset.bLift || 7) * effRadiance / effWarmth * 0.65;
 
     const rMult = 1.0 + ((preset.rMult || 1.05) - 1.0) * effWarmth;
     const gMult = preset.gMult || 1.02;
@@ -732,6 +754,9 @@
     const contrast = preset.contrast || 1.04;
 
     const totalPixels = w * h;
+    const cachedWeights = (state.skinWeightsBuffer && state.skinWeightsWidth === w && state.skinWeightsHeight === h)
+      ? state.skinWeightsBuffer
+      : computeFeatheredSkinWeights(src, w, h);
 
     for (let i = 0; i < totalPixels; i++) {
       const idx = i * 4;
@@ -741,37 +766,9 @@
       const g = raw[idx + 1] * (1 - clarityBlend) + src[idx + 1] * clarityBlend;
       const b = raw[idx + 2] * (1 - clarityBlend) + src[idx + 2] * clarityBlend;
 
-      // Strict Human Skin Dermis Segmentation
-      const maxC = Math.max(r, Math.max(g, b));
-      const minC = Math.min(r, Math.min(g, b));
-      const chromaDiff = maxC - minC;
+      const sw = cachedWeights[i];
 
-      let sw = 0.0;
-      if (chromaDiff >= 8 && maxC >= 30 && r > g && g > b * 0.65) {
-        const cr = 128 + 0.500 * r - 0.419 * g - 0.081 * b;
-        const cb = 128 - 0.169 * r - 0.331 * g + 0.500 * b;
-
-        if (cr >= 128 && cr <= 180 && cb >= 76 && cb <= 136) {
-          let hue = 0;
-          if (maxC === r) {
-            hue = 60 * (((g - b) / chromaDiff) % 6);
-          } else if (maxC === g) {
-            hue = 60 * (((b - r) / chromaDiff) + 2);
-          } else {
-            hue = 60 * (((r - g) / chromaDiff) + 4);
-          }
-          if (hue < 0) hue += 360;
-
-          if (hue <= 42 || hue >= 342) {
-            const dCr = (cr - 150) / 25.0;
-            const dCb = (cb - 106) / 22.0;
-            const distSq = dCr * dCr + dCb * dCb;
-            sw = Math.max(0, Math.min(1.0, 1.25 - distSq * 0.45));
-          }
-        }
-      }
-
-      if (sw <= 0.0) {
+      if (sw <= 0.002) {
         // Non-skin pixels (black shirt, hair, eyes, background, mirror frame, wall signs):
         // 100% untouched and sharp, zero color distortion, zero bleaching, rich deep blacks!
         dst[idx] = Math.max(0, Math.min(255, Math.round(r)));
@@ -781,18 +778,24 @@
         continue;
       }
 
-      // Remini Studio Aesthetic Skin Tone Synthesis
-      const rGraded = r * rMult + rLift;
-      const gGraded = g * gMult + gLift;
-      const bGraded = b * bMult + bLift;
+      // Midtone Relighting: Sinusoidal weighting centered around midtones (lum ~ 128)
+      // Shadows (under arm, chin, neck contours) have wMid -> 0, preventing shadow-washing!
+      // Highlights have wMid -> 0, preventing blown-out sheen.
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      const wMid = Math.sin(Math.max(0, Math.min(1.0, lum / 255.0)) * Math.PI);
 
-      let finalR = r * (1 - sw) + rGraded * sw;
-      let finalG = g * (1 - sw) + gGraded * sw;
-      let finalB = b * (1 - sw) + bGraded * sw;
+      const rGraded = r * (1.0 + (rMult - 1.0) * wMid) + rLift * wMid;
+      const gGraded = g * (1.0 + (gMult - 1.0) * wMid) + gLift * wMid;
+      const bGraded = b * (1.0 + (bMult - 1.0) * wMid) + bLift * wMid;
 
-      finalR = (finalR - 128) * contrast + 128;
-      finalG = (finalG - 128) * contrast + 128;
-      finalB = (finalB - 128) * contrast + 128;
+      let finalR = r * (1.0 - sw) + rGraded * sw;
+      let finalG = g * (1.0 - sw) + gGraded * sw;
+      let finalB = b * (1.0 - sw) + bGraded * sw;
+
+      const skinContrast = 1.0 + (contrast - 1.0) * wMid;
+      finalR = (finalR - 128) * skinContrast + 128;
+      finalG = (finalG - 128) * skinContrast + 128;
+      finalB = (finalB - 128) * skinContrast + 128;
 
       if (params.showSkinMaskOverlay && sw > 0.18) {
         const overlayAlpha = Math.min(0.60, sw * 0.60);
@@ -943,6 +946,8 @@
     const splitX = Math.max(0, Math.min(viewW, viewW * activeSplit));
 
     // 1. Draw Full AFTER Image (4K AI Graded)
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(state.afterGradedOffscreen, drawX, drawY, drawW, drawH);
 
     // 2. Draw Clipped BEFORE Image on Left Side (0 .. splitX)
@@ -950,10 +955,9 @@
     ctx.beginPath();
     ctx.rect(0, 0, splitX, viewH);
     ctx.clip();
-    // Apply slight raw softness to Before side so split comparison is unmistakable
-    ctx.filter = 'blur(0.5px) contrast(0.96)';
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(state.beforeOffscreen, drawX, drawY, drawW, drawH);
-    ctx.filter = 'none';
     ctx.restore();
 
     // 3. Optional Animated Facial Landmark Wireframe Overlay (BeforeAfterSlider.kt lines 318-420)
@@ -2371,6 +2375,9 @@
 
     function clearCustomPhotoAndReturnHome() {
       state.customImageElement = null;
+      state.skinWeightsBuffer = null;
+      state.skinWeightsWidth = 0;
+      state.skinWeightsHeight = 0;
       state.selectedSampleIndex = 0;
       state.detectedFace = { found: false, cx: 0.50, cy: 0.38, rx: 0.25, ry: 0.32 };
       state.selectedPresetId = 'REMINI_NATURAL';

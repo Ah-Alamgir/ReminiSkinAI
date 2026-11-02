@@ -3,21 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ReminiSkinAI - AI Photo Enhancer & Biometric Passport Studio</title>
+  <title>Aura AI - ReminiSkinAI 4K</title>
 
-  <!-- PWA & Apple Web App Meta Tags -->
+  <!-- Apple & PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ReminiSkinAI">
+  <meta name="apple-mobile-web-app-title" content="Aura AI">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0D0F14">
+  <meta name="theme-color" content="#0C0E18">
   <meta name="format-detection" content="telephone=no">
 
-  <!-- SEO & Social Sharing Tags -->
-  <meta name="description" content="Free offline AI photo enhancer, skin tone grading, and biometric passport photo maker with formal suits. Works 100% offline without internet.">
-  <meta property="og:title" content="ReminiSkinAI - Photo Enhancer & Passport Studio">
-  <meta property="og:description" content="Enhance photos, calibrate regional skin tones, and generate biometric passport photos with formal suits. Works 100% offline.">
-  <meta property="og:type" content="website">
+  <!-- SEO Tags -->
+  <meta name="description" content="Aura AI ReminiSkinAI - 4K Ultra HD portrait enhancement, regional skin tone grading, and biometric passport photo maker.">
+  <meta property="og:title" content="Aura AI - ReminiSkinAI 4K">
+  <meta property="og:description" content="Transform low-res, vintage, and blurred portraits into ultra-sharp 4K masterpieces. 100% offline.">
   <meta property="og:image" content="icons/icon-512.png">
 
   <!-- Icons & Manifest -->
@@ -29,343 +28,691 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Hidden File Input for Image Selection -->
+  <input type="file" id="globalImageInput" accept="image/*" style="display:none">
+
+  <!-- Atmospheric Glow Background Layers -->
+  <div class="mesh-glow mesh-violet"></div>
+  <div class="mesh-glow mesh-cyan"></div>
+  <div class="mesh-glow mesh-magenta"></div>
+
   <!-- iOS Add to Home Screen Banner -->
   <div id="iosInstallBanner" class="ios-banner hidden">
     <div class="ios-banner-content">
       <span class="ios-banner-icon">📲</span>
       <div class="ios-banner-text">
-        <strong>Install App on iPhone:</strong>
-        <span>Tap <svg class="inline-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg> <strong>Share</strong> then <strong>"Add to Home Screen"</strong> for fullscreen offline mode!</span>
+        <strong>Install Aura AI on iPhone:</strong>
+        <span>Tap <svg class="inline-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg> <strong>Share</strong> then <strong>"Add to Home Screen"</strong> for full-screen offline mode!</span>
       </div>
-      <button id="dismissIosBanner" class="ios-banner-close" aria-label="Close">✕</button>
+      <button id="dismissIosBanner" class="ios-banner-close">✕</button>
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="app-header">
-    <div class="brand">
-      <div class="brand-logo">
-        <span class="sparkle-dot"></span>
-        <svg viewBox="0 0 24 24" class="logo-icon"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 2 0zm-1-6.5a1.25 1.25 0 1 1 1.25-1.25A1.25 1.25 0 0 1 12 10z"/></svg>
+  <div class="app-viewport">
+
+    <!-- ======================================================================
+         VIEW 1: HOME (AuraHome matching MainScreen.kt)
+         ====================================================================== -->
+    <main id="viewHome" class="screen-view active">
+      <div class="screen-scroll-container">
+
+        <!-- Top Utility Row: Credits Pill & Settings Button -->
+        <header class="aura-top-utility">
+          <button id="creditsBtn" class="credits-pill" aria-label="Credits">
+            <svg viewBox="0 0 24 24" class="bolt-icon"><path fill="currentColor" d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15L11 21z"/></svg>
+            <span id="creditsCountText">48 Credits</span>
+          </button>
+
+          <button id="settingsBtn" class="icon-circle-btn" aria-label="Settings">
+            <svg viewBox="0 0 24 24" class="header-icon"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          </button>
+        </header>
+
+        <!-- Headline & Avatars -->
+        <section class="aura-hero-header">
+          <div class="hero-title-row">
+            <h1 class="hero-title">Revive Your<br>Memories</h1>
+            <div class="avatar-stack">
+              <img src="assets/sample_1_remini_ref.webp" alt="Avatar 1" class="avatar-circle av-1">
+              <img src="assets/sample_2_remini_ref.webp" alt="Avatar 2" class="avatar-circle av-2">
+            </div>
+          </div>
+          <p class="hero-subtitle">Transform low-res, vintage, and blurred portraits into ultra-sharp 4K masterpieces.</p>
+        </section>
+
+        <!-- Hero Feature Card: AI HD Enhance & Unblur -->
+        <section class="aura-feature-card">
+          <div class="feature-media-box" id="heroMediaBox">
+            <img src="assets/sample_1_remini_ref.webp" alt="4K Restored Preview" class="feature-img">
+            <div class="media-badge badge-top-left">
+              <span class="cyan-pulse-dot"></span>
+              <span>Face Reconstruction v4.2</span>
+            </div>
+            <div class="media-badge badge-top-right">4K ULTRA HD</div>
+          </div>
+
+          <div class="feature-info">
+            <h2 class="feature-title">AI HD Enhance & Unblur</h2>
+            <p class="feature-desc">Reconstruct skin texture, eye catchlights, and hair strands</p>
+          </div>
+
+          <button id="heroEnhanceBtn" class="aura-hero-button">
+            <svg viewBox="0 0 24 24" class="btn-star-icon"><path fill="currentColor" d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12z"/></svg>
+            <span>One-Tap Magic Enhance</span>
+          </button>
+        </section>
+
+        <!-- Precision Tools Section (2x2 Bento Grid) -->
+        <section class="aura-tools-section">
+          <div class="section-header-row">
+            <h2 class="sec-title">Precision Tools</h2>
+            <button id="viewAllToolsBtn" class="sec-link">View All</button>
+          </div>
+
+          <div class="bento-grid">
+            <!-- Tool 1: AI Portrait 4K -->
+            <div class="bento-card" data-tool="portrait_4k">
+              <div class="bento-card-top">
+                <div class="bento-icon-box box-violet">
+                  <svg viewBox="0 0 24 24" class="bento-icon icon-violet"><path fill="currentColor" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm-7 7H3v4c0 1.1.9 2 2 2h4v-2H5v-4zM5 5h4V3H5c-1.1 0-2 .9-2 2v4h2V5zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2zm0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4z"/></svg>
+                </div>
+                <span class="tool-tag tag-cyan">HD 4K</span>
+              </div>
+              <h3 class="bento-title">AI Portrait 4K</h3>
+              <p class="bento-sub">Crystal sharp face detail</p>
+            </div>
+
+            <!-- Tool 2: Old Photo Restore -->
+            <div class="bento-card" data-tool="old_restore">
+              <div class="bento-card-top">
+                <div class="bento-icon-box box-thumb">
+                  <img src="assets/sample_2_before.webp" alt="Vintage" class="bento-thumb-img">
+                  <div class="bento-thumb-overlay">
+                    <svg viewBox="0 0 24 24" class="bento-icon"><path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                  </div>
+                </div>
+                <span class="tool-tag tag-magenta">Vintage</span>
+              </div>
+              <h3 class="bento-title">Old Photo Restore</h3>
+              <p class="bento-sub">Scratch removal & unblur</p>
+            </div>
+
+            <!-- Tool 3: Despeckle & Denoise -->
+            <div class="bento-card" data-tool="denoise">
+              <div class="bento-card-top">
+                <div class="bento-icon-box box-cyan">
+                  <svg viewBox="0 0 24 24" class="bento-icon icon-cyan"><path fill="currentColor" d="M10 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm4-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </div>
+                <span class="tool-tag tag-glass">ISO Clean</span>
+              </div>
+              <h3 class="bento-title">Despeckle & Denoise</h3>
+              <p class="bento-sub">Remove night noise</p>
+            </div>
+
+            <!-- Tool 4: Face Glow & Makeup -->
+            <div class="bento-card" data-tool="face_glow">
+              <div class="bento-card-top">
+                <div class="bento-icon-box box-magenta">
+                  <svg viewBox="0 0 24 24" class="bento-icon icon-magenta"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                </div>
+                <span class="tool-tag tag-rose">Beauty</span>
+              </div>
+              <h3 class="bento-title">Face Glow & Makeup</h3>
+              <p class="bento-sub">Studio radiance</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recent Restorations Section -->
+        <section class="aura-recent-section">
+          <div class="section-header-row">
+            <div class="recent-title-group">
+              <h2 class="sec-title">Recent Restorations</h2>
+              <span class="pill-counter">3 photos</span>
+            </div>
+            <button id="recentHistoryBtn" class="sec-link text-violet">History</button>
+          </div>
+
+          <div class="recent-scroll-row">
+            <!-- Card 1 -->
+            <div class="recent-card" data-sample="1">
+              <div class="recent-thumb-box">
+                <img src="assets/sample_1_remini_ref.webp" alt="Portrait 1" class="recent-thumb">
+                <span class="recent-badge">Portrait 4K</span>
+              </div>
+              <h4 class="recent-file-name">Portrait_V2_4K.jpg</h4>
+              <p class="recent-file-sub">Crystal sharp face detail & eye catchlights</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="recent-card" data-sample="2">
+              <div class="recent-thumb-box">
+                <img src="assets/sample_2_remini_ref.webp" alt="Portrait 2" class="recent-thumb">
+                <span class="recent-badge">Restored</span>
+              </div>
+              <h4 class="recent-file-name">Family_Archive_1974.png</h4>
+              <p class="recent-file-sub">Scratch removal, unblur & vintage repair</p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="recent-card" data-sample="3">
+              <div class="recent-thumb-box">
+                <img src="assets/sample_3_before.webp" alt="Portrait 3" class="recent-thumb">
+                <span class="recent-badge">Daylight</span>
+              </div>
+              <h4 class="recent-file-name">Outdoor_Sunlight_HD.jpg</h4>
+              <p class="recent-file-sub">Direct daylight, specular skin highlights</p>
+            </div>
+          </div>
+        </section>
+
       </div>
-      <div class="brand-titles">
-        <h1 class="brand-name">ReminiSkinAI</h1>
-        <div class="brand-badges">
-          <span class="badge-offline" id="offlineStatusBadge">
-            <span class="status-dot"></span> Offline Ready
-          </span>
-          <span class="badge-pro">KMP Calibrated</span>
+    </main>
+
+
+    <!-- ======================================================================
+         VIEW 2: COMPARISON STUDIO (AuraComparisonStudioScreen)
+         ====================================================================== -->
+    <main id="viewComparison" class="screen-view">
+      <!-- Studio Top HUD -->
+      <header class="studio-hud">
+        <button id="studioExitBtn" class="icon-circle-btn hud-back-btn" aria-label="Exit Studio">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+
+        <div class="hud-pill hud-feature-badge">
+          <svg viewBox="0 0 24 24" class="hud-icon icon-cyan"><path fill="currentColor" d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12z"/></svg>
+          <strong>AI Ultra Enhance</strong>
+          <span class="hud-tag-cyan">v4.2</span>
+        </div>
+
+        <button id="studioSkinToneBtn" class="hud-pill hud-tone-pill">
+          <span class="swatch-mini" id="hudSwatchMini"></span>
+          <span id="hudPresetTitle">Remini Natural</span>
+        </button>
+
+        <button id="studioZoomBtn" class="hud-pill">
+          <svg viewBox="0 0 24 24" class="hud-icon"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <span id="hudZoomText">100%</span>
+        </button>
+
+        <button id="studioHoldBtn" class="hud-pill">
+          <svg viewBox="0 0 24 24" class="hud-icon"><path fill="currentColor" d="M10 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h5v2h2V1h-2v2zm0 15H5l5-6v6zm9-15h-5v2h5v13l-5-6v7h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+          <span>Compare</span>
+        </button>
+
+        <button id="studioRetouchShortcutBtn" class="hud-pill hud-retouch-pill">
+          <svg viewBox="0 0 24 24" class="hud-icon icon-violet"><path fill="currentColor" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+          <span>Retouch Suite</span>
+        </button>
+      </header>
+
+      <!-- Main Canvas Viewport (Before/After Slider) -->
+      <div class="studio-canvas-container" id="studioCanvasContainer">
+        <canvas id="canvasAfter" class="canvas-viewport"></canvas>
+        <div class="canvas-before-wrapper" id="canvasBeforeWrapper">
+          <canvas id="canvasBefore" class="canvas-viewport"></canvas>
+        </div>
+
+        <!-- Draggable Divider -->
+        <div class="split-divider-line" id="studioDivider">
+          <div class="split-handle-disc">
+            <svg viewBox="0 0 24 24" class="split-disc-icon"><path fill="currentColor" d="M8 7l-5 5 5 5V7zm8 0v10l5-5-5-5z"/></svg>
+          </div>
+        </div>
+
+        <!-- Before/After Labels -->
+        <span class="studio-tag tag-left">BEFORE (720p)</span>
+        <span class="studio-tag tag-right">AFTER (4K AI)</span>
+      </div>
+
+      <!-- Studio Bottom Dock -->
+      <footer class="studio-dock">
+        <!-- Intensity Slider Row -->
+        <div class="dock-intensity-row">
+          <div class="dock-label-group">
+            <span class="dock-label">Facial Clarity & Sharpness</span>
+            <span class="dock-val" id="dockIntensityVal">82%</span>
+          </div>
+          <input type="range" id="dockIntensitySlider" min="0" max="100" value="82" class="aura-slider">
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="dock-buttons-row">
+          <button id="studioRegenerateBtn" class="btn-dock-secondary">
+            <svg viewBox="0 0 24 24" class="dock-btn-icon"><path fill="currentColor" d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            <span>Regenerate</span>
+          </button>
+          <button id="studioExportBtn" class="btn-dock-primary">
+            <svg viewBox="0 0 24 24" class="dock-btn-icon"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            <span>Export 4K Ultra</span>
+          </button>
+        </div>
+      </footer>
+    </main>
+
+
+    <!-- ======================================================================
+         VIEW 3: RETOUCH SUITE (AuraRetouchSuiteScreen)
+         ====================================================================== -->
+    <main id="viewRetouch" class="screen-view">
+      <!-- Retouch HUD -->
+      <header class="retouch-hud">
+        <button id="retouchBackBtn" class="icon-circle-btn" aria-label="Back">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <div class="hud-pill">
+          <span class="cyan-pulse-dot"></span>
+          <strong>Retouch Suite Pro</strong>
+        </div>
+        <button id="retouchExportBtn" class="hud-pill hud-export-pill">
+          <span>Export</span>
+        </button>
+      </header>
+
+      <div class="retouch-scroll-container">
+        <!-- Retouch Live Canvas -->
+        <div class="retouch-canvas-box">
+          <canvas id="retouchCanvas"></canvas>
+        </div>
+
+        <!-- Retouch Sub-Tabs -->
+        <div class="retouch-subtabs">
+          <button class="retouch-subtab active" data-subtab="TONES">Skin Tones</button>
+          <button class="retouch-subtab" data-subtab="CALIBRATION">Calibration</button>
+          <button class="retouch-subtab" data-subtab="PRESETS">Presets</button>
+        </div>
+
+        <!-- Section: Regional Aesthetic Presets -->
+        <div id="subtabTonesContent" class="retouch-panel-content">
+          <div class="section-header-row">
+            <h3 class="sec-title-sm">Regional & Aesthetic Presets</h3>
+            <span class="tool-tag tag-violet">Remini Calibrated</span>
+          </div>
+          <p class="panel-desc">Segmented specifically to dermis skin layers. Background, hair, and clothing remain untouched.</p>
+          <div class="presets-slider-row" id="retouchPresetsContainer">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Section: Sliders -->
+        <div id="subtabCalibrationContent" class="retouch-panel-content">
+          <div class="slider-group-card">
+            <div class="slider-item">
+              <div class="slider-item-header">
+                <span>Warmth & Undertone</span>
+                <span class="slider-val-tag" id="rValWarmth">1.00×</span>
+              </div>
+              <input type="range" id="rSliderWarmth" min="0.60" max="1.40" step="0.02" value="1.00" class="aura-slider">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-item-header">
+                <span>Radiance & Studio Glow</span>
+                <span class="slider-val-tag" id="rValRadiance">1.00×</span>
+              </div>
+              <input type="range" id="rSliderRadiance" min="0.50" max="1.80" step="0.05" value="1.00" class="aura-slider">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-item-header">
+                <span>Dermis Smoothing</span>
+                <span class="slider-val-tag" id="rValSmoothness">85%</span>
+              </div>
+              <input type="range" id="rSliderSmoothness" min="0.0" max="1.0" step="0.05" value="0.85" class="aura-slider">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-item-header">
+                <span>Micro-Texture Clarity</span>
+                <span class="slider-val-tag" id="rValClarity">82%</span>
+              </div>
+              <input type="range" id="rSliderClarity" min="0.0" max="1.0" step="0.05" value="0.82" class="aura-slider">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+
+    <!-- ======================================================================
+         VIEW 4: BIOMETRIC PASSPORT STUDIO (PassportStudioEditor)
+         ====================================================================== -->
+    <main id="viewPassport" class="screen-view">
+      <!-- Passport Header -->
+      <header class="passport-hud">
+        <button id="passportBackBtn" class="icon-circle-btn" aria-label="Back">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <div class="hud-pill">
+          <svg viewBox="0 0 24 24" class="hud-icon icon-cyan"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          <strong>Passport Studio</strong>
+          <span class="hud-tag-cyan">ICAO</span>
+        </div>
+        <button id="passportGuideToggleBtn" class="hud-pill">
+          <span>Biometric Guides</span>
+        </button>
+      </header>
+
+      <div class="passport-scroll-container">
+        <!-- Viewport Canvas with Biometric Lines -->
+        <div class="passport-canvas-box" id="passportBox">
+          <canvas id="passportCanvas"></canvas>
+          <div id="passportGuideOverlay" class="biometric-guides-overlay hidden">
+            <div class="bio-oval"></div>
+            <div class="bio-eyeline"></div>
+            <div class="bio-chinline"></div>
+            <span class="bio-label-crown">CROWN (10%)</span>
+            <span class="bio-label-eyes">EYE LEVEL (38%)</span>
+            <span class="bio-label-chin">CHIN (65%)</span>
+          </div>
+        </div>
+
+        <!-- Country Standard Selector -->
+        <div class="passport-control-card">
+          <div class="section-header-row">
+            <h3 class="sec-title-sm">Biometric Country Standard</h3>
+          </div>
+          <select id="passportStandardSelect" class="aura-select">
+            <option value="US_2X2">🇺🇸 United States (US) — 2×2 in (51×51 mm)</option>
+            <option value="UK_EU_35X45">🇪🇺 UK / EU / Schengen — 35×45 mm</option>
+            <option value="BANGLADESH_40X50">🇧🇩 Bangladesh Passport — 40×50 mm</option>
+            <option value="INDIA_2X2">🇮🇳 India Passport / OCI — 2×2 in (51×51 mm)</option>
+            <option value="JAPAN_35X45">🇯🇵 Japan Passport / Visa — 35×45 mm</option>
+            <option value="CANADA_50X70">🇨🇦 Canada Passport — 50×70 mm (2×2.75 in)</option>
+            <option value="CHINA_33X48">🇨🇳 China Passport / Visa — 33×48 mm</option>
+            <option value="AUSTRALIA_35X45">🇦🇺 Australia Passport — 35×45 mm</option>
+            <option value="UAE_SAUDI_40X60">🇦🇪 UAE / Saudi / Gulf — 40×60 mm</option>
+            <option value="MALAYSIA_SG_35X50">🇲🇾 Malaysia / Singapore — 35×50 mm</option>
+          </select>
+        </div>
+
+        <!-- Background Palette -->
+        <div class="passport-control-card">
+          <div class="section-header-row">
+            <h3 class="sec-title-sm">Background Color</h3>
+            <span id="passportBgName" class="tag-cyan-text">Pure White</span>
+          </div>
+          <div class="passport-bg-row" id="passportBgRow">
+            <button class="bg-circle active" data-color="#FFFFFF" title="Pure White" style="background:#FFFFFF;"></button>
+            <button class="bg-circle" data-color="#F5F6F8" title="Studio Off-White" style="background:#F5F6F8;"></button>
+            <button class="bg-circle" data-color="#CBE6FF" title="Passport Sky Blue" style="background:#CBE6FF;"></button>
+            <button class="bg-circle" data-color="#438EDB" title="Official ID Blue" style="background:#438EDB;"></button>
+            <button class="bg-circle" data-color="#1D4E89" title="Deep Navy Blue" style="background:#1D4E89;"></button>
+            <button class="bg-circle" data-color="#E4E6EB" title="Biometric Grey" style="background:#E4E6EB;"></button>
+            <button class="bg-circle" data-color="#D62828" title="Official ID Red" style="background:#D62828;"></button>
+            <button class="bg-circle" data-color="#FDF7E7" title="Warm Cream" style="background:#FDF7E7;"></button>
+            <button class="bg-circle circle-trans" data-color="transparent" title="Transparent"></button>
+          </div>
+        </div>
+
+        <!-- 10 Formal Suits / Outfits -->
+        <div class="passport-control-card">
+          <div class="section-header-row">
+            <h3 class="sec-title-sm">10 Formal Coats & Blazers</h3>
+            <div class="gender-chips">
+              <button class="gender-chip active" data-filter="ALL">All (10)</button>
+              <button class="gender-chip" data-filter="MEN">Men (5)</button>
+              <button class="gender-chip" data-filter="WOMEN">Women (5)</button>
+            </div>
+          </div>
+
+          <div class="passport-suit-carousel" id="passportSuitCarousel">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Suit Adjustments -->
+          <div class="suit-sliders-box">
+            <div class="slider-item">
+              <div class="slider-item-header">
+                <span>Coat Scale</span>
+                <span class="slider-val-tag" id="pValCoatScale">100%</span>
+              </div>
+              <input type="range" id="pSliderCoatScale" min="0.70" max="1.50" step="0.02" value="1.00" class="aura-slider">
+            </div>
+            <div class="slider-item">
+              <div class="slider-item-header">
+                <span>Collar Height (Up/Down)</span>
+                <span class="slider-val-tag" id="pValCoatY">0px</span>
+              </div>
+              <input type="range" id="pSliderCoatY" min="-120" max="120" step="2" value="0" class="aura-slider">
+            </div>
+            <div class="slider-item">
+              <div class="slider-item-header">
+                <span>Horizontal Offset</span>
+                <span class="slider-val-tag" id="pValCoatX">0px</span>
+              </div>
+              <input type="range" id="pSliderCoatX" min="-100" max="100" step="2" value="0" class="aura-slider">
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="passport-export-row">
+          <button id="passportExportSingleBtn" class="btn-dock-primary">
+            <svg viewBox="0 0 24 24" class="dock-btn-icon"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>Single 300 DPI Photo</span>
+          </button>
+          <button id="passportExportSheetBtn" class="btn-dock-secondary">
+            <svg viewBox="0 0 24 24" class="dock-btn-icon"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>
+            <span>4×6" Print Sheet (6 Copies)</span>
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+
+    <!-- ======================================================================
+         VIEW 5: PROCESSING (AuraProcessingScreen)
+         ====================================================================== -->
+    <main id="viewProcessing" class="screen-view">
+      <div class="processing-center-card">
+        <div class="processing-halo-box">
+          <div class="halo-spinner"></div>
+          <div class="halo-inner-glow">
+            <svg viewBox="0 0 24 24" class="halo-icon"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 2 0zm-1-6.5a1.25 1.25 0 1 1 1.25-1.25A1.25 1.25 0 0 1 12 10z"/></svg>
+          </div>
+        </div>
+
+        <div class="processing-meta">
+          <span class="stage-step-tag" id="procStageStep">Stage 1 of 5</span>
+          <h2 class="stage-title" id="procStageTitle">Face Reconstruction v4.2</h2>
+          <p class="stage-desc" id="procStageDesc">Upscaling facial canvas to Ultra 4K UHD...</p>
+        </div>
+
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="procProgressFill"></div>
+        </div>
+
+        <button id="procCancelBtn" class="btn-text-muted">Cancel</button>
+      </div>
+    </main>
+
+
+    <!-- ======================================================================
+         VIEW 6: SAVED SHARE (AuraSavedShareScreen)
+         ====================================================================== -->
+    <main id="viewSaved" class="screen-view">
+      <div class="saved-scroll-container">
+        <div class="saved-success-badge">
+          <svg viewBox="0 0 24 24" class="success-icon"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <span>Saved to Device</span>
+        </div>
+
+        <div class="saved-preview-card">
+          <img id="savedResultImg" src="" alt="Enhanced" class="saved-preview-img">
+        </div>
+
+        <div class="saved-details">
+          <h2 class="saved-title" id="savedFileName">AuraAI_Ultra_4K.jpg</h2>
+          <p class="saved-sub">Calibrated at 300 DPI · Lossless Dermis Smoothing · 4K UHD</p>
+        </div>
+
+        <div class="saved-buttons-row">
+          <button id="savedShareBtn" class="aura-hero-button">
+            <svg viewBox="0 0 24 24" class="btn-star-icon"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+            <span>Share Photo</span>
+          </button>
+          <button id="savedAnotherBtn" class="btn-dock-secondary">
+            <span>Enhance Another</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ======================================================================
+         FLOATING GLASS BOTTOM NAVIGATION BAR (AuraBottomNavBar)
+         ====================================================================== -->
+    <nav class="aura-bottom-navbar" id="mainBottomNav">
+      <!-- Tab 0: Home -->
+      <button class="nav-item active" data-nav="HOME">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>Home</span>
+      </button>
+
+      <!-- Tab 1: Studio -->
+      <button class="nav-item" data-nav="STUDIO">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M10 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h5v2h2V1h-2v2zm0 15H5l5-6v6zm9-15h-5v2h5v13l-5-6v7h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        <span>Studio</span>
+      </button>
+
+      <!-- Tab 2: Restore / Retouch -->
+      <button class="nav-item" data-nav="RETOUCH">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+        <span>Retouch</span>
+      </button>
+
+      <!-- Tab 3: Passport -->
+      <button class="nav-item" data-nav="PASSPORT">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10 0h2v2h-2zm-6-4h8v2h-8z"/></svg>
+        <span>Passport</span>
+      </button>
+    </nav>
+
+  </div><!-- /.app-viewport -->
+
+  <!-- ======================================================================
+       MODALS & DIALOGS
+       ====================================================================== -->
+
+  <!-- 4K Export Upscale Modal -->
+  <div id="modalExport4k" class="aura-modal-backdrop hidden">
+    <div class="aura-modal-sheet">
+      <div class="modal-pill-handle"></div>
+      <div class="modal-header-row">
+        <h3 class="modal-heading">Export 4K Ultra Canvas</h3>
+        <button class="modal-close-icon" id="closeExportModalBtn">✕</button>
+      </div>
+
+      <p class="modal-subtitle">Choose high-precision render resolution calibrated for print & screens.</p>
+
+      <div class="modal-option-list">
+        <label class="modal-radio-card active">
+          <input type="radio" name="modalResOption" value="native" checked>
+          <div class="radio-card-content">
+            <div class="radio-card-title-row">
+              <strong>Native Sensor Resolution</strong>
+              <span class="tag-glass">Free</span>
+            </div>
+            <span class="radio-card-desc">Lossless original pixel matrix with micro-texture restoration</span>
+          </div>
+        </label>
+
+        <label class="modal-radio-card">
+          <input type="radio" name="modalResOption" value="4k">
+          <div class="radio-card-content">
+            <div class="radio-card-title-row">
+              <strong>Ultra HD 4K (3840×2160)</strong>
+              <span class="tag-violet">Studio Master</span>
+            </div>
+            <span class="radio-card-desc">Upscaled with high-frequency GAN sharpening</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="modal-format-row">
+        <label class="format-chip active">
+          <input type="radio" name="modalFmtOption" value="png" checked>
+          <span>PNG (Lossless 4K)</span>
+        </label>
+        <label class="format-chip">
+          <input type="radio" name="modalFmtOption" value="jpeg">
+          <span>JPEG (High-Res 98%)</span>
+        </label>
+      </div>
+
+      <button id="modalConfirmSaveBtn" class="aura-hero-button full-width">
+        <span>Save to Camera Roll</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Credits Refill Dialog -->
+  <div id="modalCredits" class="aura-modal-backdrop hidden">
+    <div class="aura-modal-sheet">
+      <div class="modal-pill-handle"></div>
+      <div class="modal-header-row">
+        <h3 class="modal-heading">Aura AI Credits</h3>
+        <button class="modal-close-icon" id="closeCreditsModalBtn">✕</button>
+      </div>
+      <div class="credits-balance-display">
+        <svg viewBox="0 0 24 24" class="credits-big-bolt"><path fill="currentColor" d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15L11 21z"/></svg>
+        <span class="credits-number" id="creditsDialogBalance">48</span>
+        <span class="credits-label">Daily Balance Available</span>
+      </div>
+      <p class="modal-subtitle text-center">Your daily allocation resets automatically every midnight. Tap below to claim bonus credits!</p>
+      <button id="claimBonusCreditsBtn" class="aura-hero-button full-width">
+        <span>Claim +10 Free Credits</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Settings Dialog -->
+  <div id="modalSettings" class="aura-modal-backdrop hidden">
+    <div class="aura-modal-sheet">
+      <div class="modal-pill-handle"></div>
+      <div class="modal-header-row">
+        <h3 class="modal-heading">Studio Settings</h3>
+        <button class="modal-close-icon" id="closeSettingsModalBtn">✕</button>
+      </div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-meta">
+            <strong>Offline Local Rendering</strong>
+            <span>100% of image processing runs on your iPhone device</span>
+          </div>
+          <span class="tag-cyan">Active</span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-meta">
+            <strong>BiSeNet Skin Dermis Gating</strong>
+            <span>Prevents color shifts on clothing and background</span>
+          </div>
+          <span class="tag-cyan">Enabled</span>
+        </div>
+        <div class="settings-item">
+          <div class="settings-meta">
+            <strong>App Version</strong>
+            <span>ReminiSkinAI 4K v4.2 · Luminescent Glass UI</span>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Navigation Switcher -->
-    <nav class="nav-tabs">
-      <button id="tabMainBtn" class="nav-tab active">
-        <svg viewBox="0 0 24 24" class="tab-icon"><path fill="currentColor" d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12z"/></svg>
-        <span>Skin Glow</span>
-      </button>
-      <button id="tabPassportBtn" class="nav-tab">
-        <svg viewBox="0 0 24 24" class="tab-icon"><path fill="currentColor" d="M4 4h16v16H4zm2 4h12V6H6zm0 4h12v-2H6zm0 4h8v-2H6z"/></svg>
-        <span>Passport Studio</span>
-      </button>
-    </nav>
-  </header>
-
-  <!-- Main Container -->
-  <main class="app-content">
-
-    <!-- ==================== TAB 1: SKIN GLOW & REMINI ENHANCE ==================== -->
-    <section id="screenMain" class="screen-panel active">
-
-      <!-- Upload & Sample Bar -->
-      <div class="action-bar card">
-        <div class="upload-buttons">
-          <label class="btn btn-primary upload-label">
-            <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            <span>Upload Photo</span>
-            <input type="file" id="imageInput" accept="image/*" class="hidden-input">
-          </label>
-          <button id="cameraBtn" class="btn btn-secondary">
-            <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.5-9h-3.17L14.5 4h-5L7.67 6H4.5A2.5 2.5 0 0 0 2 8.5v9A2.5 2.5 0 0 0 4.5 20h15a2.5 2.5 0 0 0 2.5-2.5v-9A2.5 2.5 0 0 0 19.5 6z"/></svg>
-            <span>Camera</span>
-          </button>
-        </div>
-
-        <!-- Sample Switchers -->
-        <div class="sample-chips-row">
-          <span class="sample-label">Try sample:</span>
-          <button class="sample-chip" data-sample="sample_1_before.webp">Portrait 1</button>
-          <button class="sample-chip" data-sample="sample_2_before.webp">Portrait 2</button>
-          <button class="sample-chip" data-sample="sample_3_before.webp">Portrait 3</button>
-        </div>
+  <!-- Skin Tone Quick Modal (when clicking tone pill in Studio) -->
+  <div id="modalSkinTones" class="aura-modal-backdrop hidden">
+    <div class="aura-modal-sheet">
+      <div class="modal-pill-handle"></div>
+      <div class="modal-header-row">
+        <h3 class="modal-heading">Regional Skin Tones</h3>
+        <button class="modal-close-icon" id="closeSkinTonesModalBtn">✕</button>
       </div>
-
-      <!-- Before / After Viewer Card -->
-      <div class="preview-card card">
-        <div class="comparison-container" id="comparisonContainer">
-          <canvas id="afterCanvas" class="canvas-layer canvas-after"></canvas>
-          <div class="before-wrapper" id="beforeWrapper">
-            <canvas id="beforeCanvas" class="canvas-layer canvas-before"></canvas>
-          </div>
-          <div class="split-divider" id="splitDivider">
-            <div class="split-handle">
-              <svg viewBox="0 0 24 24" class="split-arrow-icon"><path fill="currentColor" d="M8 7l-5 5 5 5V7zm8 0v10l5-5-5-5z"/></svg>
-            </div>
-          </div>
-          <!-- Badges -->
-          <span class="comp-badge badge-left">BEFORE</span>
-          <span class="comp-badge badge-right">ENHANCED</span>
-          <div id="processingIndicator" class="processing-overlay hidden">
-            <div class="spinner"></div>
-            <span>Calibrating Skin Dermis...</span>
-          </div>
-        </div>
-
-        <!-- Interactive zoom/view hints -->
-        <div class="preview-footer">
-          <span class="hint-text">⇄ Drag slider to inspect before & after clarity</span>
-          <button id="toggleAiEnhanceBtn" class="btn-pill active">
-            <span class="pill-dot"></span> AI Sharpness HD
-          </button>
-        </div>
-      </div>
-
-      <!-- Aesthetic Skin Tone Presets -->
-      <div class="card control-group">
-        <div class="section-title-row">
-          <h2 class="section-title">Regional Aesthetic Presets</h2>
-          <span class="preset-tag">Remini Calibrated</span>
-        </div>
-        <p class="section-desc">Preserves clothing, hair & background 100%. Only dermis skin receives regional tone calibration.</p>
-
-        <div class="presets-grid" id="presetsGrid">
-          <!-- Dynamically populated or rendered presets -->
-        </div>
-      </div>
-
-      <!-- Calibration Sliders -->
-      <div class="card control-group">
-        <div class="section-title-row">
-          <h2 class="section-title">Fine-Tuning Controls</h2>
-          <button id="resetSlidersBtn" class="btn-text">Reset</button>
-        </div>
-
-        <div class="slider-row">
-          <div class="slider-header">
-            <span>Warmth & Undertone</span>
-            <span class="slider-val" id="valWarmth">1.00×</span>
-          </div>
-          <input type="range" id="sliderWarmth" min="0.60" max="1.40" step="0.02" value="1.00" class="app-range">
-        </div>
-
-        <div class="slider-row">
-          <div class="slider-header">
-            <span>Radiance Glow</span>
-            <span class="slider-val" id="valRadiance">1.00×</span>
-          </div>
-          <input type="range" id="sliderRadiance" min="0.50" max="1.80" step="0.05" value="1.00" class="app-range">
-        </div>
-
-        <div class="slider-row">
-          <div class="slider-header">
-            <span>Skin Dermis Smoothing</span>
-            <span class="slider-val" id="valSmoothness">85%</span>
-          </div>
-          <input type="range" id="sliderSmoothness" min="0.0" max="1.0" step="0.05" value="0.85" class="app-range">
-        </div>
-
-        <div class="slider-row">
-          <div class="slider-header">
-            <span>Micro-Texture Clarity</span>
-            <span class="slider-val" id="valClarity">82%</span>
-          </div>
-          <input type="range" id="sliderClarity" min="0.0" max="1.0" step="0.05" value="0.82" class="app-range">
-        </div>
-      </div>
-
-      <!-- Export Bar -->
-      <div class="export-bar">
-        <button id="exportModalBtn" class="btn btn-export">
-          <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-          <span>Save & Export Photo (4K / HD)</span>
-        </button>
-      </div>
-
-    </section>
-
-    <!-- ==================== TAB 2: BIOMETRIC PASSPORT STUDIO ==================== -->
-    <section id="screenPassport" class="screen-panel">
-
-      <!-- Country Standard Selector -->
-      <div class="card control-group">
-        <div class="section-title-row">
-          <h2 class="section-title">Country Standard & Biometrics</h2>
-          <span class="preset-tag">ICAO Compliant</span>
-        </div>
-        <select id="countryStandardSelect" class="app-select">
-          <option value="US_2X2">🇺🇸 United States (US) — 2×2 in (51×51 mm)</option>
-          <option value="UK_EU_35X45">🇪🇺 UK / EU / Schengen — 35×45 mm</option>
-          <option value="BANGLADESH_40X50">🇧🇩 Bangladesh Passport — 40×50 mm</option>
-          <option value="INDIA_2X2">🇮🇳 India Passport / OCI — 2×2 in (51×51 mm)</option>
-          <option value="JAPAN_35X45">🇯🇵 Japan Passport / Visa — 35×45 mm</option>
-          <option value="CANADA_50X70">🇨🇦 Canada Passport — 50×70 mm (2×2.75 in)</option>
-          <option value="CHINA_33X48">🇨🇳 China Passport / Visa — 33×48 mm</option>
-          <option value="AUSTRALIA_35X45">🇦🇺 Australia Passport — 35×45 mm</option>
-          <option value="UAE_SAUDI_40X60">🇦🇪 UAE / Saudi / Gulf — 40×60 mm</option>
-          <option value="MALAYSIA_SG_35X50">🇲🇾 Malaysia / Singapore — 35×50 mm</option>
-        </select>
-      </div>
-
-      <!-- Passport Live Preview Canvas -->
-      <div class="preview-card card passport-preview-card">
-        <div class="passport-viewport" id="passportViewport">
-          <canvas id="passportCanvas"></canvas>
-          <!-- Biometric Guide Overlay -->
-          <div id="biometricGuide" class="biometric-guide hidden">
-            <div class="guide-oval"></div>
-            <div class="guide-eye-line"></div>
-            <div class="guide-chin-line"></div>
-            <span class="guide-label-top">CROWN</span>
-            <span class="guide-label-eye">EYE LEVEL</span>
-            <span class="guide-label-chin">CHIN</span>
-          </div>
-        </div>
-
-        <div class="preview-footer passport-footer">
-          <button id="toggleGuidesBtn" class="btn-pill">
-            <span class="pill-dot"></span> Biometric Guides
-          </button>
-          <button id="resetTransformBtn" class="btn-text">Reset Fit</button>
-        </div>
-      </div>
-
-      <!-- Background Color Palette -->
-      <div class="card control-group">
-        <div class="section-title-row">
-          <h2 class="section-title">Background Replacement</h2>
-          <span id="currentBgLabel" class="selected-label">Pure White</span>
-        </div>
-        <div class="bg-palette" id="bgPalette">
-          <button class="bg-swatch active" data-color="#FFFFFF" title="Pure White" style="background: #FFFFFF;"></button>
-          <button class="bg-swatch" data-color="#F5F6F8" title="Studio Off-White" style="background: #F5F6F8;"></button>
-          <button class="bg-swatch" data-color="#CBE6FF" title="Passport Sky Blue" style="background: #CBE6FF;"></button>
-          <button class="bg-swatch" data-color="#438EDB" title="Official ID Blue" style="background: #438EDB;"></button>
-          <button class="bg-swatch" data-color="#1D4E89" title="Deep Navy Blue" style="background: #1D4E89;"></button>
-          <button class="bg-swatch" data-color="#E4E6EB" title="Biometric Grey" style="background: #E4E6EB;"></button>
-          <button class="bg-swatch" data-color="#D62828" title="Official ID Red" style="background: #D62828;"></button>
-          <button class="bg-swatch" data-color="#FDF7E7" title="Warm Cream" style="background: #FDF7E7;"></button>
-          <button class="bg-swatch bg-transparent" data-color="transparent" title="Transparent Background"></button>
-        </div>
-      </div>
-
-      <!-- 10 Formal Suits / Outfits Overlay -->
-      <div class="card control-group">
-        <div class="section-title-row">
-          <h2 class="section-title">Formal Suit & Outfit Overlay</h2>
-          <span class="preset-tag">10 Styles</span>
-        </div>
-
-        <!-- Gender Filter Chips -->
-        <div class="suit-filters">
-          <button class="suit-filter-btn active" data-filter="ALL">All (10)</button>
-          <button class="suit-filter-btn" data-filter="MEN">Men (5)</button>
-          <button class="suit-filter-btn" data-filter="WOMEN">Women (5)</button>
-        </div>
-
-        <!-- Suits Carousel -->
-        <div class="suit-grid" id="suitGrid">
-          <!-- Populated by app.js -->
-        </div>
-
-        <!-- Suit Position / Alignment adjustments -->
-        <div class="suit-adjustments" id="suitAdjustments">
-          <div class="slider-row">
-            <div class="slider-header">
-              <span>Suit Scale</span>
-              <span class="slider-val" id="valSuitScale">100%</span>
-            </div>
-            <input type="range" id="sliderSuitScale" min="0.70" max="1.50" step="0.02" value="1.00" class="app-range">
-          </div>
-          <div class="slider-row">
-            <div class="slider-header">
-              <span>Collar Height (Up/Down)</span>
-              <span class="slider-val" id="valSuitY">0px</span>
-            </div>
-            <input type="range" id="sliderSuitY" min="-120" max="120" step="2" value="0" class="app-range">
-          </div>
-          <div class="slider-row">
-            <div class="slider-header">
-              <span>Horizontal Center</span>
-              <span class="slider-val" id="valSuitX">0px</span>
-            </div>
-            <input type="range" id="sliderSuitX" min="-100" max="100" step="2" value="0" class="app-range">
-          </div>
-        </div>
-      </div>
-
-      <!-- Passport Export Options -->
-      <div class="export-bar dual-export">
-        <button id="exportSinglePassportBtn" class="btn btn-export">
-          <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-          <span>Single 300 DPI Photo</span>
-        </button>
-        <button id="exportSheetBtn" class="btn btn-secondary">
-          <svg viewBox="0 0 24 24" class="btn-icon"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>
-          <span>4×6" Print Sheet (6 Copies)</span>
-        </button>
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- Export Modal (4K & Format Selection) -->
-  <div id="exportModal" class="modal-backdrop hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 class="modal-title">Export Enhanced Photo</h3>
-        <button id="closeModalBtn" class="modal-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-desc">Choose resolution and quality. All processing is rendered locally on your device.</p>
-        
-        <div class="export-options">
-          <label class="radio-option">
-            <input type="radio" name="exportRes" value="native" checked>
-            <div class="radio-label">
-              <strong>Native Resolution (Ultra Sharp)</strong>
-              <span>Full original sensor pixels preserved</span>
-            </div>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="exportRes" value="4k">
-            <div class="radio-label">
-              <strong>Ultra HD 4K (Upscaled)</strong>
-              <span>3840×2160 studio master format</span>
-            </div>
-          </label>
-        </div>
-
-        <div class="export-options">
-          <label class="radio-option">
-            <input type="radio" name="exportFormat" value="png" checked>
-            <div class="radio-label">
-              <strong>PNG (Lossless Quality)</strong>
-              <span>Best for high-frequency skin textures</span>
-            </div>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="exportFormat" value="jpeg">
-            <div class="radio-label">
-              <strong>JPEG (Compact Size 98%)</strong>
-              <span>Standard for social media and sharing</span>
-            </div>
-          </label>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="confirmDownloadBtn" class="btn btn-export">Download Photo</button>
+      <p class="modal-subtitle">Select calibrated undertone. Only skin pixels will be graded.</p>
+      <div class="tones-modal-grid" id="modalTonesGrid">
+        <!-- Dynamically populated -->
       </div>
     </div>
   </div>

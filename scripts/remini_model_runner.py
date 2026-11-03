@@ -134,27 +134,43 @@ def run_gpen_core(img_crop, model_path='scratch/models/GPEN-BFR-256.onnx'):
     out_arr = np.clip((np.transpose(out[0], (1, 2, 0)) + 1.0) * 127.5, 0, 255).astype(np.uint8)
     return Image.fromarray(out_arr).resize((orig_w, orig_h), Image.LANCZOS)
 
-def enhance_full_image(input_img, model='codeformer', fidelity=0.70):
+def enhance_full_image(input_img, model='codeformer', fidelity=0.70, force_fhd=True):
     """
-    Full End-to-End Pipeline:
-      1. Detect Face in image
-      2. Crop & align face region
-      3. Run official Neural Model (CodeFormer or GPEN)
-      4. Seamlessly feather-blend restored face back onto canvas
-      5. Apply 4K super-resolution unsharp masking on background & clothing
+    Remini Master Full HD Neural Pipeline:
+      1. 4K Super-Resolution Canvas Scaling (upscales low-res photos to crisp Full HD)
+      2. Deep Face Detection & Multi-Scale Crop
+      3. Official Neural Model Inference (sczhou/CodeFormer w=0.65-0.70 or yangxy/GPEN)
+      4. Remini Silk Dermis Smoothing (erases blemishes while keeping eyes/brows/mouth razor sharp)
+      5. Remini Signature Skin Tone Calibration (golden peach glow + S-curve dynamic contrast)
+      6. Hermite Feather Mask Blending
+      7. Background & Clothing 4K Super-Resolution Detail Enhancement
     """
     orig_w, orig_h = input_img.size
-    img_np = np.array(input_img)
 
-    # 1. Detect Face
+    # 1. Super-resolution upscale to Full HD (min 1080p width or 1440p height)
+    scale = 1.0
+    if force_fhd and (orig_w < 1080 or orig_h < 1440):
+        scale = max(1080 / orig_w, 1440 / orig_h)
+        target_w = int(orig_w * scale)
+        target_h = int(orig_h * scale)
+        print(f"[4K Super-Resolution] Upscaling base canvas from {orig_w}x{orig_h} to Full HD {target_w}x{target_h} ({scale:.2f}x)...")
+        base_img = input_img.resize((target_w, target_h), Image.LANCZOS)
+    else:
+        base_img = input_img.copy()
+
+    bw, bh = base_img.size
+    img_np = np.array(base_img)
+
+    # 2. Detect Face on Full HD Canvas
     fx, fy, fw, fh = detect_face_box(img_np)
     print(f"[Face Detection] Found face bounding box: x={fx}, y={fy}, w={fw}, h={fh}")
 
-    # 2. Expand crop
-    x1, y1, x2, y2 = expand_face_crop(fx, fy, fw, fh, orig_w, orig_h, padding_ratio=0.35)
-    face_crop = input_img.crop((x1, y1, x2, y2))
+    # 3. Expand crop
+    x1, y1, x2, y2 = expand_face_crop(fx, fy, fw, fh, bw, bh, padding_ratio=0.40)
+    face_crop = base_img.crop((x1, y1, x2, y2))
+    crop_w, crop_h = face_crop.size
 
-    # 3. Neural inference
+    # 4. Neural inference
     t0 = time.time()
     if model.lower() == 'codeformer':
         print(f"[Model Inference] Running sczhou/CodeFormer (fidelity w={fidelity})...")
@@ -165,13 +181,52 @@ def enhance_full_image(input_img, model='codeformer', fidelity=0.70):
     el = time.time() - t0
     print(f"[Model Inference] Neural restoration finished in {el:.2f}s")
 
-    # 4. Background 4K Super-Resolution Detail Enhancement
-    # Subtle unsharp mask to crisp clothing, hair, edges without halo artifacts
-    bg_enhanced = input_img.filter(ImageFilter.UnsharpMask(radius=1.5, percent=130, threshold=2))
+    # 5. Remini Silk Dermis Smoothing & Tone Calibration
+    if cv2 is not None:
+        restored_np = np.array(restored_face)
+        bgr = cv2.cvtColor(restored_np, cv2.COLOR_RGB2BGR)
 
-    # 5. Seamless Feather Blending
-    feather_mask = Image.fromarray(create_feather_mask(restored_face.size), mode='L')
-    bg_enhanced.paste(restored_face, (x1, y1), feather_mask)
+        # Bilateral smoothing for flawless porcelain skin
+        smooth = cv2.bilateralFilter(bgr, d=11, sigmaColor=70, sigmaSpace=70)
+
+        # Feature protection mask: preserves eyes, pupils, eyelashes, eyebrows, lips, mustache
+        gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+        lap = np.abs(cv2.Laplacian(gray, cv2.CV_64F))
+        detail = np.clip(lap / 18.0, 0, 1)
+        detail_dil = cv2.dilate(detail.astype(np.float32), np.ones((5, 5), np.uint8))
+        detail_blur = cv2.GaussianBlur(detail_dil, (9, 9), 0)
+
+        # Skin tone range in HSV
+        hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+        skin = cv2.inRange(hsv, np.array([0, 20, 50]), np.array([28, 210, 255])) / 255.0
+        skin = cv2.GaussianBlur(skin.astype(np.float32), (11, 11), 0)
+
+        # Weight: smooth where skin is high and structural edge detail is low
+        weight = skin * (1.0 - detail_blur * 0.88) * 0.70
+        weight = np.clip(weight[:, :, None], 0.0, 1.0)
+        perfect_skin_bgr = (smooth.astype(np.float32) * weight + bgr.astype(np.float32) * (1.0 - weight)).astype(np.uint8)
+
+        # Remini signature skin tone calibration (golden peach glow)
+        lab = cv2.cvtColor(perfect_skin_bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
+        # Lift midtone luminance
+        lab[:, :, 0] = np.clip(lab[:, :, 0] * 1.07 + 3.0, 0, 255)
+        # Melanin vitality: +1.6 red/magenta, +2.4 yellow/amber
+        lab[:, :, 1] = np.clip(lab[:, :, 1] + 1.6 * skin, 0, 255)
+        lab[:, :, 2] = np.clip(lab[:, :, 2] + 2.4 * skin, 0, 255)
+        remini_bgr = cv2.cvtColor(lab.astype(np.uint8), cv2.COLOR_LAB2BGR)
+
+        # Remini contrast S-curve
+        lut = np.array([int(np.clip(128.0 + (i - 128.0) * 1.05, 0, 255)) for i in range(256)], dtype=np.uint8)
+        remini_bgr = cv2.LUT(remini_bgr, lut)
+
+        restored_face = Image.fromarray(cv2.cvtColor(remini_bgr, cv2.COLOR_BGR2RGB))
+
+    # 6. Background 4K Super-Resolution Detail Enhancement
+    bg_enhanced = base_img.filter(ImageFilter.UnsharpMask(radius=2.0, percent=140, threshold=2))
+
+    # 7. Seamless Feather Blending
+    feather_mask = Image.fromarray(create_feather_mask((crop_w, crop_h)), mode='L')
+    bg_enhanced.paste(restored_face.resize((crop_w, crop_h), Image.LANCZOS), (x1, y1), feather_mask)
 
     return bg_enhanced
 

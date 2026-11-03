@@ -28,7 +28,7 @@
       conference: 'NeurIPS 2022',
       repoUrl: 'https://github.com/sczhou/CodeFormer',
       regionDescription: 'Towards Robust Blind Face Restoration with Codebook Lookup Transformer. Crisp eye pupil & catchlights, genuine epidermal pores, discrete eyelashes & adjustable fidelity weight w.',
-      defaultWeight: 0.35,
+      defaultWeight: 0.20,
       sliderLabel: 'CodeFormer Fidelity Weight (w)',
       previewHex: '#4CD7F6',
       isDefault: true
@@ -267,7 +267,7 @@
     // Dedicated Official sczhou/CodeFormer Face Restoration Model (NeurIPS 2022)
     selectedModelId: 'CODEFORMER',
     editParams: {
-      codeformerFidelity: 0.35, // w in [0.0, 1.0]: 0.35 gives maximum face restoration & smooth skin prior
+      codeformerFidelity: 0.20, // w in [0.0, 1.0]: 0.20 gives maximum face restoration & smooth skin prior
       facialClarity: 0.85,
       skinSmoothness: 0.85,
       skinWarmth: 1.00,
@@ -770,7 +770,7 @@
   // ==========================================================================
 
   async function executeNeuralEnhancement(srcImg, modelId, fidelity) {
-    const wVal = fidelity || state.editParams.codeformerFidelity || 0.35;
+    const wVal = fidelity || state.editParams.codeformerFidelity || 0.20;
     const modelDisplayName = `sczhou/CodeFormer (w=${wVal.toFixed(2)})`;
     showToast(`Restoring face with ${modelDisplayName}...`);
 
@@ -2925,7 +2925,7 @@
   function resetSkinEditParamsToDefault() {
     state.selectedModelId = 'CODEFORMER';
     state.editParams = {
-      codeformerFidelity: 0.35,
+      codeformerFidelity: 0.20,
       facialClarity: 0.85,
       skinSmoothness: 0.85,
       skinWarmth: 1.00,

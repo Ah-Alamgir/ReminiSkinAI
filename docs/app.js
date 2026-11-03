@@ -35,6 +35,138 @@
     }
   ];
 
+  // Authentic Remini Biological & Regional Skin Tone Presets
+  const REMINI_SKIN_TONES = [
+    {
+      id: 'REMINI_NATURAL',
+      displayName: 'Remini Natural',
+      tag: 'DEFAULT',
+      subtitle: 'Signature studio clarity & healthy rosy-peach glow (Default)',
+      previewHex: '#F5D0C0',
+      warmth: 1.00,
+      radiance: 1.00,
+      smoothness: 0.85,
+      rMult: 1.02,
+      gMult: 1.01,
+      bMult: 1.01,
+      radBoost: 14,
+      contrast: 1.03,
+      isDefault: true
+    },
+    {
+      id: 'AMERICAN',
+      displayName: 'American Fair White',
+      tag: 'PORCELAIN',
+      subtitle: 'Fair creamy-white porcelain with neutral undertones',
+      previewHex: '#FCEFE4',
+      warmth: 1.00,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.02,
+      gMult: 1.02,
+      bMult: 1.03,
+      radBoost: 18,
+      contrast: 1.02,
+      isDefault: false
+    },
+    {
+      id: 'KOREAN',
+      displayName: 'Korean Glass Skin',
+      tag: 'K-BEAUTY',
+      subtitle: 'K-Beauty translucent ivory & luminous peach highlight',
+      previewHex: '#FFF1EB',
+      warmth: 0.96,
+      radiance: 1.10,
+      smoothness: 0.90,
+      rMult: 1.03,
+      gMult: 1.02,
+      bMult: 1.05,
+      radBoost: 26,
+      contrast: 1.02,
+      isDefault: false
+    },
+    {
+      id: 'AFRICAN',
+      displayName: 'African Deep Melanin',
+      tag: 'RICH MELANIN',
+      subtitle: 'Authentic rich black/ebony with velvety luster & bronze highlights',
+      previewHex: '#4A3026',
+      warmth: 1.00,
+      radiance: 0.98,
+      smoothness: 0.85,
+      rMult: 1.00,
+      gMult: 0.99,
+      bMult: 0.99,
+      radBoost: 8,
+      contrast: 1.06,
+      isDefault: false
+    },
+    {
+      id: 'BANGLADESHI',
+      displayName: 'South Asian Golden',
+      tag: 'GOLDEN WARMTH',
+      subtitle: 'Warm golden-wheat glow & rich amber undertones',
+      previewHex: '#C68A5E',
+      warmth: 1.05,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.05,
+      gMult: 1.03,
+      bMult: 0.98,
+      radBoost: 16,
+      contrast: 1.03,
+      isDefault: false
+    },
+    {
+      id: 'LATINA_OLIVE',
+      displayName: 'Latina Olive Bronze',
+      tag: 'HONEY BRONZE',
+      subtitle: 'Sun-kissed warm olive & radiant honey bronze',
+      previewHex: '#D29B6C',
+      warmth: 1.06,
+      radiance: 1.04,
+      smoothness: 0.85,
+      rMult: 1.06,
+      gMult: 1.03,
+      bMult: 0.96,
+      radBoost: 20,
+      contrast: 1.04,
+      isDefault: false
+    },
+    {
+      id: 'NORDIC_FAIR',
+      displayName: 'Nordic Alabaster',
+      tag: 'COOL ALABASTER',
+      subtitle: 'Ultra-bright cool alabaster & crystal clarity',
+      previewHex: '#FFF5F0',
+      warmth: 0.98,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.02,
+      gMult: 1.02,
+      bMult: 1.04,
+      radBoost: 22,
+      contrast: 1.02,
+      isDefault: false
+    },
+    {
+      id: 'MEDITERRANEAN',
+      displayName: 'Mediterranean Sun',
+      tag: 'TERRACOTTA',
+      subtitle: 'Golden warm terracotta & sunlit radiance',
+      previewHex: '#DC9E75',
+      warmth: 1.07,
+      radiance: 1.03,
+      smoothness: 0.85,
+      rMult: 1.07,
+      gMult: 1.03,
+      bMult: 0.95,
+      radBoost: 18,
+      contrast: 1.04,
+      isDefault: false
+    }
+  ];
+
   const LIP_SHADE_PRESETS = [
     { id: 'NONE', displayName: 'Natural', hex: '#D88A8A', r: 0, g: 0, b: 0 },
     { id: 'NATURAL_ROSE', displayName: 'Natural Rose', hex: '#C85A6E', r: 200, g: 90, b: 110 },
@@ -57,15 +189,15 @@
   const STUDIO_SAMPLES = [
     {
       index: 0,
-      title: 'Portrait I',
-      fileName: 'Portrait_V2_4K.jpg',
+      title: 'Studio Master',
+      fileName: 'Studio_Master_4K.jpg',
       beforeUrl: 'assets/sample_1_before.webp',
       codeformerUrl: 'assets/sample_1_codeformer.webp',
       isGeneratedAfter: false
     },
     {
       index: 1,
-      title: 'Portrait II',
+      title: 'Family Archive',
       fileName: 'Family_Archive_1974.png',
       beforeUrl: 'assets/sample_2_before.webp',
       codeformerUrl: 'assets/sample_2_codeformer.webp',
@@ -73,7 +205,7 @@
     },
     {
       index: 2,
-      title: 'Portrait III',
+      title: 'Selfie Pro',
       fileName: 'Selfie_Restoration_4K.jpg',
       beforeUrl: 'assets/sample_3_before.webp',
       codeformerUrl: 'assets/sample_3_codeformer.webp',
@@ -81,8 +213,8 @@
     },
     {
       index: 3,
-      title: 'Custom',
-      fileName: 'Custom_Portrait_4K.jpg',
+      title: 'Custom Photo',
+      fileName: 'Custom_Photo_4K.jpg',
       beforeUrl: 'assets/sample_3_before.webp',
       codeformerUrl: 'assets/sample_3_codeformer.webp',
       isGeneratedAfter: true
@@ -253,7 +385,7 @@
     // Active Sample / Custom Image
     selectedSampleIndex: 0,
     customImageElement: null,
-    customFileName: 'Custom_Portrait_4K.jpg',
+    customFileName: 'Custom_Photo_4K.jpg',
 
     // BeforeAfterSlider State
     splitProgress: 0.48,
@@ -266,7 +398,9 @@
 
     // Dedicated Official sczhou/CodeFormer Face Restoration Model (NeurIPS 2022)
     selectedModelId: 'CODEFORMER',
+    selectedSkinToneId: 'REMINI_NATURAL',
     editParams: {
+      preset: 'REMINI_NATURAL',
       codeformerFidelity: 0.20, // w in [0.0, 1.0]: 0.20 gives maximum face restoration & smooth skin prior
       facialClarity: 0.85,
       skinSmoothness: 0.85,
@@ -325,10 +459,18 @@
       if (savedModel && AI_FACIAL_MODELS.some((m) => m.id === savedModel)) {
         state.selectedModelId = savedModel;
       }
+      const savedTone = localStorage.getItem('remini_selected_skin_tone');
+      if (savedTone && REMINI_SKIN_TONES.some((t) => t.id === savedTone)) {
+        state.selectedSkinToneId = savedTone;
+        state.editParams.preset = savedTone;
+      }
       const savedParams = localStorage.getItem(STORAGE_KEY_PARAMS);
       if (savedParams) {
         const parsed = JSON.parse(savedParams);
         Object.assign(state.editParams, parsed);
+        if (parsed.preset && REMINI_SKIN_TONES.some((t) => t.id === parsed.preset)) {
+          state.selectedSkinToneId = parsed.preset;
+        }
       }
       const savedCredits = localStorage.getItem(STORAGE_KEY_CREDITS);
       if (savedCredits !== null && !isNaN(parseInt(savedCredits, 10))) {
@@ -342,6 +484,7 @@
   function savePersistedSettings() {
     try {
       localStorage.setItem(STORAGE_KEY_PRESET, state.selectedModelId);
+      localStorage.setItem('remini_selected_skin_tone', state.selectedSkinToneId);
       localStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(state.editParams));
       localStorage.setItem(STORAGE_KEY_CREDITS, String(state.userCredits));
     } catch (e) {
@@ -351,6 +494,10 @@
 
   function getSelectedModel() {
     return AI_FACIAL_MODELS.find((m) => m.id === state.selectedModelId) || AI_FACIAL_MODELS[0];
+  }
+
+  function getSelectedSkinTone() {
+    return REMINI_SKIN_TONES.find((t) => t.id === state.selectedSkinToneId) || REMINI_SKIN_TONES[0];
   }
 
   // ==========================================================================
@@ -724,22 +871,49 @@
       ? state.skinWeightsBuffer
       : computeFeatheredSkinWeights(src, w, h);
 
+    const activeTone = REMINI_SKIN_TONES.find((t) => t.id === state.selectedSkinToneId) || REMINI_SKIN_TONES[0];
+    const effWarmth = Math.max(0.6, Math.min(1.4, params.skinWarmth));
+    const effRMult = activeTone.rMult * effWarmth;
+    const effGMult = activeTone.gMult * ((effWarmth - 1.0) * 0.25 + 1.0);
+    const effBMult = Math.max(0.70, Math.min(1.30, activeTone.bMult / effWarmth));
+    const radOffset = Math.max(-25, Math.min(35, (params.skinRadiance - 1.0) * activeTone.radBoost));
+    const pContrast = activeTone.contrast;
+
     for (let i = 0; i < totalPixels; i++) {
       const idx = i * 4;
 
-      // 100% pristine neural restoration from CodeFormer (zero dilution with raw blurry photo)
-      let finalR = src[idx];
-      let finalG = src[idx + 1];
-      let finalB = src[idx + 2];
+      const r = src[idx];
+      const g = src[idx + 1];
+      const b = src[idx + 2];
 
       const sw = cachedWeights[i];
 
-      // Subtle dermis radiance micro-lift on skin pixels only (zero flat paint)
-      if (sw > 0.05) {
-        const lum = 0.299 * finalR + 0.587 * finalG + 0.114 * finalB;
-        if (lum > 35 && lum < 225) {
-          // Midtone micro-contrast enhancement
-          const midWeight = Math.sin((lum / 255.0) * Math.PI) * sw * 0.05;
+      let finalR = r;
+      let finalG = g;
+      let finalB = b;
+
+      // Authentic Remini Dermis Color & Radiance Grading (applies ONLY to segmented human skin dermis)
+      if (sw > 0.02) {
+        const yLum = 0.299 * r + 0.587 * g + 0.114 * b;
+        let contrastFactor = 1.0;
+        if (yLum > 128) {
+          contrastFactor = 1.0 + (pContrast - 1.0) * ((yLum - 128) / 128);
+        } else {
+          contrastFactor = 1.0 - (pContrast - 1.0) * ((128 - yLum) / 128) * 0.4;
+        }
+
+        const rGraded = Math.max(0, Math.min(255, r * effRMult * contrastFactor + radOffset));
+        const gGraded = Math.max(0, Math.min(255, g * effGMult * contrastFactor + radOffset * 0.85));
+        const bGraded = Math.max(0, Math.min(255, b * effBMult * contrastFactor + radOffset * 0.80));
+
+        // Smooth skin blend with Gaussian feathering
+        finalR = r * (1.0 - sw) + rGraded * sw;
+        finalG = g * (1.0 - sw) + gGraded * sw;
+        finalB = b * (1.0 - sw) + bGraded * sw;
+
+        // Micro-contrast pore retention
+        if (yLum > 35 && yLum < 225) {
+          const midWeight = Math.sin((yLum / 255.0) * Math.PI) * sw * 0.04;
           finalR = finalR * (1.0 + midWeight);
           finalG = finalG * (1.0 + midWeight * 0.8);
           finalB = finalB * (1.0 + midWeight * 0.6);
@@ -801,7 +975,8 @@
           body: JSON.stringify({
             image: b64,
             model: 'codeformer',
-            fidelity: wVal
+            fidelity: wVal,
+            skin_tone: state.selectedSkinToneId || 'REMINI_NATURAL'
           })
         });
 
@@ -918,7 +1093,7 @@
         showLandmarks: state.studioBottomTab === 'MAGNIFIER'
       });
       renderSplitCanvas(document.getElementById('retouchCanvas'), {
-        showLandmarks: true
+        showLandmarks: false
       });
     });
   }
@@ -1289,6 +1464,7 @@
   }
 
   function syncStudioControlsUI() {
+    const tone = getSelectedSkinTone();
     const model = getSelectedModel();
     const params = state.editParams;
 
@@ -1300,16 +1476,16 @@
     const maskLabel = document.getElementById('studioMaskStateLabel');
 
     if (titleEl) {
-      titleEl.textContent = 'CodeFormer Fidelity Weight (w)';
+      titleEl.textContent = 'Remini Skin Tone & Smoothing';
     }
     if (pillTextEl) {
-      pillTextEl.textContent = `CodeFormer • w = ${params.codeformerFidelity.toFixed(2)}`;
+      pillTextEl.textContent = `${tone.displayName} • ${Math.round(params.skinSmoothness * 100)}%`;
     }
     if (swatchEl) {
-      swatchEl.style.backgroundColor = model.previewHex;
+      swatchEl.style.backgroundColor = tone.previewHex;
     }
     if (mainSlider) {
-      mainSlider.value = String(Math.round(params.codeformerFidelity * 100));
+      mainSlider.value = String(Math.round(params.skinSmoothness * 100));
     }
     if (maskLabel) {
       maskLabel.textContent = params.showSkinMaskOverlay ? 'ON' : 'OFF';
@@ -1324,20 +1500,20 @@
     const denoisePct = Math.round(params.facialClarity * 100);
     const codeformerPct = Math.round(params.codeformerFidelity * 100);
     const smoothnessPct = Math.round(params.skinSmoothness * 100);
-    const eyePct = Math.round(params.skinRadiance * 100);
-    const bgPct = Math.round(params.detailPreservation * 100);
+    const radiancePct = Math.round(params.skinRadiance * 100);
+    const warmthPct = Math.round(params.skinWarmth * 100);
 
-    setElText('valDenoiseUnblur', `${denoisePct}%`);
-    setElValue('sliderDenoiseUnblur', denoisePct);
+    setElText('valDenoiseUnblur', `w = ${params.codeformerFidelity.toFixed(2)} (Clarity ${denoisePct}%)`);
+    setElValue('sliderDenoiseUnblur', codeformerPct);
 
-    setElText('valSkinTexture', `w = ${(params.codeformerFidelity).toFixed(2)}`);
-    setElValue('sliderSkinTexture', codeformerPct);
+    setElText('valSkinTexture', `${smoothnessPct}%`);
+    setElValue('sliderSkinTexture', smoothnessPct);
 
-    setElText('valEyeIris', `${eyePct}%`);
-    setElValue('sliderEyeIris', eyePct);
+    setElText('valEyeIris', `${radiancePct}%`);
+    setElValue('sliderEyeIris', Math.round((params.skinRadiance - 0.5) * 100));
 
-    setElText('valLightingHdr', `${bgPct}%`);
-    setElValue('sliderLightingHdr', bgPct);
+    setElText('valLightingHdr', `${warmthPct}%`);
+    setElValue('sliderLightingHdr', Math.round((params.skinWarmth - 0.5) * 100));
 
     // Lip & Hair sliders
     setElText('lipIntensityLabel', `${Math.round(params.lipIntensity * 100)}%`);
@@ -1349,18 +1525,18 @@
     if (chkMask) chkMask.checked = Boolean(params.showSkinMaskOverlay);
 
     // Dialog Sliders
-    setElText('dlgValSmooth', `w = ${(params.codeformerFidelity).toFixed(2)}`);
-    setElValue('dlgSliderSmooth', codeformerPct);
     setElText('dlgValWarmth', `${smoothnessPct}%`);
     setElValue('dlgSliderWarmth', smoothnessPct);
-    setElText('dlgValRadiance', `${eyePct}%`);
-    setElValue('dlgSliderRadiance', eyePct);
-    setElText('dlgValDetail', `${bgPct}%`);
-    setElValue('dlgSliderDetail', bgPct);
+    setElText('dlgValSmooth', `${warmthPct}%`);
+    setElValue('dlgSliderSmooth', Math.round((params.skinWarmth - 0.5) * 100));
+    setElText('dlgValRadiance', `${radiancePct}%`);
+    setElValue('dlgSliderRadiance', Math.round((params.skinRadiance - 0.5) * 100));
+    setElText('dlgValDetail', `w = ${params.codeformerFidelity.toFixed(2)}`);
+    setElValue('dlgSliderDetail', codeformerPct);
 
-    // Active states on Model Cards & Shade Chips
-    document.querySelectorAll('[data-model-id]').forEach((el) => {
-      const isSel = el.getAttribute('data-model-id') === state.selectedModelId;
+    // Active states on Skin Tone Cards & Shade Chips
+    document.querySelectorAll('[data-skin-tone-id]').forEach((el) => {
+      const isSel = el.getAttribute('data-skin-tone-id') === state.selectedSkinToneId;
       el.classList.toggle('active', isSel);
       const checkIcon = el.querySelector('.preset-check-icon');
       if (checkIcon) checkIcon.style.display = isSel ? 'inline-flex' : 'none';
@@ -1378,56 +1554,52 @@
   }
 
   function populateDynamicSkinToneAndShadeLists() {
-    // 1. Retouch Suite 2-Column Trained AI Models Grid
+    // 1. Retouch Suite 2-Column Remini Skin Tones Grid
     const grid = document.getElementById('retouchSkinToneGrid');
     if (grid) {
-      grid.innerHTML = AI_FACIAL_MODELS.map((model) => `
-        <button type="button" class="skin-tone-preset-card ${model.id === state.selectedModelId ? 'active' : ''}" data-model-id="${model.id}">
+      grid.innerHTML = REMINI_SKIN_TONES.map((tone) => `
+        <button type="button" class="skin-tone-preset-card ${tone.id === state.selectedSkinToneId ? 'active' : ''}" data-skin-tone-id="${tone.id}">
           <div class="skin-tone-card-top">
-            <div class="skin-swatch-circle" style="background: ${model.previewHex}">
-              <span class="material-symbols-rounded preset-check-icon" style="display: ${model.id === state.selectedModelId ? 'inline-flex' : 'none'}">check</span>
+            <div class="skin-swatch-circle" style="background: ${tone.previewHex}">
+              <span class="material-symbols-rounded preset-check-icon" style="display: ${tone.id === state.selectedSkinToneId ? 'inline-flex' : 'none'}">check</span>
             </div>
-            <span class="model-pill-badge ${model.badgeClass}">${model.badge}</span>
+            <span class="model-pill-badge badge-pro">${tone.tag}</span>
           </div>
           <div>
-            <div class="skin-tone-card-title">${model.name} (${model.conference})</div>
-            <div class="skin-tone-card-sub">${model.regionDescription}</div>
-            <div class="model-github-tag">
-              <span class="material-symbols-rounded" style="font-size: 13px">link</span>
-              <a href="${model.repoUrl}" target="_blank" rel="noopener noreferrer">${model.author}/${model.name}</a>
-            </div>
+            <div class="skin-tone-card-title">${tone.displayName}</div>
+            <div class="skin-tone-card-sub">${tone.subtitle}</div>
           </div>
         </button>
       `).join('');
 
-      grid.querySelectorAll('[data-model-id]').forEach((btn) => {
+      grid.querySelectorAll('[data-skin-tone-id]').forEach((btn) => {
         btn.addEventListener('click', () => {
-          selectAiModel(btn.getAttribute('data-model-id'));
+          selectSkinTone(btn.getAttribute('data-skin-tone-id'));
         });
       });
     }
 
-    // 2. Dialog Trained AI Models Radio List
+    // 2. Dialog Remini Skin Tones Radio List
     const dlgList = document.getElementById('dialogSkinToneList');
     if (dlgList) {
-      dlgList.innerHTML = AI_FACIAL_MODELS.map((model) => `
-        <div class="dialog-skin-row ${model.id === state.selectedModelId ? 'active' : ''}" data-model-id="${model.id}" role="button" tabindex="0">
-          <div class="skin-swatch-circle" style="background: ${model.previewHex}">
-            <span class="material-symbols-rounded preset-check-icon" style="display: ${model.id === state.selectedModelId ? 'inline-flex' : 'none'}">check</span>
+      dlgList.innerHTML = REMINI_SKIN_TONES.map((tone) => `
+        <div class="dialog-skin-row ${tone.id === state.selectedSkinToneId ? 'active' : ''}" data-skin-tone-id="${tone.id}" role="button" tabindex="0">
+          <div class="skin-swatch-circle" style="background: ${tone.previewHex}">
+            <span class="material-symbols-rounded preset-check-icon" style="display: ${tone.id === state.selectedSkinToneId ? 'inline-flex' : 'none'}">check</span>
           </div>
           <div style="flex: 1">
             <div style="display: flex; align-items: center; justify-content: space-between">
-              <span style="font-size: 13px; font-weight: 700; color: #E5E1E4">${model.fullTitle}</span>
-              <span class="model-pill-badge ${model.badgeClass}">${model.conference}</span>
+              <span style="font-size: 13px; font-weight: 700; color: #E5E1E4">${tone.displayName}</span>
+              <span class="model-pill-badge badge-pro">${tone.tag}</span>
             </div>
-            <div style="font-size: 11px; color: #C3C6CF; margin-top: 3px">${model.regionDescription}</div>
+            <div style="font-size: 11px; color: #C3C6CF; margin-top: 3px">${tone.subtitle}</div>
           </div>
         </div>
       `).join('');
 
-      dlgList.querySelectorAll('[data-model-id]').forEach((row) => {
+      dlgList.querySelectorAll('[data-skin-tone-id]').forEach((row) => {
         row.addEventListener('click', () => {
-          selectAiModel(row.getAttribute('data-model-id'));
+          selectSkinTone(row.getAttribute('data-skin-tone-id'));
         });
       });
     }
@@ -1473,6 +1645,23 @@
         });
       });
     }
+  }
+
+  function selectSkinTone(toneId) {
+    state.selectedSkinToneId = toneId;
+    state.editParams.preset = toneId;
+    const tone = getSelectedSkinTone();
+    if (tone) {
+      state.editParams.skinWarmth = tone.warmth;
+      state.editParams.skinRadiance = tone.radiance;
+      state.editParams.skinSmoothness = tone.smoothness;
+    }
+    savePersistedSettings();
+    rebuildGradedAfterBuffer();
+    syncStudioControlsUI();
+    populateDynamicSkinToneAndShadeLists();
+    requestStudioCanvasRender();
+    showToast(`Skin Tone applied: ${tone.displayName}`);
   }
 
   async function selectAiModel(modelId) {
@@ -2369,7 +2558,9 @@
 
     // Home Hero Upload & Quick Samples
     bindClick('btnHeroSelectPhoto', () => globalPhotoInput && globalPhotoInput.click());
+    bindClick('btnHeroUploadDirect', () => globalPhotoInput && globalPhotoInput.click());
     bindClick('btnHeroOpenStudio', () => switchMainMode('COMPARISON_STUDIO'));
+    bindClick('btnStudioUploadNewPhoto', () => globalPhotoInput && globalPhotoInput.click());
 
     document.querySelectorAll('[data-sample-idx]').forEach((chip) => {
       chip.addEventListener('click', async () => {
@@ -2437,6 +2628,9 @@
           openModal('projectsModal');
         } else if (nav === 'HOME') {
           clearCustomPhotoAndReturnHome();
+        } else if (nav === 'RETOUCH_SUITE') {
+          // Open skin tone chooser modal directly
+          openModal('skinToneModal');
         } else {
           switchMainMode(nav);
         }
@@ -2498,7 +2692,7 @@
     if (studioMainSlider) {
       studioMainSlider.addEventListener('input', (e) => {
         const v = parseInt(e.target.value, 10) / 100;
-        state.editParams.codeformerFidelity = v;
+        state.editParams.skinSmoothness = v;
         savePersistedSettings();
         rebuildGradedAfterBuffer();
         syncStudioControlsUI();
@@ -2509,14 +2703,11 @@
     document.querySelectorAll('[data-studio-tool]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const tool = btn.getAttribute('data-studio-tool');
-        if (tool === 'RETOUCH') {
-          switchMainMode('RETOUCH_SUITE');
+        if (tool === 'RETOUCH' || tool === 'SKIN_AI') {
+          openModal('skinToneModal');
           return;
         }
         state.studioBottomTab = tool;
-        if (tool === 'SKIN_AI') {
-          openModal('skinToneModal');
-        }
         syncStudioControlsUI();
         requestStudioCanvasRender();
       });
@@ -2543,19 +2734,20 @@
 
     // 4 Core Retouch Sliders
     bindRange('sliderDenoiseUnblur', (pct) => {
-      state.editParams.facialClarity = pct / 100;
+      state.editParams.codeformerFidelity = pct / 100;
+      state.editParams.facialClarity = Math.max(0.2, 1.0 - (pct / 200));
       onEditParamsChanged();
     });
     bindRange('sliderSkinTexture', (pct) => {
-      state.editParams.codeformerFidelity = pct / 100;
+      state.editParams.skinSmoothness = pct / 100;
       onEditParamsChanged();
     });
     bindRange('sliderEyeIris', (pct) => {
-      state.editParams.skinRadiance = pct / 100;
+      state.editParams.skinRadiance = 0.5 + (pct / 100);
       onEditParamsChanged();
     });
     bindRange('sliderLightingHdr', (pct) => {
-      state.editParams.detailPreservation = pct / 100;
+      state.editParams.skinWarmth = 0.5 + (pct / 100);
       onEditParamsChanged();
     });
 
@@ -2579,20 +2771,20 @@
 
     // Dialog Sliders & Reset
     bindClick('btnDialogResetSkinTone', () => resetSkinEditParamsToDefault());
-    bindRange('dlgSliderSmooth', (pct) => {
-      state.editParams.codeformerFidelity = pct / 100;
-      onEditParamsChanged();
-    });
     bindRange('dlgSliderWarmth', (pct) => {
       state.editParams.skinSmoothness = pct / 100;
       onEditParamsChanged();
     });
+    bindRange('dlgSliderSmooth', (pct) => {
+      state.editParams.skinWarmth = 0.5 + (pct / 100);
+      onEditParamsChanged();
+    });
     bindRange('dlgSliderRadiance', (pct) => {
-      state.editParams.skinRadiance = pct / 100;
+      state.editParams.skinRadiance = 0.5 + (pct / 100);
       onEditParamsChanged();
     });
     bindRange('dlgSliderDetail', (pct) => {
-      state.editParams.detailPreservation = pct / 100;
+      state.editParams.codeformerFidelity = pct / 100;
       onEditParamsChanged();
     });
 
@@ -2923,8 +3115,10 @@
   }
 
   function resetSkinEditParamsToDefault() {
+    state.selectedSkinToneId = 'REMINI_NATURAL';
     state.selectedModelId = 'CODEFORMER';
     state.editParams = {
+      preset: 'REMINI_NATURAL',
       codeformerFidelity: 0.20,
       facialClarity: 0.85,
       skinSmoothness: 0.85,
@@ -2938,6 +3132,7 @@
       showSkinMaskOverlay: false
     };
     onEditParamsChanged();
+    populateDynamicSkinToneAndShadeLists();
   }
 
   function bindClick(id, handler) {
@@ -2965,8 +3160,8 @@
       state.wireframePulsePhase = (Math.sin(elapsed * Math.PI * 2) + 1) * 0.5;
       if (
         state.currentAppScreen === 'MAIN' &&
-        (state.screenMode === 'RETOUCH_SUITE' ||
-          (state.screenMode === 'COMPARISON_STUDIO' && state.studioBottomTab === 'MAGNIFIER'))
+        state.screenMode === 'COMPARISON_STUDIO' &&
+        state.studioBottomTab === 'MAGNIFIER'
       ) {
         requestStudioCanvasRender();
       }

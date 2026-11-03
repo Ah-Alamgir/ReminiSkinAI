@@ -34,10 +34,11 @@ class ReminiAPIHandler(BaseHTTPRequestHandler):
             res = {
                 'status': 'ok',
                 'server': 'ReminiSkinAI Local Neural Bridge',
-                'version': '2.9.0',
+                'version': '2.9.3',
                 'models': ['codeformer'],
                 'model_author': 'sczhou/CodeFormer (NeurIPS 2022)',
-                'device': 'Native ONNX Engine'
+                'device': 'Native ONNX Engine',
+                'skin_tones': list(remini_model_runner.REMINI_SKIN_TONES.keys())
             }
             body = json.dumps(res).encode('utf-8')
             self.send_response(200)
@@ -59,7 +60,8 @@ class ReminiAPIHandler(BaseHTTPRequestHandler):
                 payload = json.loads(post_data.decode('utf-8'))
                 img_data_b64 = payload.get('image', '')
                 model_name = payload.get('model', 'codeformer').lower()
-                fidelity = float(payload.get('fidelity', 0.70))
+                fidelity = float(payload.get('fidelity', 0.20))
+                skin_tone = payload.get('skin_tone', 'REMINI_NATURAL')
 
                 # Strip base64 header if present
                 if ',' in img_data_b64:
@@ -72,7 +74,8 @@ class ReminiAPIHandler(BaseHTTPRequestHandler):
                 restored_img = remini_model_runner.enhance_full_image(
                     input_img,
                     model=model_name,
-                    fidelity=fidelity
+                    fidelity=fidelity,
+                    skin_tone=skin_tone
                 )
                 duration = time.time() - t0
 
@@ -85,6 +88,7 @@ class ReminiAPIHandler(BaseHTTPRequestHandler):
                 response_data = {
                     'status': 'success',
                     'model': model_name,
+                    'skin_tone': skin_tone,
                     'durationSec': round(duration, 3),
                     'width': restored_img.width,
                     'height': restored_img.height,

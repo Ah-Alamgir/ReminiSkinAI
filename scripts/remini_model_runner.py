@@ -41,6 +41,90 @@ FFHQ_512_TEMPLATE = np.array([
     [313.8890, 371.1512]   # Left Mouth Corner
 ], dtype=np.float32)
 
+# Complete Calibrated Remini Skin Tone Presets
+REMINI_SKIN_TONES = {
+    'REMINI_NATURAL': {
+        'title': 'Remini Natural',
+        'subtitle': 'Signature studio clarity & healthy rosy-peach glow (Default)',
+        'hex': '#F5D0C0',
+        'shadow_lift_max': 35.0,
+        'l_scale': 1.06,
+        'a_shift': 2.0,
+        'b_shift': 3.0,
+        'contrast': 1.06,
+    },
+    'AMERICAN': {
+        'title': 'American Fair White',
+        'subtitle': 'Fair creamy-white porcelain with neutral undertones',
+        'hex': '#FCEFE4',
+        'shadow_lift_max': 38.0,
+        'l_scale': 1.08,
+        'a_shift': 0.8,
+        'b_shift': 1.8,
+        'contrast': 1.04,
+    },
+    'KOREAN': {
+        'title': 'Korean Glass Skin',
+        'subtitle': 'K-Beauty translucent ivory & luminous peach highlight',
+        'hex': '#FFF1EB',
+        'shadow_lift_max': 40.0,
+        'l_scale': 1.10,
+        'a_shift': 1.5,
+        'b_shift': 1.2,
+        'contrast': 1.03,
+    },
+    'AFRICAN': {
+        'title': 'African Deep Melanin',
+        'subtitle': 'Authentic rich black/ebony with velvety luster',
+        'hex': '#4A3026',
+        'shadow_lift_max': 12.0,
+        'l_scale': 0.98,
+        'a_shift': 1.8,
+        'b_shift': 3.8,
+        'contrast': 1.08,
+    },
+    'BANGLADESHI': {
+        'title': 'South Asian Golden',
+        'subtitle': 'Warm golden-wheat glow & rich amber undertones',
+        'hex': '#C68A5E',
+        'shadow_lift_max': 30.0,
+        'l_scale': 1.05,
+        'a_shift': 2.5,
+        'b_shift': 6.5,
+        'contrast': 1.05,
+    },
+    'LATINA_OLIVE': {
+        'title': 'Latina Olive Bronze',
+        'subtitle': 'Sun-kissed warm olive & radiant honey bronze',
+        'hex': '#D29B6C',
+        'shadow_lift_max': 28.0,
+        'l_scale': 1.04,
+        'a_shift': 2.2,
+        'b_shift': 5.2,
+        'contrast': 1.05,
+    },
+    'NORDIC_FAIR': {
+        'title': 'Nordic Alabaster',
+        'subtitle': 'Ultra-bright cool alabaster & crystal clarity',
+        'hex': '#FFF5F0',
+        'shadow_lift_max': 40.0,
+        'l_scale': 1.11,
+        'a_shift': 0.6,
+        'b_shift': 0.8,
+        'contrast': 1.03,
+    },
+    'MEDITERRANEAN': {
+        'title': 'Mediterranean Sun',
+        'subtitle': 'Golden warm terracotta & sunlit radiance',
+        'hex': '#DC9E75',
+        'shadow_lift_max': 28.0,
+        'l_scale': 1.05,
+        'a_shift': 3.2,
+        'b_shift': 5.8,
+        'contrast': 1.06,
+    }
+}
+
 def detect_face_and_landmarks(bgr_img, yunet_path='scratch/models/face_detection_yunet_2023mar.onnx'):
     """
     Detects face bounding box and 5 landmarks using OpenCV YuNet DNN.
@@ -97,13 +181,13 @@ def run_codeformer_aligned(aligned_bgr, fidelity=0.20, model_path='scratch/model
     out_arr = np.clip((np.transpose(out[0], (1, 2, 0)) + 1.0) * 127.5, 0, 255).astype(np.uint8)
     return cv2.cvtColor(out_arr, cv2.COLOR_RGB2BGR)
 
-def apply_remini_porcelain_smoothing(cf_bgr):
+def apply_remini_porcelain_smoothing(cf_bgr, skin_tone='REMINI_NATURAL'):
     """
     Landmark-Guided Remini Porcelain Skin Smoothing on canonical 512x512 face:
       - Forehead, cheeks, and chin are smoothed into flawless, spotless porcelain dermis
       - Strictly protects pupils, irises, lashes, brows, lips, teeth, mustache
       - Micro-pore texture retention for genuine authenticity
-      - Bathroom shadow equalization & Remini golden-peach skin calibration curve
+      - Bathroom shadow equalization & Calibrated Remini skin tone curves
     """
     r_eye = FFHQ_512_TEMPLATE[0]
     l_eye = FFHQ_512_TEMPLATE[1]
@@ -165,25 +249,29 @@ def apply_remini_porcelain_smoothing(cf_bgr):
     smooth_face = (smooth_2.astype(np.float32) * sw + cf_bgr.astype(np.float32) * (1.0 - sw)).astype(np.uint8)
     smooth_face = cv2.addWeighted(smooth_face, 1.0, high_pass, 0.20, 0)
 
-    # Remini golden-peach skin tone curve & shadow lift
+    # Remini skin tone curve & shadow lift based on selected preset
+    tone_key = str(skin_tone).upper()
+    tone_cfg = REMINI_SKIN_TONES.get(tone_key, REMINI_SKIN_TONES['REMINI_NATURAL'])
+
     lab = cv2.cvtColor(smooth_face, cv2.COLOR_BGR2LAB).astype(np.float32)
     l, a, b_ch = lab[:, :, 0], lab[:, :, 1], lab[:, :, 2]
-    shadow_lift = np.clip((140.0 - l) * 0.35, 0, 35) * skin_weight
-    l = np.clip(l * 1.06 + shadow_lift, 0, 255)
-    a = np.clip(a + 2.0 * skin_weight, 0, 255)
-    b_ch = np.clip(b_ch + 3.0 * skin_weight, 0, 255)
+    shadow_lift = np.clip((140.0 - l) * 0.35, 0, tone_cfg['shadow_lift_max']) * skin_weight
+    l = np.clip(l * tone_cfg['l_scale'] + shadow_lift, 0, 255)
+    a = np.clip(a + tone_cfg['a_shift'] * skin_weight, 0, 255)
+    b_ch = np.clip(b_ch + tone_cfg['b_shift'] * skin_weight, 0, 255)
     calib_bgr = cv2.cvtColor(np.stack([l, a, b_ch], axis=-1).astype(np.uint8), cv2.COLOR_LAB2BGR)
-    lut = np.array([int(np.clip(128.0 + (i - 128.0) * 1.06, 0, 255)) for i in range(256)], dtype=np.uint8)
+    contrast_val = tone_cfg['contrast']
+    lut = np.array([int(np.clip(128.0 + (i - 128.0) * contrast_val, 0, 255)) for i in range(256)], dtype=np.uint8)
     return cv2.LUT(calib_bgr, lut)
 
-def enhance_full_image(input_img, model='codeformer', fidelity=0.20, force_fhd=True):
+def enhance_full_image(input_img, model='codeformer', fidelity=0.20, skin_tone='REMINI_NATURAL', force_fhd=True):
     """
     Remini Master Full HD Neural Pipeline:
       1. 4K Super-Resolution Canvas Scaling (upscales low-res photos to crisp Full HD)
       2. 5-Point Canonical Face Alignment to FFHQ 512x512
       3. Official sczhou/CodeFormer Neural Restoration (NeurIPS 2022) with fidelity w=0.20
       4. Landmark-Guided Remini Porcelain Skin Smoothing
-      5. Remini Signature Skin Tone Calibration (golden peach glow + shadow lift)
+      5. Remini Calibrated Skin Tone Curve
       6. Inverse Affine Warping & Smooth Mask Compositing
       7. Background & Clothing 4K Super-Resolution Detail Enhancement
     """
@@ -216,10 +304,10 @@ def enhance_full_image(input_img, model='codeformer', fidelity=0.20, force_fhd=T
     el = time.time() - t0
     print(f"[Model Inference] CodeFormer neural restoration finished in {el:.2f}s")
 
-    # 5. Landmark-Guided Remini Porcelain Skin Smoothing
+    # 5. Landmark-Guided Remini Porcelain Skin Smoothing & Selected Skin Tone
     t1 = time.time()
-    perfect_face = apply_remini_porcelain_smoothing(cf_aligned)
-    print(f"[Skin Beautifier] Remini Porcelain smoothing finished in {time.time() - t1:.2f}s")
+    perfect_face = apply_remini_porcelain_smoothing(cf_aligned, skin_tone=skin_tone)
+    print(f"[Skin Beautifier] Remini Porcelain smoothing & skin tone '{skin_tone}' finished in {time.time() - t1:.2f}s")
 
     # 6. Inverse Affine Warp & Mask Blend
     mask_512 = np.zeros((512, 512), dtype=np.float32)
@@ -244,12 +332,13 @@ if __name__ == '__main__':
     parser.add_argument('--input', type=str, default='docs/assets/sample_3_before.webp', help="Path to input photo")
     parser.add_argument('--output', type=str, default='scratch/output_restored.png', help="Path to output photo")
     parser.add_argument('--fidelity', type=float, default=0.20, help="CodeFormer fidelity weight w (0.0 to 1.0, default 0.20)")
+    parser.add_argument('--skin-tone', type=str, default='REMINI_NATURAL', choices=list(REMINI_SKIN_TONES.keys()), help="Remini Skin Tone Preset")
     args = parser.parse_args()
 
     os.makedirs(os.path.dirname(args.output) or '.', exist_ok=True)
     img = Image.open(args.input).convert('RGB')
     print(f"Loaded input {args.input} ({img.width}x{img.height})")
 
-    res = enhance_full_image(img, model=args.model, fidelity=args.fidelity)
+    res = enhance_full_image(img, model=args.model, fidelity=args.fidelity, skin_tone=args.skin_tone)
     res.save(args.output)
     print(f"Restored 4K image saved to: {args.output} ({res.width}x{res.height})")

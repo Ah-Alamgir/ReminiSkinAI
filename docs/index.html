@@ -23,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=2.9.2" />
+  <link rel="stylesheet" href="styles.css?v=2.9.3" />
 </head>
 <body>
   <!-- Hidden File Inputs for Camera Roll / Photo Library -->
@@ -88,11 +88,14 @@
               </button>
 
               <div class="hero-quick-samples">
-                <span class="quick-sample-label">Or try studio sample:</span>
-                <button type="button" class="quick-sample-chip" data-sample-idx="0">Portrait I</button>
-                <button type="button" class="quick-sample-chip" data-sample-idx="1">Portrait II</button>
-                <button type="button" class="quick-sample-chip" data-sample-idx="2">Portrait III</button>
-                <button type="button" class="quick-sample-chip" id="btnHeroOpenStudio">Open 4K Studio →</button>
+                <button type="button" class="quick-sample-chip" id="btnHeroUploadDirect">
+                  <span class="material-symbols-rounded" style="font-size: 15px">upload_file</span>
+                  <span>Upload &amp; Restore Any Photo</span>
+                </button>
+                <button type="button" class="quick-sample-chip" id="btnHeroOpenStudio">
+                  <span class="material-symbols-rounded" style="font-size: 15px">tune</span>
+                  <span>Open 4K Studio →</span>
+                </button>
               </div>
             </div>
           </div>
@@ -170,11 +173,11 @@
             </div>
 
             <div class="recent-restorations-row">
-              <!-- Card 1: Portrait_V2_4K.jpg -->
+              <!-- Card 1: Studio_Master_4K.jpg -->
               <div class="restoration-card" data-recent-sample="0" role="button" tabindex="0">
                 <div class="restoration-split-img">
-                  <img src="assets/sample_1_before.webp" alt="Before Portrait I" class="restoration-half-left" />
-                  <img src="assets/sample_1_remini_ref.webp" alt="After Portrait I" class="restoration-half-right" />
+                  <img src="assets/sample_1_before.webp" alt="Before Restoration" class="restoration-half-left" />
+                  <img src="assets/sample_1_remini_ref.webp" alt="After Restoration" class="restoration-half-right" />
                   <div class="restoration-split-line"></div>
                   <div class="restoration-bottom-scrim"></div>
                 </div>
@@ -184,7 +187,7 @@
                     <span class="material-symbols-rounded status-icon-cyan">check_circle</span>
                     <span class="restoration-status-text">Enhanced</span>
                   </div>
-                  <div class="restoration-filename">Portrait_V2_4K.jpg</div>
+                  <div class="restoration-filename">Studio_Master_4K.jpg</div>
                   <div class="restoration-time">Today, 2:15 PM</div>
                 </div>
               </div>
@@ -192,8 +195,8 @@
               <!-- Card 2: Family_Archive_1974.png -->
               <div class="restoration-card" data-recent-sample="1" role="button" tabindex="0">
                 <div class="restoration-split-img">
-                  <img src="assets/sample_2_before.webp" alt="Before Portrait II" class="restoration-half-left" />
-                  <img src="assets/sample_2_remini_ref.webp" alt="After Portrait II" class="restoration-half-right" />
+                  <img src="assets/sample_2_before.webp" alt="Before Restoration" class="restoration-half-left" />
+                  <img src="assets/sample_2_remini_ref.webp" alt="After Restoration" class="restoration-half-right" />
                   <div class="restoration-split-line"></div>
                   <div class="restoration-bottom-scrim"></div>
                 </div>
@@ -211,8 +214,8 @@
               <!-- Card 3: Selfie_Restoration_4K.jpg -->
               <div class="restoration-card" data-recent-sample="2" role="button" tabindex="0">
                 <div class="restoration-split-img">
-                  <img src="assets/sample_3_before.webp" alt="Before Portrait III" class="restoration-half-left" />
-                  <img src="assets/sample_3_codeformer.webp" alt="After Portrait III" class="restoration-half-right" />
+                  <img src="assets/sample_3_before.webp" alt="Before Restoration" class="restoration-half-left" />
+                  <img src="assets/sample_3_codeformer.webp" alt="After Restoration" class="restoration-half-right" />
                   <div class="restoration-split-line"></div>
                   <div class="restoration-bottom-scrim"></div>
                 </div>
@@ -284,12 +287,12 @@
               <span class="material-symbols-rounded">arrow_back</span>
             </button>
 
-            <!-- Sample Switcher Pill -->
-            <div class="sample-switcher-pill">
-              <button type="button" class="sample-tab-btn active" data-studio-sample="0">Portrait I</button>
-              <button type="button" class="sample-tab-btn" data-studio-sample="1">Portrait II</button>
-              <button type="button" class="sample-tab-btn" data-studio-sample="2">Portrait III</button>
-              <button type="button" class="sample-tab-btn" id="btnStudioCustomSample" data-studio-sample="3">Custom</button>
+            <!-- Topbar Center: Active Status & Upload Trigger -->
+            <div class="studio-topbar-center">
+              <button type="button" id="btnStudioUploadNewPhoto" class="sample-tab-btn active" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;">
+                <span class="material-symbols-rounded icon-cyan" style="font-size: 16px">add_photo_alternate</span>
+                <span>Upload Photo</span>
+              </button>
             </div>
 
             <div class="studio-topbar-right">
@@ -453,60 +456,73 @@
                 </button>
               </div>
 
-              <!-- Section: Fine-Tuning Parameters -->
+              <!-- Section: Remini Skin Tone Palette -->
               <div class="retouch-section-header">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="material-symbols-rounded icon-cyan" style="font-size: 18px">face_retouching_natural</span>
+                  <span class="retouch-section-title">Remini Skin Tone</span>
+                </div>
+                <span class="retouch-engine-pill">CodeFormer Restored</span>
+              </div>
+
+              <div id="retouchSkinToneGrid" class="skin-tone-grid-2col">
+                <!-- Populated dynamically with all 8 Remini skin tones -->
+              </div>
+
+              <!-- Section: Fine-Tuning Parameters -->
+              <div class="retouch-section-header" style="margin-top: 14px">
                 <span class="retouch-section-title">Fine-Tuning Parameters</span>
                 <span class="retouch-engine-pill">Neural Engine v4.2</span>
               </div>
 
-              <!-- 4 Core AuraTuningSliderCards (MainScreen.kt lines 2425-2485) -->
+              <!-- 4 Core AuraTuningSliderCards -->
               <div class="tuning-cards-stack">
-                <!-- Slider 1: AI Denoise & Unblur (facialClarity) -->
-                <div class="aura-tuning-card">
-                  <div class="tuning-card-header">
-                    <div class="tuning-label-row">
-                      <span class="material-symbols-rounded" style="color: #4CD7F6">blur_off</span>
-                      <span>AI Denoise &amp; Unblur</span>
-                    </div>
-                    <span id="valDenoiseUnblur" class="tuning-value-badge" style="color: #4CD7F6">85%</span>
-                  </div>
-                  <input type="range" id="sliderDenoiseUnblur" class="aura-range-input accent-cyan" min="0" max="100" value="85" />
-                </div>
-
-                <!-- Slider 2: Skin Texture & Pores (skinSmoothness) -->
+                <!-- Slider 1: Skin Texture & Pores (skinSmoothness) -->
                 <div class="aura-tuning-card">
                   <div class="tuning-card-header">
                     <div class="tuning-label-row">
                       <span class="material-symbols-rounded" style="color: #D0BCFF">face</span>
-                      <span>Skin Texture &amp; Pores</span>
+                      <span>Porcelain Skin Smoothness</span>
                     </div>
-                    <span id="valSkinTexture" class="tuning-value-badge" style="color: #D0BCFF">45% (Natural)</span>
+                    <span id="valSkinTexture" class="tuning-value-badge" style="color: #D0BCFF">85% (Natural)</span>
                   </div>
-                  <input type="range" id="sliderSkinTexture" class="aura-range-input accent-violet" min="0" max="100" value="45" />
+                  <input type="range" id="sliderSkinTexture" class="aura-range-input accent-violet" min="0" max="100" value="85" />
                 </div>
 
-                <!-- Slider 3: Eye Iris Brightness (skinRadiance - 0.5) -->
-                <div class="aura-tuning-card">
-                  <div class="tuning-card-header">
-                    <div class="tuning-label-row">
-                      <span class="material-symbols-rounded" style="color: #4CD7F6">visibility</span>
-                      <span>Eye Iris Brightness</span>
-                    </div>
-                    <span id="valEyeIris" class="tuning-value-badge" style="color: #4CD7F6">65%</span>
-                  </div>
-                  <input type="range" id="sliderEyeIris" class="aura-range-input accent-cyan" min="0" max="100" value="65" />
-                </div>
-
-                <!-- Slider 4: Lighting Boost & HDR (skinWarmth - 0.5) -->
+                <!-- Slider 2: Skin Warmth (skinWarmth) -->
                 <div class="aura-tuning-card">
                   <div class="tuning-card-header">
                     <div class="tuning-label-row">
                       <span class="material-symbols-rounded" style="color: #EC4899">wb_sunny</span>
-                      <span>Lighting Boost &amp; HDR</span>
+                      <span>Skin Tone Warmth</span>
                     </div>
-                    <span id="valLightingHdr" class="tuning-value-badge" style="color: #EC4899">60%</span>
+                    <span id="valLightingHdr" class="tuning-value-badge" style="color: #EC4899">100%</span>
                   </div>
-                  <input type="range" id="sliderLightingHdr" class="aura-range-input accent-pink" min="0" max="100" value="60" />
+                  <input type="range" id="sliderLightingHdr" class="aura-range-input accent-pink" min="0" max="100" value="50" />
+                </div>
+
+                <!-- Slider 3: Eye Iris Brightness & Radiance -->
+                <div class="aura-tuning-card">
+                  <div class="tuning-card-header">
+                    <div class="tuning-label-row">
+                      <span class="material-symbols-rounded" style="color: #4CD7F6">visibility</span>
+                      <span>Eye Iris &amp; Dermis Radiance</span>
+                    </div>
+                    <span id="valEyeIris" class="tuning-value-badge" style="color: #4CD7F6">100%</span>
+                  </div>
+                  <input type="range" id="sliderEyeIris" class="aura-range-input accent-cyan" min="0" max="100" value="50" />
+                </div>
+
+                <!-- Slider 4: CodeFormer Face Clarity & Unblur -->
+                <div class="aura-tuning-card">
+                  <div class="tuning-card-header">
+                    <div class="tuning-label-row">
+                      <span class="material-symbols-rounded" style="color: #4CD7F6">blur_off</span>
+                      <span>CodeFormer Clarity &amp; Unblur</span>
+                    </div>
+                    <span id="valDenoiseUnblur" class="tuning-value-badge" style="color: #4CD7F6">85%</span>
+                  </div>
+                  <input type="range" id="sliderDenoiseUnblur" class="aura-range-input accent-cyan" min="0" max="100" value="85" />
                 </div>
               </div>
 
@@ -557,16 +573,6 @@
                     </div>
                   </button>
                 </div>
-              </div>
-
-              <!-- Section: Dedicated AI Facial Restoration (sczhou/CodeFormer) -->
-              <div class="retouch-section-header" style="margin-top: 18px">
-                <span class="retouch-section-title">Face Restoration Model</span>
-                <span class="retouch-meta-text">sczhou/CodeFormer SOTA</span>
-              </div>
-
-              <div id="retouchSkinToneGrid" class="skin-tone-grid-2col">
-                <!-- Populated dynamically with CodeFormer model card -->
               </div>
 
             </div>
@@ -1180,35 +1186,26 @@
       </div>
     </div>
 
-    <!-- 2. DEDICATED AI FACIAL RESTORATION MODEL DIALOG (sczhou/CodeFormer) -->
+    <!-- 2. REMINI SKIN TONE CHOOSER DIALOG -->
     <div id="skinToneModal" class="aura-modal-backdrop" hidden>
       <div class="aura-dialog-card" role="dialog" aria-modal="true">
         <div class="dialog-header-row">
           <div class="dialog-title-group">
-            <span class="material-symbols-rounded icon-cyan">psychology</span>
-            <h3 class="dialog-title">AI Face Restoration Model</h3>
+            <span class="material-symbols-rounded icon-cyan">face_retouching_natural</span>
+            <h3 class="dialog-title">Choose Remini Skin Tone</h3>
           </div>
           <button id="btnDialogResetSkinTone" type="button" class="dialog-text-link">Default</button>
         </div>
 
         <div class="dialog-scroll-body">
-          <div class="dialog-sub-label">Active Neural Restoration Model:</div>
+          <div class="dialog-sub-label">Select from authentic Remini skin tones (restored with CodeFormer):</div>
           <div id="dialogSkinToneList" class="dialog-skin-tone-list">
-            <!-- Populated dynamically with CodeFormer -->
+            <!-- Populated dynamically with all 8 Remini skin tones -->
           </div>
 
           <div class="dialog-divider"></div>
 
           <!-- Model Parameter Sliders inside Dialog -->
-          <div class="dialog-slider-block">
-            <div class="dialog-slider-head">
-              <span>CodeFormer Fidelity Weight (w)</span>
-              <span id="dlgValSmooth" class="icon-cyan">w = 0.20</span>
-            </div>
-            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="20" />
-            <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Lower w gives highest restoration detail; higher w preserves original identity.</div>
-          </div>
-
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
               <span>Porcelain Skin Smoothness</span>
@@ -1220,18 +1217,27 @@
 
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
-              <span>Eye &amp; Iris Micro-Detail Boost</span>
-              <span id="dlgValRadiance" class="icon-cyan">85%</span>
+              <span>Skin Tone Warmth</span>
+              <span id="dlgValSmooth" class="icon-cyan">100%</span>
             </div>
-            <input type="range" id="dlgSliderRadiance" class="aura-range-input accent-cyan" min="0" max="100" value="85" />
+            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="50" />
           </div>
 
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
-              <span>4K Background &amp; Attire Super-Resolution</span>
-              <span id="dlgValDetail" class="icon-cyan">85%</span>
+              <span>Radiance &amp; Glow Boost</span>
+              <span id="dlgValRadiance" class="icon-cyan">100%</span>
             </div>
-            <input type="range" id="dlgSliderDetail" class="aura-range-input accent-cyan" min="0" max="100" value="85" />
+            <input type="range" id="dlgSliderRadiance" class="aura-range-input accent-cyan" min="0" max="100" value="50" />
+          </div>
+
+          <div class="dialog-slider-block">
+            <div class="dialog-slider-head">
+              <span>CodeFormer Fidelity Weight (w)</span>
+              <span id="dlgValDetail" class="icon-cyan">w = 0.20</span>
+            </div>
+            <input type="range" id="dlgSliderDetail" class="aura-range-input accent-cyan" min="0" max="100" value="20" />
+            <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Official sczhou/CodeFormer codebook transformer fidelity weight.</div>
           </div>
         </div>
 
@@ -1483,9 +1489,9 @@
           <p class="dialog-sub-label">Tap any project to reopen it in the 4K Comparison Studio:</p>
 
           <div class="project-item-card" data-open-project="0" role="button" tabindex="0">
-            <img src="assets/sample_1_remini_ref.webp" alt="Portrait_V2_4K.jpg" class="project-thumb" />
+            <img src="assets/sample_1_remini_ref.webp" alt="Studio_Master_4K.jpg" class="project-thumb" />
             <div class="project-copy">
-              <div class="project-name">Portrait_V2_4K.jpg</div>
+              <div class="project-name">Studio_Master_4K.jpg</div>
               <div class="project-sub">Enhanced • 3840 × 5120 px • Remini Natural</div>
               <div class="project-tag" style="color: #4CD7F6">Today, 2:15 PM</div>
             </div>
@@ -1558,6 +1564,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
-  <script src="app.js?v=2.9.2"></script>
+  <script src="app.js?v=2.9.3"></script>
 </body>
 </html>

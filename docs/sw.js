@@ -1,4 +1,4 @@
-const CACHE_NAME = 'reminiskinai-aura-v2.6.0';
+const CACHE_NAME = 'reminiskinai-aura-v2.7.0';
 
 const PRECACHE_ASSETS = [
   './',
@@ -11,10 +11,14 @@ const PRECACHE_ASSETS = [
   './icons/apple-touch-icon.png',
   './icons/favicon.png',
   './assets/sample_1_before.webp',
-  './assets/sample_1_remini_ref.webp',
+  './assets/sample_1_codeformer.webp',
+  './assets/sample_1_gpen.webp',
   './assets/sample_2_before.webp',
-  './assets/sample_2_remini_ref.webp',
+  './assets/sample_2_codeformer.webp',
+  './assets/sample_2_gpen.webp',
   './assets/sample_3_before.webp',
+  './assets/sample_3_codeformer.webp',
+  './assets/sample_3_gpen.webp',
   './assets/men_1_navy_suit.png',
   './assets/men_2_charcoal_suit.png',
   './assets/men_3_grey_blazer.png',

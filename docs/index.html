@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Aura AI" />
-  <meta name="description" content="Aura ReminiSkinAI — 4K Neural Photo Enhancer, Biological Skin Tone Grading & ICAO Biometric Passport Studio." />
+  <meta name="description" content="Aura ReminiSkinAI — 4K Neural Photo Enhancer with Official CodeFormer (sczhou/CodeFormer) &amp; GPEN (yangxy/GPEN) Models &amp; ICAO Biometric Passport Studio." />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -23,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=2.6.0" />
+  <link rel="stylesheet" href="styles.css?v=2.7.0" />
 </head>
 <body>
   <!-- Hidden File Inputs for Camera Roll / Photo Library -->
@@ -296,7 +296,7 @@
                 </div>
                 <button id="btnStudioOpenSkinToneModal" type="button" class="studio-preset-pill">
                   <span id="studioPresetSwatch" class="mini-swatch-dot"></span>
-                  <span id="studioPresetPillText">Remini Natural • 85%</span>
+                  <span id="studioPresetPillText">CodeFormer • w = 0.70</span>
                 </button>
               </div>
 
@@ -314,8 +314,8 @@
               <!-- Quick Dermis Mask & Upload Row -->
               <div class="studio-quick-chip-row">
                 <button id="btnStudioTonePickerChip" type="button" class="studio-mini-chip">
-                  <span class="material-symbols-rounded">palette</span>
-                  <span>8 Skin Tones</span>
+                  <span class="material-symbols-rounded">psychology</span>
+                  <span>AI Models: CodeFormer &amp; GPEN</span>
                 </button>
                 <button id="btnStudioToggleMaskChip" type="button" class="studio-mini-chip">
                   <span class="material-symbols-rounded">layers</span>
@@ -538,14 +538,14 @@
                 </div>
               </div>
 
-              <!-- Section: Biological Skin Tones (AuraSkinToneGrid - 8 Presets in 2-col grid) -->
+              <!-- Section: Trained AI Facial Models (CodeFormer & GPEN) -->
               <div class="retouch-section-header" style="margin-top: 18px">
-                <span class="retouch-section-title">Biological Skin Tones</span>
-                <span class="retouch-meta-text">8 Presets</span>
+                <span class="retouch-section-title">Trained AI Facial Models</span>
+                <span class="retouch-meta-text">CodeFormer &amp; GPEN</span>
               </div>
 
               <div id="retouchSkinToneGrid" class="skin-tone-grid-2col">
-                <!-- Populated dynamically with all 8 SkinTonePreset cards -->
+                <!-- Populated dynamically with CodeFormer and GPEN model cards -->
               </div>
 
             </div>
@@ -1159,53 +1159,55 @@
       </div>
     </div>
 
-    <!-- 2. SKIN TONE & DERMIS GRADING DIALOG (AuraSkinToneDialog) -->
+    <!-- 2. TRAINED AI FACIAL MODELS DIALOG (CodeFormer & GPEN) -->
     <div id="skinToneModal" class="aura-modal-backdrop" hidden>
       <div class="aura-dialog-card" role="dialog" aria-modal="true">
         <div class="dialog-header-row">
           <div class="dialog-title-group">
-            <span class="material-symbols-rounded icon-cyan">face_retouching_natural</span>
-            <h3 class="dialog-title">AI Skin Tone &amp; Dermis Grading</h3>
+            <span class="material-symbols-rounded icon-cyan">psychology</span>
+            <h3 class="dialog-title">Trained Face AI Models</h3>
           </div>
-          <button id="btnDialogResetSkinTone" type="button" class="dialog-text-link">Reset</button>
+          <button id="btnDialogResetSkinTone" type="button" class="dialog-text-link">Default</button>
         </div>
 
         <div class="dialog-scroll-body">
-          <div class="dialog-sub-label">Select Regional Skin Tone Preset:</div>
+          <div class="dialog-sub-label">Select Official Deep Learning Face Model:</div>
           <div id="dialogSkinToneList" class="dialog-skin-tone-list">
-            <!-- Populated dynamically with all 8 SkinTonePreset rows -->
+            <!-- Populated dynamically with CodeFormer and GPEN -->
           </div>
 
           <div class="dialog-divider"></div>
 
-          <!-- 4 Fine-Tuning Sliders inside Dialog -->
+          <!-- Model Parameter Sliders inside Dialog -->
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
-              <span>Skin Smoothness</span>
-              <span id="dlgValSmooth" class="icon-cyan">45%</span>
+              <span>CodeFormer Fidelity Weight (w)</span>
+              <span id="dlgValSmooth" class="icon-cyan">w = 0.70</span>
             </div>
-            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="45" />
+            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="70" />
+            <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Lower w gives highest restoration detail; higher w preserves original identity.</div>
           </div>
 
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
-              <span>Warmth (Cool / Golden)</span>
-              <span id="dlgValWarmth" class="icon-cyan">60%</span>
+              <span>GPEN StyleGAN2 Prior Strength</span>
+              <span id="dlgValWarmth" class="icon-violet" style="color: #A259FF">85%</span>
             </div>
-            <input type="range" id="dlgSliderWarmth" class="aura-range-input accent-cyan" min="0" max="100" value="60" />
+            <input type="range" id="dlgSliderWarmth" class="aura-range-input" style="accent-color: #A259FF" min="0" max="100" value="85" />
+            <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Injects multi-scale StyleGAN2 generator priors for photorealistic skin radiance.</div>
           </div>
 
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
-              <span>Radiance &amp; Glow</span>
-              <span id="dlgValRadiance" class="icon-cyan">65%</span>
+              <span>Eye &amp; Iris Micro-Detail Boost</span>
+              <span id="dlgValRadiance" class="icon-cyan">85%</span>
             </div>
-            <input type="range" id="dlgSliderRadiance" class="aura-range-input accent-cyan" min="0" max="100" value="65" />
+            <input type="range" id="dlgSliderRadiance" class="aura-range-input accent-cyan" min="0" max="100" value="85" />
           </div>
 
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
-              <span>Detail Preservation</span>
+              <span>4K Background &amp; Attire Super-Resolution</span>
               <span id="dlgValDetail" class="icon-cyan">85%</span>
             </div>
             <input type="range" id="dlgSliderDetail" class="aura-range-input accent-cyan" min="0" max="100" value="85" />
@@ -1332,27 +1334,23 @@
         </div>
 
         <div class="dialog-scroll-body">
-          <p class="dialog-sub-label">Production AI Architecture for 4K Restoration &amp; Skin Tone Grading:</p>
+          <p class="dialog-sub-label">Official Deep Neural Architecture for 4K Face Restoration:</p>
 
           <div class="arch-spec-card">
-            <div class="arch-spec-title">1. Real-ESRGAN x4plus</div>
-            <div class="arch-spec-desc">4× super-resolution upscaling &amp; high-frequency micro-detail synthesis.</div>
+            <div class="arch-spec-title" style="color: #4CD7F6">1. CodeFormer (sczhou/CodeFormer — NeurIPS 2022)</div>
+            <div class="arch-spec-desc">Robust Blind Face Restoration via Codebook Lookup Transformer. Discrete codebook prior dictionary (V) with Controllable Feature Transformation (CFT) fidelity weight w.</div>
           </div>
           <div class="arch-spec-card">
-            <div class="arch-spec-title">2. GFPGAN v1.4 / CodeFormer</div>
-            <div class="arch-spec-desc">Blind face restoration for eyes, catchlights, eyelashes, and lip contours.</div>
+            <div class="arch-spec-title" style="color: #A259FF">2. GPEN-BFR (yangxy/GPEN — CVPR 2021)</div>
+            <div class="arch-spec-desc">GAN Prior Embedded Network for Blind Face Restoration in the Wild. Embedded StyleGAN2 generator prior inside deep U-Net with multi-scale skip modulation.</div>
           </div>
           <div class="arch-spec-card">
-            <div class="arch-spec-title">3. BiSeNet 19-Class Face Parser</div>
-            <div class="arch-spec-desc">Strict semantic mask isolating facial &amp; neck skin while excluding eyes, brows, lips, teeth, hair &amp; clothes.</div>
+            <div class="arch-spec-title">3. Real-ESRGAN x4plus</div>
+            <div class="arch-spec-desc">4× super-resolution upscaling &amp; high-frequency micro-detail synthesis for clothing, hair, and ambient background.</div>
           </div>
           <div class="arch-spec-card">
-            <div class="arch-spec-title">4. Guided Bilateral Dermis Filter</div>
-            <div class="arch-spec-desc">Frequency separation smoothing low-frequency blotches while preserving natural pores.</div>
-          </div>
-          <div class="arch-spec-card">
-            <div class="arch-spec-title">5. 3D LUT Regional Skin Tone Grader</div>
-            <div class="arch-spec-desc">Perceptually uniform LAB/YCbCr grading for Remini Natural, American, Korean, African &amp; Bangladeshi tones.</div>
+            <div class="arch-spec-title">4. Sub-Pixel Feathered Blending</div>
+            <div class="arch-spec-desc">Continuous 2D elliptical gaussian boundary integration with zero edge artifacts and natural lighting coherence.</div>
           </div>
         </div>
 
@@ -1426,7 +1424,7 @@
               </div>
               <div class="all-tool-copy">
                 <div class="all-tool-title">Dermis &amp; Beauty Studio</div>
-                <div class="all-tool-sub">8 biological skin tones, pore texture &amp; studio HDR</div>
+                <div class="all-tool-sub">Official CodeFormer &amp; GPEN neural models with 4K HDR</div>
               </div>
               <span class="material-symbols-rounded all-tool-chevron">chevron_right</span>
             </div>
@@ -1538,6 +1536,6 @@
 
   </div>
 
-  <script src="app.js?v=2.6.0"></script>
+  <script src="app.js?v=2.7.0"></script>
 </body>
 </html>

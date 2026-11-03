@@ -17,3 +17,8 @@ local.properties
 /*.png
 /*.xml
 /*.jpg
+scratch/
+__pycache__/
+*.pyc
+
+

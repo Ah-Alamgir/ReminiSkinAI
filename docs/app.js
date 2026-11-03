@@ -28,7 +28,7 @@
       conference: 'NeurIPS 2022',
       repoUrl: 'https://github.com/sczhou/CodeFormer',
       regionDescription: 'Towards Robust Blind Face Restoration with Codebook Lookup Transformer. Crisp eye pupil & catchlights, genuine epidermal pores, discrete eyelashes & adjustable fidelity weight w.',
-      defaultWeight: 0.65,
+      defaultWeight: 0.35,
       sliderLabel: 'CodeFormer Fidelity Weight (w)',
       previewHex: '#4CD7F6',
       isDefault: true
@@ -267,7 +267,7 @@
     // Dedicated Official sczhou/CodeFormer Face Restoration Model (NeurIPS 2022)
     selectedModelId: 'CODEFORMER',
     editParams: {
-      codeformerFidelity: 0.65, // w in [0.0, 1.0]: 0.65 balances codebook prior & original identity
+      codeformerFidelity: 0.35, // w in [0.0, 1.0]: 0.35 gives maximum face restoration & smooth skin prior
       facialClarity: 0.85,
       skinSmoothness: 0.85,
       skinWarmth: 1.00,
@@ -719,15 +719,6 @@
 
     const params = state.editParams;
 
-    // CodeFormer fidelity weight w in [0.0, 1.0]:
-    // w = 0.0 -> 100% codebook prior; w = 1.0 -> 100% input fidelity
-    const wVal = Math.max(0.0, Math.min(1.0, params.codeformerFidelity));
-    const neuralBlend = 1.0 - wVal * 0.40; // at w=0.65 gives ~0.74 optimal blend
-
-    // Secondary user clarity slider modulation
-    const clarityFactor = Math.max(0.0, Math.min(1.0, params.facialClarity));
-    const effectiveBlend = neuralBlend * clarityFactor;
-
     const totalPixels = w * h;
     const cachedWeights = (state.skinWeightsBuffer && state.skinWeightsWidth === w && state.skinWeightsHeight === h)
       ? state.skinWeightsBuffer
@@ -736,14 +727,10 @@
     for (let i = 0; i < totalPixels; i++) {
       const idx = i * 4;
 
-      // Neural restoration blend between raw input and neural restored src
-      const rRestored = raw[idx] * (1.0 - effectiveBlend) + src[idx] * effectiveBlend;
-      const gRestored = raw[idx + 1] * (1.0 - effectiveBlend) + src[idx + 1] * effectiveBlend;
-      const bRestored = raw[idx + 2] * (1.0 - effectiveBlend) + src[idx + 2] * effectiveBlend;
-
-      let finalR = rRestored;
-      let finalG = gRestored;
-      let finalB = bRestored;
+      // 100% pristine neural restoration from CodeFormer (zero dilution with raw blurry photo)
+      let finalR = src[idx];
+      let finalG = src[idx + 1];
+      let finalB = src[idx + 2];
 
       const sw = cachedWeights[i];
 
@@ -783,7 +770,7 @@
   // ==========================================================================
 
   async function executeNeuralEnhancement(srcImg, modelId, fidelity) {
-    const wVal = fidelity || state.editParams.codeformerFidelity || 0.65;
+    const wVal = fidelity || state.editParams.codeformerFidelity || 0.35;
     const modelDisplayName = `sczhou/CodeFormer (w=${wVal.toFixed(2)})`;
     showToast(`Restoring face with ${modelDisplayName}...`);
 
@@ -2938,7 +2925,7 @@
   function resetSkinEditParamsToDefault() {
     state.selectedModelId = 'CODEFORMER';
     state.editParams = {
-      codeformerFidelity: 0.65,
+      codeformerFidelity: 0.35,
       facialClarity: 0.85,
       skinSmoothness: 0.85,
       skinWarmth: 1.00,

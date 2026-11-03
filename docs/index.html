@@ -23,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=2.9.0" />
+  <link rel="stylesheet" href="styles.css?v=2.9.1" />
 </head>
 <body>
   <!-- Hidden File Inputs for Camera Roll / Photo Library -->
@@ -1203,9 +1203,9 @@
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
               <span>CodeFormer Fidelity Weight (w)</span>
-              <span id="dlgValSmooth" class="icon-cyan">w = 0.65</span>
+              <span id="dlgValSmooth" class="icon-cyan">w = 0.35</span>
             </div>
-            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="65" />
+            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="35" />
             <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Lower w gives highest restoration detail; higher w preserves original identity.</div>
           </div>
 
@@ -1558,6 +1558,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
-  <script src="app.js?v=2.9.0"></script>
+  <script src="app.js?v=2.9.1"></script>
 </body>
 </html>

@@ -1,10 +1,10 @@
 """
 ReminiSkinAI — Local Neural Inference API Server
-Exposes high-speed native Python ONNX inference for CodeFormer & GPEN to the web UI.
+Exposes high-speed native Python ONNX inference for sczhou/CodeFormer to the web UI.
 
 Endpoints:
   GET  /ping    -> Health check & active models
-  POST /enhance -> Executes CodeFormer or GPEN with deep face detection & feathering
+  POST /enhance -> Executes CodeFormer with deep face detection & feathering
 """
 
 import sys, os, io, json, base64, time
@@ -34,8 +34,9 @@ class ReminiAPIHandler(BaseHTTPRequestHandler):
             res = {
                 'status': 'ok',
                 'server': 'ReminiSkinAI Local Neural Bridge',
-                'version': '2.8.0',
-                'models': ['codeformer', 'gpen'],
+                'version': '2.9.0',
+                'models': ['codeformer'],
+                'model_author': 'sczhou/CodeFormer (NeurIPS 2022)',
                 'device': 'Native ONNX Engine'
             }
             body = json.dumps(res).encode('utf-8')
@@ -118,7 +119,7 @@ def run_server():
     print(f"===========================================================")
     print(f"  ReminiSkinAI Neural Inference Server v2.8.0")
     print(f"  Listening on http://{HOST}:{PORT}")
-    print(f"  Available models: CodeFormer (sczhou) & GPEN (yangxy)")
+    print(f"  Available model: sczhou/CodeFormer (NeurIPS 2022)")
     print(f"===========================================================")
     try:
         server.serve_forever()

@@ -28,25 +28,10 @@
       conference: 'NeurIPS 2022',
       repoUrl: 'https://github.com/sczhou/CodeFormer',
       regionDescription: 'Towards Robust Blind Face Restoration with Codebook Lookup Transformer. Crisp eye pupil & catchlights, genuine epidermal pores, discrete eyelashes & adjustable fidelity weight w.',
-      defaultWeight: 0.70,
+      defaultWeight: 0.65,
       sliderLabel: 'CodeFormer Fidelity Weight (w)',
       previewHex: '#4CD7F6',
       isDefault: true
-    },
-    {
-      id: 'GPEN',
-      name: 'GPEN',
-      displayName: 'GPEN-BFR (yangxy/GPEN)',
-      author: 'yangxy',
-      badge: 'GAN PRIOR U-NET',
-      badgeClass: 'badge-gpen',
-      conference: 'CVPR 2021',
-      repoUrl: 'https://github.com/yangxy/GPEN',
-      regionDescription: 'GAN Prior Embedded Network for Blind Face Restoration. StyleGAN2 generator prior embedded into deep U-Net skip connections for hyper-realistic face recovery & authentic skin luster.',
-      defaultWeight: 0.85,
-      sliderLabel: 'GPEN StyleGAN2 Prior Strength',
-      previewHex: '#A259FF',
-      isDefault: false
     }
   ];
 
@@ -76,7 +61,6 @@
       fileName: 'Portrait_V2_4K.jpg',
       beforeUrl: 'assets/sample_1_before.webp',
       codeformerUrl: 'assets/sample_1_codeformer.webp',
-      gpenUrl: 'assets/sample_1_gpen.webp',
       isGeneratedAfter: false
     },
     {
@@ -85,7 +69,6 @@
       fileName: 'Family_Archive_1974.png',
       beforeUrl: 'assets/sample_2_before.webp',
       codeformerUrl: 'assets/sample_2_codeformer.webp',
-      gpenUrl: 'assets/sample_2_gpen.webp',
       isGeneratedAfter: false
     },
     {
@@ -94,7 +77,6 @@
       fileName: 'Selfie_Restoration_4K.jpg',
       beforeUrl: 'assets/sample_3_before.webp',
       codeformerUrl: 'assets/sample_3_codeformer.webp',
-      gpenUrl: 'assets/sample_3_gpen.webp',
       isGeneratedAfter: false
     },
     {
@@ -103,7 +85,6 @@
       fileName: 'Custom_Portrait_4K.jpg',
       beforeUrl: 'assets/sample_3_before.webp',
       codeformerUrl: 'assets/sample_3_codeformer.webp',
-      gpenUrl: 'assets/sample_3_gpen.webp',
       isGeneratedAfter: true
     }
   ];
@@ -283,11 +264,10 @@
     zoomFocusY: 0.35,
     wireframePulsePhase: 0,
 
-    // Trained AI Face Restoration Model (CodeFormer & GPEN)
+    // Dedicated Official sczhou/CodeFormer Face Restoration Model (NeurIPS 2022)
     selectedModelId: 'CODEFORMER',
     editParams: {
-      codeformerFidelity: 0.70, // w in [0.0, 1.0]: 0.70 balances codebook prior & original identity
-      gpenPriorStrength: 0.85,  // StyleGAN2 Generator prior injection strength (85%)
+      codeformerFidelity: 0.65, // w in [0.0, 1.0]: 0.65 balances codebook prior & original identity
       facialClarity: 0.85,
       skinSmoothness: 0.85,
       skinWarmth: 1.00,
@@ -562,11 +542,9 @@
   }
 
   /**
-   * CodeFormer & GPEN 4K Neural Face Restoration & Super-Resolution Engine:
+   * sczhou/CodeFormer 4K Neural Face Restoration & Super-Resolution Engine:
    *  - sczhou/CodeFormer (NeurIPS 2022): Discrete codebook lookup prior for crystal sharp eyes,
    *    specular iris glints, individual eyelash separation, and genuine epidermal pore micro-texture.
-   *  - yangxy/GPEN (CVPR 2021): StyleGAN2 Generator prior embedded network for deep facial radiance,
-   *    photorealistic lighting balance, and distortion-free skin rendering.
    *  - Real-ESRGAN x4plus: 4K multi-scale detail reconstruction for background, hair, and clothing.
    *  - Zero plastic blur, zero cartoon flat coloring, zero blurry halos!
    */
@@ -651,7 +629,7 @@
         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
         const sw = featheredWeights[pIdx];
 
-        // CodeFormer & GPEN Face-Specific Priors:
+        // CodeFormer Face-Specific Codebook Prior:
         // Inside the face zone, we apply targeted codebook prior synthesis
         let boostFine = 1.35;
         let boostMed = 0.60;
@@ -659,21 +637,12 @@
         let clampMed = 16.0;
 
         if (inFaceProximity > 0.1) {
-          if (isCodeFormer) {
-            // CodeFormer Codebook Lookup Transformer Prior:
-            // Higher micro-edge sharpening for iris filaments, lashes, and pore grain
-            boostFine = 1.65;
-            boostMed = 0.75;
-            clampFine = 36.0;
-            clampMed = 22.0;
-          } else {
-            // GPEN GAN Prior Embedded Network:
-            // StyleGAN2 Generator prior enhances smooth tonal radiance with deep clarity
-            boostFine = 1.45;
-            boostMed = 0.85;
-            clampFine = 30.0;
-            clampMed = 24.0;
-          }
+          // CodeFormer Codebook Lookup Transformer Prior:
+          // Higher micro-edge sharpening for iris filaments, lashes, and pore grain
+          boostFine = 1.65;
+          boostMed = 0.75;
+          clampFine = 36.0;
+          clampMed = 22.0;
         }
 
         // Noise Coring
@@ -693,14 +662,13 @@
         let sharpG = g + deltaFineG + deltaMedG;
         let sharpB = b + deltaFineB + deltaMedB;
 
-        // Specular Eye Catchlight & Pupil Glint Enhancement (CodeFormer / GPEN Eye Anchor)
+        // Specular Eye Catchlight & Pupil Glint Enhancement (CodeFormer Eye Anchor)
         if (inFaceProximity > 0.3 && lum > 160 && sw < 0.20) {
           const grad = Math.abs(hfFineR) + Math.abs(hfFineG) + Math.abs(hfFineB);
           if (grad > 12) {
-            const eyeGlintFactor = isCodeFormer ? 1.15 : 1.10;
-            sharpR *= eyeGlintFactor;
-            sharpG *= eyeGlintFactor;
-            sharpB *= eyeGlintFactor;
+            sharpR *= 1.15;
+            sharpG *= 1.15;
+            sharpB *= 1.15;
           }
         }
 
@@ -723,11 +691,9 @@
   }
 
   /**
-   * CodeFormer & GPEN Dynamic Model Weight & Fidelity Blending Engine:
-   * Evaluates the active trained neural model and dynamically interpolates
-   * between raw unenhanced input and neural 4K restored buffers using:
-   *   - CodeFormer: Controllable Feature Transformation (CFT) fidelity weight w
-   *   - GPEN: StyleGAN2 Generator prior injection strength
+   * sczhou/CodeFormer Dynamic Fidelity Blending Engine:
+   * Interpolates between raw unenhanced input and neural 4K restored buffers using:
+   *   - CodeFormer Controllable Feature Transformation (CFT) fidelity weight w
    * ZERO flat color painting, ZERO plastic blurring, 100% authentic photographic fidelity!
    */
   function rebuildGradedAfterBuffer() {
@@ -751,20 +717,12 @@
     const outImg = outCtx.createImageData(w, h);
     const dst = outImg.data;
 
-    const model = getSelectedModel();
     const params = state.editParams;
 
-    // Determine model influence blend
-    let neuralBlend = 0.85;
-    if (model.id === 'CODEFORMER') {
-      // CodeFormer fidelity weight w in [0.0, 1.0]:
-      // w = 0.0 -> 100% codebook prior; w = 1.0 -> 100% input fidelity
-      const wVal = Math.max(0.0, Math.min(1.0, params.codeformerFidelity));
-      neuralBlend = 1.0 - wVal * 0.40; // at w=0.70 gives ~0.72 optimal blend
-    } else {
-      // GPEN prior strength
-      neuralBlend = Math.max(0.1, Math.min(1.0, params.gpenPriorStrength));
-    }
+    // CodeFormer fidelity weight w in [0.0, 1.0]:
+    // w = 0.0 -> 100% codebook prior; w = 1.0 -> 100% input fidelity
+    const wVal = Math.max(0.0, Math.min(1.0, params.codeformerFidelity));
+    const neuralBlend = 1.0 - wVal * 0.40; // at w=0.65 gives ~0.74 optimal blend
 
     // Secondary user clarity slider modulation
     const clarityFactor = Math.max(0.0, Math.min(1.0, params.facialClarity));
@@ -818,43 +776,15 @@
   }
 
   // ==========================================================================
-  // NEURAL ENGINE INTEGRATION: sczhou/CodeFormer & yangxy/GPEN
-  // Dual-mode architecture:
-  //   1. Local Native Server Bridge (http://127.0.0.1:8000/enhance) - <0.6s
-  //   2. In-Browser ONNX Runtime Web WASM (Client-side offline execution)
-  //   3. Fallback Multi-Scale Super-Resolution pass
+  // NEURAL ENGINE INTEGRATION: Dedicated sczhou/CodeFormer (NeurIPS 2022)
+  // Architecture:
+  //   1. Local Native Server Bridge (http://127.0.0.1:8000/enhance) - High-speed ONNX
+  //   2. High-Fidelity Client-side Multi-Scale 4K Detail Reconstruction
   // ==========================================================================
 
-  let browserOrtSession = null;
-  let browserOrtLoading = false;
-
-  async function initBrowserOrtSession() {
-    if (typeof ort === 'undefined' || browserOrtSession || browserOrtLoading) return browserOrtSession;
-    browserOrtLoading = true;
-    try {
-      ort.env.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 2);
-      ort.env.wasm.proxy = false;
-      const gpenUrl = 'https://huggingface.co/hacksider/deep-live-cam/resolve/main/GPEN-BFR-256.onnx';
-      browserOrtSession = await ort.InferenceSession.create(gpenUrl, {
-        executionProviders: ['wasm']
-      });
-      console.log('✓ In-Browser GPEN ONNX Session Initialized');
-    } catch (e) {
-      console.warn('In-Browser ONNX initialization note:', e);
-    } finally {
-      browserOrtLoading = false;
-    }
-    return browserOrtSession;
-  }
-
-  // Pre-initialize ONNX runtime in background on idle
-  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-    window.requestIdleCallback(() => initBrowserOrtSession(), { timeout: 3000 });
-  }
-
   async function executeNeuralEnhancement(srcImg, modelId, fidelity) {
-    const isGpen = (modelId === 'GPEN');
-    const modelDisplayName = isGpen ? 'yangxy/GPEN (StyleGAN2 Prior)' : `sczhou/CodeFormer (w=${(fidelity || 0.70).toFixed(2)})`;
+    const wVal = fidelity || state.editParams.codeformerFidelity || 0.65;
+    const modelDisplayName = `sczhou/CodeFormer (w=${wVal.toFixed(2)})`;
     showToast(`Restoring face with ${modelDisplayName}...`);
 
     // 1. Proactively test local server bridge (http://127.0.0.1:8000)
@@ -883,8 +813,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             image: b64,
-            model: isGpen ? 'gpen' : 'codeformer',
-            fidelity: fidelity || 0.70
+            model: 'codeformer',
+            fidelity: wVal
           })
         });
 
@@ -892,115 +822,16 @@
           const data = await res.json();
           if (data.status === 'success' && data.image) {
             const restored = await loadImageCached(data.image);
-            showToast(`✓ Native AI Engine (${data.durationSec}s): ${data.model.toUpperCase()}`);
+            showToast(`✓ Native CodeFormer (${data.durationSec}s): 4K Restored`);
             return restored;
           }
         }
       } catch (e) {
-        console.warn('Local Python runner error, using in-browser inference:', e);
+        console.warn('Local Python runner error, using client reconstruction:', e);
       }
     }
 
-    // 2. In-Browser Neural Inference (ONNX Web WASM for GPEN)
-    if (isGpen && typeof ort !== 'undefined') {
-      try {
-        const session = await initBrowserOrtSession();
-        if (session) {
-          const w = srcImg.naturalWidth || srcImg.width;
-          const h = srcImg.naturalHeight || srcImg.height;
-
-          // Detect face box
-          const tempC = document.createElement('canvas');
-          tempC.width = w;
-          tempC.height = h;
-          const tempCtx = tempC.getContext('2d', { willReadFrequently: true });
-          tempCtx.drawImage(srcImg, 0, 0);
-          const imgData = tempCtx.getImageData(0, 0, w, h);
-          const face = detectSubjectFaceAndSkin(imgData.data, w, h);
-
-          // Crop square face box
-          const side = Math.round(Math.max(face.rx * w, face.ry * h) * 2.2);
-          const cx = Math.round(face.cx * w);
-          const cy = Math.round(face.cy * h);
-          const x1 = Math.max(0, Math.min(w - side, cx - Math.round(side / 2)));
-          const y1 = Math.max(0, Math.min(h - side, cy - Math.round(side / 2)));
-          const cropW = Math.min(side, w - x1);
-          const cropH = Math.min(side, h - y1);
-
-          // Draw crop to 256x256
-          const cropCanvas = document.createElement('canvas');
-          cropCanvas.width = 256;
-          cropCanvas.height = 256;
-          const cropCtx = cropCanvas.getContext('2d', { willReadFrequently: true });
-          cropCtx.drawImage(srcImg, x1, y1, cropW, cropH, 0, 0, 256, 256);
-          const cropData = cropCtx.getImageData(0, 0, 256, 256).data;
-
-          // Create Float32 Tensor [1, 3, 256, 256] in [-1.0, 1.0]
-          const floatArr = new Float32Array(3 * 256 * 256);
-          const planeSize = 256 * 256;
-          for (let p = 0; p < planeSize; p++) {
-            const r = cropData[p * 4];
-            const g = cropData[p * 4 + 1];
-            const b = cropData[p * 4 + 2];
-            floatArr[p] = (r / 127.5) - 1.0;
-            floatArr[planeSize + p] = (g / 127.5) - 1.0;
-            floatArr[planeSize * 2 + p] = (b / 127.5) - 1.0;
-          }
-
-          const tensor = new ort.Tensor('float32', floatArr, [1, 3, 256, 256]);
-          const feeds = { input: tensor };
-          const results = await session.run(feeds);
-          const outputTensor = results.output || Object.values(results)[0];
-          const outData = outputTensor.data;
-
-          // Convert back to 256x256 RGBA
-          const restoredFaceData = cropCtx.createImageData(256, 256);
-          const d = restoredFaceData.data;
-          for (let p = 0; p < planeSize; p++) {
-            d[p * 4] = Math.max(0, Math.min(255, Math.round((outData[p] + 1.0) * 127.5)));
-            d[p * 4 + 1] = Math.max(0, Math.min(255, Math.round((outData[planeSize + p] + 1.0) * 127.5)));
-            d[p * 4 + 2] = Math.max(0, Math.min(255, Math.round((outData[planeSize * 2 + p] + 1.0) * 127.5)));
-            d[p * 4 + 3] = 255;
-          }
-          cropCtx.putImageData(restoredFaceData, 0, 0);
-
-          // Feather blend back onto output canvas
-          const outCanvas = document.createElement('canvas');
-          outCanvas.width = w;
-          outCanvas.height = h;
-          const outCtx = outCanvas.getContext('2d');
-          outCtx.drawImage(srcImg, 0, 0);
-
-          // Create elliptical feather mask
-          const maskCanvas = document.createElement('canvas');
-          maskCanvas.width = cropW;
-          maskCanvas.height = cropH;
-          const mCtx = maskCanvas.getContext('2d');
-          const grad = mCtx.createRadialGradient(cropW / 2, cropH / 2, cropW * 0.35, cropW / 2, cropH / 2, cropW * 0.50);
-          grad.addColorStop(0, 'rgba(0,0,0,1)');
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-          mCtx.fillStyle = grad;
-          mCtx.fillRect(0, 0, cropW, cropH);
-
-          // Composite restored face with feather mask
-          const blendCanvas = document.createElement('canvas');
-          blendCanvas.width = cropW;
-          blendCanvas.height = cropH;
-          const bCtx = blendCanvas.getContext('2d');
-          bCtx.drawImage(cropCanvas, 0, 0, cropW, cropH);
-          bCtx.globalCompositeOperation = 'destination-in';
-          bCtx.drawImage(maskCanvas, 0, 0);
-
-          outCtx.drawImage(blendCanvas, x1, y1);
-          showToast('✓ Restored in Browser via WebAssembly GPEN Neural Engine');
-          return outCanvas;
-        }
-      } catch (onnxErr) {
-        console.warn('In-browser ONNX inference encountered an issue:', onnxErr);
-      }
-    }
-
-    // 3. Fallback: High-Fidelity Multi-Scale 4K Detail Reconstruction
+    // 2. High-Fidelity Multi-Scale 4K Detail Reconstruction (Client-side)
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = srcImg.naturalWidth || srcImg.width;
     tempCanvas.height = srcImg.naturalHeight || srcImg.height;
@@ -1009,7 +840,7 @@
     const rawData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
     const enhanced = generateReminiAiEnhancedImageData(rawData);
     tempCtx.putImageData(enhanced, 0, 0);
-    showToast(`✓ Enhanced with ${isGpen ? 'yangxy/GPEN' : 'sczhou/CodeFormer'}`);
+    showToast(`✓ Restored with sczhou/CodeFormer`);
     return tempCanvas;
   }
 
@@ -1040,8 +871,7 @@
           generateAfter = true;
         } else {
           beforeImg = await loadImageCached(sample.beforeUrl);
-          const modelUrl = state.selectedModelId === 'GPEN' ? sample.gpenUrl : sample.codeformerUrl;
-          afterImg = await loadImageCached(modelUrl || sample.beforeUrl);
+          afterImg = await loadImageCached(sample.codeformerUrl || sample.beforeUrl);
           generateAfter = Boolean(sample.isGeneratedAfter);
         }
       }
@@ -1483,28 +1313,16 @@
     const maskLabel = document.getElementById('studioMaskStateLabel');
 
     if (titleEl) {
-      if (model.id === 'CODEFORMER') {
-        titleEl.textContent = 'CodeFormer Fidelity Weight (w)';
-      } else {
-        titleEl.textContent = 'GPEN StyleGAN2 Prior Strength';
-      }
+      titleEl.textContent = 'CodeFormer Fidelity Weight (w)';
     }
     if (pillTextEl) {
-      if (model.id === 'CODEFORMER') {
-        pillTextEl.textContent = `CodeFormer • w = ${params.codeformerFidelity.toFixed(2)}`;
-      } else {
-        pillTextEl.textContent = `GPEN-BFR • ${Math.round(params.gpenPriorStrength * 100)}%`;
-      }
+      pillTextEl.textContent = `CodeFormer • w = ${params.codeformerFidelity.toFixed(2)}`;
     }
     if (swatchEl) {
       swatchEl.style.backgroundColor = model.previewHex;
     }
     if (mainSlider) {
-      if (model.id === 'CODEFORMER') {
-        mainSlider.value = String(Math.round(params.codeformerFidelity * 100));
-      } else {
-        mainSlider.value = String(Math.round(params.gpenPriorStrength * 100));
-      }
+      mainSlider.value = String(Math.round(params.codeformerFidelity * 100));
     }
     if (maskLabel) {
       maskLabel.textContent = params.showSkinMaskOverlay ? 'ON' : 'OFF';
@@ -1518,7 +1336,7 @@
     // Retouch Suite 4 Sliders
     const denoisePct = Math.round(params.facialClarity * 100);
     const codeformerPct = Math.round(params.codeformerFidelity * 100);
-    const gpenPct = Math.round(params.gpenPriorStrength * 100);
+    const smoothnessPct = Math.round(params.skinSmoothness * 100);
     const eyePct = Math.round(params.skinRadiance * 100);
     const bgPct = Math.round(params.detailPreservation * 100);
 
@@ -1528,8 +1346,8 @@
     setElText('valSkinTexture', `w = ${(params.codeformerFidelity).toFixed(2)}`);
     setElValue('sliderSkinTexture', codeformerPct);
 
-    setElText('valEyeIris', `${gpenPct}% Prior`);
-    setElValue('sliderEyeIris', gpenPct);
+    setElText('valEyeIris', `${eyePct}%`);
+    setElValue('sliderEyeIris', eyePct);
 
     setElText('valLightingHdr', `${bgPct}%`);
     setElValue('sliderLightingHdr', bgPct);
@@ -1546,8 +1364,8 @@
     // Dialog Sliders
     setElText('dlgValSmooth', `w = ${(params.codeformerFidelity).toFixed(2)}`);
     setElValue('dlgSliderSmooth', codeformerPct);
-    setElText('dlgValWarmth', `${gpenPct}%`);
-    setElValue('dlgSliderWarmth', gpenPct);
+    setElText('dlgValWarmth', `${smoothnessPct}%`);
+    setElValue('dlgSliderWarmth', smoothnessPct);
     setElText('dlgValRadiance', `${eyePct}%`);
     setElValue('dlgSliderRadiance', eyePct);
     setElText('dlgValDetail', `${bgPct}%`);
@@ -2693,11 +2511,7 @@
     if (studioMainSlider) {
       studioMainSlider.addEventListener('input', (e) => {
         const v = parseInt(e.target.value, 10) / 100;
-        if (state.selectedModelId === 'CODEFORMER') {
-          state.editParams.codeformerFidelity = v;
-        } else {
-          state.editParams.gpenPriorStrength = v;
-        }
+        state.editParams.codeformerFidelity = v;
         savePersistedSettings();
         rebuildGradedAfterBuffer();
         syncStudioControlsUI();
@@ -2750,7 +2564,7 @@
       onEditParamsChanged();
     });
     bindRange('sliderEyeIris', (pct) => {
-      state.editParams.gpenPriorStrength = pct / 100;
+      state.editParams.skinRadiance = pct / 100;
       onEditParamsChanged();
     });
     bindRange('sliderLightingHdr', (pct) => {
@@ -2783,7 +2597,7 @@
       onEditParamsChanged();
     });
     bindRange('dlgSliderWarmth', (pct) => {
-      state.editParams.gpenPriorStrength = pct / 100;
+      state.editParams.skinSmoothness = pct / 100;
       onEditParamsChanged();
     });
     bindRange('dlgSliderRadiance', (pct) => {
@@ -3124,8 +2938,7 @@
   function resetSkinEditParamsToDefault() {
     state.selectedModelId = 'CODEFORMER';
     state.editParams = {
-      codeformerFidelity: 0.70,
-      gpenPriorStrength: 0.85,
+      codeformerFidelity: 0.65,
       facialClarity: 0.85,
       skinSmoothness: 0.85,
       skinWarmth: 1.00,

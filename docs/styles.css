@@ -1614,11 +1614,6 @@ button {
   color: #4CD7F6;
   border: 1px solid rgba(76, 215, 246, 0.35);
 }
-.badge-gpen {
-  background: rgba(162, 89, 255, 0.20);
-  color: #A259FF;
-  border: 1px solid rgba(162, 89, 255, 0.35);
-}
 .model-github-tag {
   display: inline-flex;
   align-items: center;

@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Aura AI" />
-  <meta name="description" content="Aura ReminiSkinAI — 4K Neural Photo Enhancer with Official CodeFormer (sczhou/CodeFormer) &amp; GPEN (yangxy/GPEN) Models &amp; ICAO Biometric Passport Studio." />
+  <meta name="description" content="Aura ReminiSkinAI — 4K Neural Photo Enhancer with Dedicated sczhou/CodeFormer Face Restoration &amp; ICAO Biometric Passport Studio." />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -23,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=2.8.1" />
+  <link rel="stylesheet" href="styles.css?v=2.9.0" />
 </head>
 <body>
   <!-- Hidden File Inputs for Camera Roll / Photo Library -->
@@ -336,7 +336,7 @@
               <div class="studio-quick-chip-row">
                 <button id="btnStudioTonePickerChip" type="button" class="studio-mini-chip">
                   <span class="material-symbols-rounded">psychology</span>
-                  <span>AI Models: CodeFormer &amp; GPEN</span>
+                  <span>AI Model: sczhou/CodeFormer (SOTA)</span>
                 </button>
                 <button id="btnStudioToggleMaskChip" type="button" class="studio-mini-chip">
                   <span class="material-symbols-rounded">layers</span>
@@ -559,14 +559,14 @@
                 </div>
               </div>
 
-              <!-- Section: Trained AI Facial Models (CodeFormer & GPEN) -->
+              <!-- Section: Dedicated AI Facial Restoration (sczhou/CodeFormer) -->
               <div class="retouch-section-header" style="margin-top: 18px">
-                <span class="retouch-section-title">Trained AI Facial Models</span>
-                <span class="retouch-meta-text">CodeFormer &amp; GPEN</span>
+                <span class="retouch-section-title">Face Restoration Model</span>
+                <span class="retouch-meta-text">sczhou/CodeFormer SOTA</span>
               </div>
 
               <div id="retouchSkinToneGrid" class="skin-tone-grid-2col">
-                <!-- Populated dynamically with CodeFormer and GPEN model cards -->
+                <!-- Populated dynamically with CodeFormer model card -->
               </div>
 
             </div>
@@ -1180,21 +1180,21 @@
       </div>
     </div>
 
-    <!-- 2. TRAINED AI FACIAL MODELS DIALOG (CodeFormer & GPEN) -->
+    <!-- 2. DEDICATED AI FACIAL RESTORATION MODEL DIALOG (sczhou/CodeFormer) -->
     <div id="skinToneModal" class="aura-modal-backdrop" hidden>
       <div class="aura-dialog-card" role="dialog" aria-modal="true">
         <div class="dialog-header-row">
           <div class="dialog-title-group">
             <span class="material-symbols-rounded icon-cyan">psychology</span>
-            <h3 class="dialog-title">Trained Face AI Models</h3>
+            <h3 class="dialog-title">AI Face Restoration Model</h3>
           </div>
           <button id="btnDialogResetSkinTone" type="button" class="dialog-text-link">Default</button>
         </div>
 
         <div class="dialog-scroll-body">
-          <div class="dialog-sub-label">Select Official Deep Learning Face Model:</div>
+          <div class="dialog-sub-label">Active Neural Restoration Model:</div>
           <div id="dialogSkinToneList" class="dialog-skin-tone-list">
-            <!-- Populated dynamically with CodeFormer and GPEN -->
+            <!-- Populated dynamically with CodeFormer -->
           </div>
 
           <div class="dialog-divider"></div>
@@ -1203,19 +1203,19 @@
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
               <span>CodeFormer Fidelity Weight (w)</span>
-              <span id="dlgValSmooth" class="icon-cyan">w = 0.70</span>
+              <span id="dlgValSmooth" class="icon-cyan">w = 0.65</span>
             </div>
-            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="70" />
+            <input type="range" id="dlgSliderSmooth" class="aura-range-input accent-cyan" min="0" max="100" value="65" />
             <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Lower w gives highest restoration detail; higher w preserves original identity.</div>
           </div>
 
           <div class="dialog-slider-block">
             <div class="dialog-slider-head">
-              <span>GPEN StyleGAN2 Prior Strength</span>
+              <span>Porcelain Skin Smoothness</span>
               <span id="dlgValWarmth" class="icon-violet" style="color: #A259FF">85%</span>
             </div>
             <input type="range" id="dlgSliderWarmth" class="aura-range-input" style="accent-color: #A259FF" min="0" max="100" value="85" />
-            <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Injects multi-scale StyleGAN2 generator priors for photorealistic skin radiance.</div>
+            <div style="font-size: 10px; color: var(--aura-text-muted); margin-top: 4px;">Remini Silk Dermis bilateral filtering with eye/lash feature preservation.</div>
           </div>
 
           <div class="dialog-slider-block">
@@ -1358,12 +1358,12 @@
           <p class="dialog-sub-label">Official Deep Neural Architecture for 4K Face Restoration:</p>
 
           <div class="arch-spec-card">
-            <div class="arch-spec-title" style="color: #4CD7F6">1. CodeFormer (sczhou/CodeFormer — NeurIPS 2022)</div>
+            <div class="arch-spec-title" style="color: #4CD7F6">1. sczhou/CodeFormer (NeurIPS 2022)</div>
             <div class="arch-spec-desc">Robust Blind Face Restoration via Codebook Lookup Transformer. Discrete codebook prior dictionary (V) with Controllable Feature Transformation (CFT) fidelity weight w.</div>
           </div>
           <div class="arch-spec-card">
-            <div class="arch-spec-title" style="color: #A259FF">2. GPEN-BFR (yangxy/GPEN — CVPR 2021)</div>
-            <div class="arch-spec-desc">GAN Prior Embedded Network for Blind Face Restoration in the Wild. Embedded StyleGAN2 generator prior inside deep U-Net with multi-scale skip modulation.</div>
+            <div class="arch-spec-title" style="color: #38BDF8">2. YuNet DNN Face Detection &amp; Alignment</div>
+            <div class="arch-spec-desc">Deep OpenCV neural face detection with sub-pixel landmark coordinates and dynamic bounding box expansion.</div>
           </div>
           <div class="arch-spec-card">
             <div class="arch-spec-title">3. Real-ESRGAN x4plus</div>
@@ -1445,7 +1445,7 @@
               </div>
               <div class="all-tool-copy">
                 <div class="all-tool-title">Dermis &amp; Beauty Studio</div>
-                <div class="all-tool-sub">Official CodeFormer &amp; GPEN neural models with 4K HDR</div>
+                <div class="all-tool-sub">Official sczhou/CodeFormer neural model with 4K HDR</div>
               </div>
               <span class="material-symbols-rounded all-tool-chevron">chevron_right</span>
             </div>
@@ -1558,6 +1558,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
-  <script src="app.js?v=2.8.1"></script>
+  <script src="app.js?v=2.9.0"></script>
 </body>
 </html>

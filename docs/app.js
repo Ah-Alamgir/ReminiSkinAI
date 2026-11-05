@@ -168,7 +168,7 @@
   ];
 
   const LIP_SHADE_PRESETS = [
-    { id: 'NONE', displayName: 'Natural', hex: '#D88A8A', r: 0, g: 0, b: 0 },
+    { id: 'NONE', displayName: 'Natural Base', hex: '#D88A8A', r: 0, g: 0, b: 0 },
     { id: 'NATURAL_ROSE', displayName: 'Natural Rose', hex: '#C85A6E', r: 200, g: 90, b: 110 },
     { id: 'SOFT_CORAL', displayName: 'Soft Coral', hex: '#E06C58', r: 224, g: 108, b: 88 },
     { id: 'BERRY_TINT', displayName: 'Berry Tint', hex: '#9B365A', r: 155, g: 54, b: 90 },
@@ -933,6 +933,127 @@
       dst[idx + 3] = 255;
     }
 
+    // ------------------------------------------------------------------------
+    // Adaptive Base-Derived Natural Lip Coloring Pass
+    // ------------------------------------------------------------------------
+    const effLipIntensity = params.lipIntensity !== undefined ? params.lipIntensity : 0.50;
+    if (effLipIntensity > 0.01) {
+      const face = state.detectedFace || { found: false, cx: 0.50, cy: 0.38, rx: 0.22, ry: 0.30 };
+      const mouthCx = face.cx * w;
+      const mouthCy = (face.cy + face.ry * 0.46) * h;
+      const mouthRx = Math.max(16, face.rx * w * 0.38);
+      const mouthRy = Math.max(8, face.ry * h * 0.22);
+      const mouthRxSq = mouthRx * mouthRx;
+      const mouthRySq = mouthRy * mouthRy;
+
+      const xMin = Math.max(0, Math.floor(mouthCx - mouthRx));
+      const xMax = Math.min(w - 1, Math.ceil(mouthCx + mouthRx));
+      const yMin = Math.max(0, Math.floor(mouthCy - mouthRy));
+      const yMax = Math.min(h - 1, Math.ceil(mouthCy + mouthRy));
+
+      // Step A: Sample natural baseline lip pigment from the subject's own vermilion zone
+      let sumBaseR = 0, sumBaseG = 0, sumBaseB = 0, lipPixelCount = 0;
+      for (let ly = yMin; ly <= yMax; ly += 2) {
+        const rowOffset = ly * w;
+        const dy = ly - mouthCy;
+        const dyTerm = (dy * dy) / mouthRySq;
+        if (dyTerm > 1.0) continue;
+
+        for (let lx = xMin; lx <= xMax; lx += 2) {
+          const dx = lx - mouthCx;
+          const distSq = (dx * dx) / mouthRxSq + dyTerm;
+          if (distSq > 0.85) continue;
+
+          const pIdx = (rowOffset + lx) * 4;
+          const pr = src[pIdx];
+          const pg = src[pIdx + 1];
+          const pb = src[pIdx + 2];
+          const yLum = 0.299 * pr + 0.587 * pg + 0.114 * pb;
+
+          // Exclude teeth (high luminance + neutral chroma)
+          if (yLum > 145 && Math.abs(pr - pg) < 22 && Math.abs(pg - pb) < 24) continue;
+
+          // Vermilion chrominance criteria
+          if (pr > pg * 1.04 && pr > pb * 1.04 && pr > 40) {
+            sumBaseR += pr;
+            sumBaseG += pg;
+            sumBaseB += pb;
+            lipPixelCount++;
+          }
+        }
+      }
+
+      const baseLipR = lipPixelCount > 10 ? (sumBaseR / lipPixelCount) : 175.0;
+      const baseLipG = lipPixelCount > 10 ? (sumBaseG / lipPixelCount) : 95.0;
+      const baseLipB = lipPixelCount > 10 ? (sumBaseB / lipPixelCount) : 90.0;
+
+      // Step B: Calculate base-adaptive color vitality and tint offsets
+      // Proportional to the subject's own base lip pigment
+      const chosenLipPreset = LIP_SHADE_PRESETS.find((lp) => lp.id === params.lipShade);
+      let targetRBoost = (baseLipR / 255.0) * 42.0 * effLipIntensity;
+      let targetGTint = -6.0 * effLipIntensity * (baseLipG / 128.0);
+      let targetBTint = -7.0 * effLipIntensity * (baseLipB / 128.0);
+
+      if (chosenLipPreset && chosenLipPreset.id !== 'NONE') {
+        // Harmonize preset tone with the individual's natural base color
+        const harmonizedR = (chosenLipPreset.r * 0.40 + baseLipR * 0.60);
+        const harmonizedG = (chosenLipPreset.g * 0.40 + baseLipG * 0.60);
+        const harmonizedB = (chosenLipPreset.b * 0.40 + baseLipB * 0.60);
+        targetRBoost = (harmonizedR - baseLipR) * effLipIntensity * 0.80 + targetRBoost * 0.45;
+        targetGTint = (harmonizedG - baseLipG) * effLipIntensity * 0.80 + targetGTint * 0.35;
+        targetBTint = (harmonizedB - baseLipB) * effLipIntensity * 0.80 + targetBTint * 0.35;
+      }
+
+      // Step C: Apply lip vitality with Gaussian radial feathering and teeth protection
+      for (let ly = yMin; ly <= yMax; ly++) {
+        const rowOffset = ly * w;
+        const dy = ly - mouthCy;
+        const dyTerm = (dy * dy) / mouthRySq;
+        if (dyTerm > 1.0) continue;
+
+        for (let lx = xMin; lx <= xMax; lx++) {
+          const dx = lx - mouthCx;
+          const distSq = (dx * dx) / mouthRxSq + dyTerm;
+          if (distSq > 1.0) continue;
+
+          const pIdx = (rowOffset + lx) * 4;
+          const curR = dst[pIdx];
+          const curG = dst[pIdx + 1];
+          const curB = dst[pIdx + 2];
+
+          const yLum = 0.299 * curR + 0.587 * curG + 0.114 * curB;
+
+          // Strict teeth protection: ensure zero color spill onto teeth
+          let teethProtect = 0.0;
+          if (yLum > 140 && Math.abs(curR - curG) < 26 && Math.abs(curG - curB) < 28) {
+            teethProtect = Math.min(1.0, ((yLum - 140) / 40.0) * (1.0 - Math.abs(curR - curG) / 26.0));
+          }
+
+          // Smooth elliptical feathering
+          const spatialWeight = Math.max(0.0, 1.0 - distSq);
+          const isVermilion = (curR > curG * 1.03 && curR > curB * 1.03);
+          const lipWeight = spatialWeight * (isVermilion ? 1.0 : 0.35) * (1.0 - teethProtect * 1.4) * effLipIntensity;
+
+          if (lipWeight > 0.01) {
+            // Lower lip center specular hydration luster (signature Remini gloss)
+            let luster = 0.0;
+            if (dy > 0 && dy < mouthRy * 0.70 && Math.abs(dx) < mouthRx * 0.45) {
+              const dxLuster = (dx * dx) / (mouthRxSq * 0.20);
+              const dyLuster = ((dy - mouthRy * 0.35) * (dy - mouthRy * 0.35)) / (mouthRySq * 0.15);
+              const lusterDist = dxLuster + dyLuster;
+              if (lusterDist < 1.0) {
+                luster = (1.0 - lusterDist) * lipWeight * 12.0 * effLipIntensity;
+              }
+            }
+
+            dst[pIdx] = Math.max(0, Math.min(255, Math.round(curR + targetRBoost * lipWeight + luster)));
+            dst[pIdx + 1] = Math.max(0, Math.min(255, Math.round(curG + targetGTint * lipWeight + luster * 0.6)));
+            dst[pIdx + 2] = Math.max(0, Math.min(255, Math.round(curB + targetBTint * lipWeight + luster * 0.6)));
+          }
+        }
+      }
+    }
+
     outCtx.putImageData(outImg, 0, 0);
   }
 
@@ -976,7 +1097,8 @@
             image: b64,
             model: 'codeformer',
             fidelity: wVal,
-            skin_tone: state.selectedSkinToneId || 'REMINI_NATURAL'
+            skin_tone: state.selectedSkinToneId || 'REMINI_NATURAL',
+            lip_intensity: state.editParams.lipIntensity !== undefined ? state.editParams.lipIntensity : 0.50
           })
         });
 
@@ -1023,8 +1145,8 @@
         beforeImg = customImg;
         afterImg = customImg;
         generateAfter = true;
-        state.selectedModelId = 'CODEFORMER';
-        resetSkinEditParamsToDefault();
+        // Forward settings preservation: Keep user's chosen skin tone, porcelain smoothness,
+        // warmth, radiance, CodeFormer fidelity, and adaptive lip tint active for all forward images!
       } else {
         const sample = STUDIO_SAMPLES[sampleIdx] || STUDIO_SAMPLES[0];
         if (sampleIdx === 3 && state.customImageElement) {
@@ -1073,6 +1195,7 @@
       state.isSampleLoaded = true;
       rebuildGradedAfterBuffer();
       syncSampleTabsUI();
+      syncStudioControlsUI();
       requestStudioCanvasRender();
     } catch (err) {
       console.error('Failed to load sample:', err);
@@ -2677,8 +2800,8 @@
       state.skinWeightsHeight = 0;
       state.selectedSampleIndex = 0;
       state.detectedFace = { found: false, cx: 0.50, cy: 0.38, rx: 0.25, ry: 0.32 };
-      state.selectedModelId = 'CODEFORMER';
-      resetSkinEditParamsToDefault();
+      // Preserve user's edited settings (chosen skin tone, smoothness, radiance, lip color)
+      // for all forward photo selections and reloads!
       const fileInput = document.getElementById('globalPhotoInput');
       if (fileInput) fileInput.value = '';
       const passportInput = document.getElementById('passportPhotoInput');

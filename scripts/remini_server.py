@@ -62,6 +62,7 @@ class ReminiAPIHandler(BaseHTTPRequestHandler):
                 model_name = payload.get('model', 'codeformer').lower()
                 fidelity = float(payload.get('fidelity', 0.20))
                 skin_tone = payload.get('skin_tone', 'REMINI_NATURAL')
+                lip_intensity = float(payload.get('lip_intensity', 0.50))
 
                 # Strip base64 header if present
                 if ',' in img_data_b64:
@@ -75,7 +76,8 @@ class ReminiAPIHandler(BaseHTTPRequestHandler):
                     input_img,
                     model=model_name,
                     fidelity=fidelity,
-                    skin_tone=skin_tone
+                    skin_tone=skin_tone,
+                    lip_intensity=lip_intensity
                 )
                 duration = time.time() - t0
 

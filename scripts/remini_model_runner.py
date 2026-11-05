@@ -181,7 +181,7 @@ def run_codeformer_aligned(aligned_bgr, fidelity=0.20, model_path='scratch/model
     out_arr = np.clip((np.transpose(out[0], (1, 2, 0)) + 1.0) * 127.5, 0, 255).astype(np.uint8)
     return cv2.cvtColor(out_arr, cv2.COLOR_RGB2BGR)
 
-def apply_remini_porcelain_smoothing(cf_bgr, skin_tone='REMINI_NATURAL'):
+def apply_remini_porcelain_smoothing(cf_bgr, skin_tone='REMINI_NATURAL', lip_intensity=0.50):
     """
     Landmark-Guided Remini Porcelain Skin Smoothing on canonical 512x512 face:
       - Forehead, cheeks, and chin are smoothed into flawless, spotless porcelain dermis
@@ -262,16 +262,69 @@ def apply_remini_porcelain_smoothing(cf_bgr, skin_tone='REMINI_NATURAL'):
     calib_bgr = cv2.cvtColor(np.stack([l, a, b_ch], axis=-1).astype(np.uint8), cv2.COLOR_LAB2BGR)
     contrast_val = tone_cfg['contrast']
     lut = np.array([int(np.clip(128.0 + (i - 128.0) * contrast_val, 0, 255)) for i in range(256)], dtype=np.uint8)
-    return cv2.LUT(calib_bgr, lut)
+    graded_face = cv2.LUT(calib_bgr, lut)
 
-def enhance_full_image(input_img, model='codeformer', fidelity=0.20, skin_tone='REMINI_NATURAL', force_fhd=True):
+    # Adaptive natural lip color vitality based on subject's own base lip pigment
+    return apply_adaptive_base_lip_tint(graded_face, mouth_center=mouth_center, mouth_w=mouth_w * 0.82, mouth_h=mouth_h * 0.75, lip_intensity=lip_intensity)
+
+def apply_adaptive_base_lip_tint(bgr_face, mouth_center=(257, 371), mouth_w=62, mouth_h=28, lip_intensity=0.50):
+    """
+    Applies adaptive lip color vitality based on the subject's natural lip base color:
+      - Analyzes the base color of the vermilion zone (lips)
+      - Boosts natural rose/coral vitality while preserving lip fissures and texture
+      - Strictly protects teeth (high luminance, neutral chroma)
+      - Soft Gaussian boundary feathering with zero artificial lipstick smear
+    """
+    res = bgr_face.copy().astype(np.float32)
+    b_ch, g_ch, r_ch = res[:, :, 0], res[:, :, 1], res[:, :, 2]
+
+    # 1. Base lip mask
+    lip_ellipse = np.zeros((bgr_face.shape[0], bgr_face.shape[1]), dtype=np.float32)
+    cv2.ellipse(lip_ellipse, (int(mouth_center[0]), int(mouth_center[1])), (int(mouth_w), int(mouth_h)), 0, 0, 360, 1.0, -1)
+
+    # 2. Identify actual lip pixels based on chromatic dominance (R > G and R > B)
+    is_lip_pixel = (lip_ellipse > 0.4) & (r_ch > g_ch * 1.05) & (r_ch > b_ch * 1.05)
+    if not np.any(is_lip_pixel):
+        return bgr_face
+
+    base_r = float(np.median(r_ch[is_lip_pixel]))
+    base_g = float(np.median(g_ch[is_lip_pixel]))
+    base_b = float(np.median(b_ch[is_lip_pixel]))
+
+    # 3. Teeth protection: high luminance and neutral chroma inside mouth aperture
+    lum = 0.299 * r_ch + 0.587 * g_ch + 0.114 * b_ch
+    is_teeth = (lip_ellipse > 0.1) & (lum > 150) & (np.abs(r_ch - g_ch) < 22)
+    teeth_protect = cv2.GaussianBlur(is_teeth.astype(np.float32), (9, 9), 0)
+
+    # 4. Soft feathered lip mask
+    lip_weight = cv2.GaussianBlur(is_lip_pixel.astype(np.float32), (9, 9), 0)
+    lip_weight = np.clip(lip_weight * (1.0 - teeth_protect * 1.3), 0.0, 1.0)
+
+    # 5. Natural color vitality boost derived from the person's base lip tone
+    r_boost = (base_r / 255.0) * 38.0 * lip_intensity
+    g_tint = -7.0 * lip_intensity
+    b_tint = -8.0 * lip_intensity
+
+    # 6. Lower lip center specular hydration luster
+    luster_mask = np.zeros_like(lip_weight)
+    cv2.ellipse(luster_mask, (int(mouth_center[0]), int(mouth_center[1] + mouth_h * 0.25)), (int(mouth_w * 0.42), int(mouth_h * 0.35)), 0, 0, 360, 1.0, -1)
+    luster_mask = cv2.GaussianBlur(luster_mask, (11, 11), 0) * lip_weight
+
+    new_r = r_ch + (r_boost * lip_weight) + (luster_mask * 12.0 * lip_intensity)
+    new_g = g_ch + (g_tint * lip_weight) + (luster_mask * 7.0 * lip_intensity)
+    new_b = b_ch + (b_tint * lip_weight) + (luster_mask * 7.0 * lip_intensity)
+
+    out = np.stack([new_b, new_g, new_r], axis=-1)
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+def enhance_full_image(input_img, model='codeformer', fidelity=0.20, skin_tone='REMINI_NATURAL', lip_intensity=0.50, force_fhd=True):
     """
     Remini Master Full HD Neural Pipeline:
       1. 4K Super-Resolution Canvas Scaling (upscales low-res photos to crisp Full HD)
       2. 5-Point Canonical Face Alignment to FFHQ 512x512
       3. Official sczhou/CodeFormer Neural Restoration (NeurIPS 2022) with fidelity w=0.20
       4. Landmark-Guided Remini Porcelain Skin Smoothing
-      5. Remini Calibrated Skin Tone Curve
+      5. Remini Calibrated Skin Tone Curve & Base-Adaptive Lip Color Vitality
       6. Inverse Affine Warping & Smooth Mask Compositing
       7. Background & Clothing 4K Super-Resolution Detail Enhancement
     """
@@ -304,10 +357,10 @@ def enhance_full_image(input_img, model='codeformer', fidelity=0.20, skin_tone='
     el = time.time() - t0
     print(f"[Model Inference] CodeFormer neural restoration finished in {el:.2f}s")
 
-    # 5. Landmark-Guided Remini Porcelain Skin Smoothing & Selected Skin Tone
+    # 5. Landmark-Guided Remini Porcelain Skin Smoothing & Selected Skin Tone & Adaptive Lip Color
     t1 = time.time()
-    perfect_face = apply_remini_porcelain_smoothing(cf_aligned, skin_tone=skin_tone)
-    print(f"[Skin Beautifier] Remini Porcelain smoothing & skin tone '{skin_tone}' finished in {time.time() - t1:.2f}s")
+    perfect_face = apply_remini_porcelain_smoothing(cf_aligned, skin_tone=skin_tone, lip_intensity=lip_intensity)
+    print(f"[Skin Beautifier] Remini Porcelain smoothing & skin tone '{skin_tone}' (lip intensity={lip_intensity:.2f}) finished in {time.time() - t1:.2f}s")
 
     # 6. Inverse Affine Warp & Mask Blend
     mask_512 = np.zeros((512, 512), dtype=np.float32)
@@ -333,12 +386,13 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=str, default='scratch/output_restored.png', help="Path to output photo")
     parser.add_argument('--fidelity', type=float, default=0.20, help="CodeFormer fidelity weight w (0.0 to 1.0, default 0.20)")
     parser.add_argument('--skin-tone', type=str, default='REMINI_NATURAL', choices=list(REMINI_SKIN_TONES.keys()), help="Remini Skin Tone Preset")
+    parser.add_argument('--lip-intensity', type=float, default=0.50, help="Adaptive lip color vitality (0.0 to 1.0, default 0.50)")
     args = parser.parse_args()
 
     os.makedirs(os.path.dirname(args.output) or '.', exist_ok=True)
     img = Image.open(args.input).convert('RGB')
     print(f"Loaded input {args.input} ({img.width}x{img.height})")
 
-    res = enhance_full_image(img, model=args.model, fidelity=args.fidelity, skin_tone=args.skin_tone)
+    res = enhance_full_image(img, model=args.model, fidelity=args.fidelity, skin_tone=args.skin_tone, lip_intensity=args.lip_intensity)
     res.save(args.output)
     print(f"Restored 4K image saved to: {args.output} ({res.width}x{res.height})")

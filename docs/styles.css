@@ -874,6 +874,8 @@ button {
 /* In Comparison Studio, position BEFORE/AFTER badges above the floating bottom dock */
 #comparisonCanvasContainer .slider-corner-badge {
   bottom: 218px;
+  pointer-events: none;
+  z-index: 5;
 }
 
 /* ============================================================================

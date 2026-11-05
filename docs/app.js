@@ -1118,32 +1118,76 @@
     const viewW = rect.width;
     const viewH = rect.height;
 
-    // Clear background
+    // Clear background to obsidian canvas surface
     ctx.fillStyle = '#131315';
     ctx.fillRect(0, 0, viewW, viewH);
 
-    // Compute ContentScale.Crop destination rect
+    // Compute clear unobstructed viewport bounds so the full photo is 100% visible
+    let topPad = 8;
+    let bottomPad = 8;
+    let sidePad = 14;
+
+    if (canvas.id === 'comparisonCanvas') {
+      // In Comparison Studio, clear the top telemetry chip and floating bottom dock
+      const telemetryEl = document.getElementById('comparisonTelemetryChip');
+      const topbarEl = document.querySelector('.studio-floating-topbar');
+      const dockEl = document.querySelector('.studio-bottom-dock');
+      const containerRect = rect;
+
+      if (telemetryEl) {
+        const tRect = telemetryEl.getBoundingClientRect();
+        topPad = Math.max(68, Math.round(tRect.bottom - containerRect.top + 8));
+      } else if (topbarEl) {
+        const tbRect = topbarEl.getBoundingClientRect();
+        topPad = Math.max(68, Math.round(tbRect.bottom - containerRect.top + 12));
+      } else {
+        topPad = 78;
+      }
+
+      if (dockEl) {
+        const dRect = dockEl.getBoundingClientRect();
+        bottomPad = Math.max(180, Math.round(containerRect.bottom - dRect.top + 8));
+      } else {
+        bottomPad = 210;
+      }
+    }
+
+    const availW = Math.max(40, viewW - sidePad * 2);
+    const availH = Math.max(40, viewH - topPad - bottomPad);
+
     const imgW = state.beforeOffscreen.width;
     const imgH = state.beforeOffscreen.height;
-    const scale = Math.max(viewW / imgW, viewH / imgH);
-    let drawW = imgW * scale;
-    let drawH = imgH * scale;
-    let drawX = (viewW - drawW) * 0.5;
-    let drawY = (viewH - drawH) * 0.5;
 
-    // Apply 200% Zoom centered on focus point (0.5, 0.35) when zoomed
+    // Zoom out to fit full photo into safe area (never crop)
+    const fitScale = Math.min(availW / imgW, availH / imgH);
+    let scale = fitScale;
+    let drawW = Math.round(imgW * scale);
+    let drawH = Math.round(imgH * scale);
+    let drawX = Math.round(sidePad + (availW - drawW) * 0.5);
+    let drawY = Math.round(topPad + (availH - drawH) * 0.5);
+
+    // Apply 200% Zoom centered on face focus point when toggled
     if (state.isZoomed200) {
       const zoom = 2.0;
       const focusPxX = drawX + drawW * state.zoomFocusX;
       const focusPxY = drawY + drawH * state.zoomFocusY;
-      drawW *= zoom;
-      drawH *= zoom;
-      drawX = viewW * 0.5 - (focusPxX - drawX) * zoom;
-      drawY = viewH * 0.42 - (focusPxY - drawY) * zoom;
+      drawW = Math.round(drawW * zoom);
+      drawH = Math.round(drawH * zoom);
+      drawX = Math.round((sidePad + availW * 0.5) - (focusPxX - drawX) * zoom);
+      drawY = Math.round((topPad + availH * 0.5) - (focusPxY - drawY) * zoom);
     }
 
-    const activeSplit = state.isHoldCompare ? 0.98 : state.splitProgress;
-    const splitX = Math.max(0, Math.min(viewW, viewW * activeSplit));
+    // Cache current photo rendering bounds for pointer slider interactions
+    state.canvasPhotoBounds = { drawX, drawY, drawW, drawH, viewW, viewH };
+
+    // Subtle ambient card shadow behind photo
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetY = 6;
+    ctx.fillStyle = '#161618';
+    ctx.fillRect(drawX, drawY, drawW, drawH);
+    ctx.restore();
 
     // 1. Draw Full AFTER Image (4K AI Graded)
     ctx.imageSmoothingEnabled = true;
@@ -1151,71 +1195,84 @@
     ctx.drawImage(state.afterGradedOffscreen, drawX, drawY, drawW, drawH);
 
     // 2. Draw Clipped BEFORE Image on Left Side (0 .. splitX)
+    const activeSplit = state.isHoldCompare ? 0.98 : state.splitProgress;
+    const splitX = Math.max(drawX, Math.min(drawX + drawW, drawX + drawW * activeSplit));
+
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, 0, splitX, viewH);
+    ctx.rect(drawX, drawY, Math.max(0, splitX - drawX), drawH);
     ctx.clip();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(state.beforeOffscreen, drawX, drawY, drawW, drawH);
     ctx.restore();
 
-    // 3. Optional Animated Facial Landmark Wireframe Overlay (BeforeAfterSlider.kt lines 318-420)
+    // Subtle 1px studio outline border around full photo
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(drawX, drawY, drawW, drawH);
+    ctx.restore();
+
+    // 3. Optional Animated Facial Landmark Wireframe Overlay (only if requested)
     if (options && options.showLandmarks) {
-      drawFacialLandmarkWireframe(ctx, viewW, viewH, state.wireframePulsePhase);
+      drawFacialLandmarkWireframe(ctx, drawX, drawY, drawW, drawH, state.wireframePulsePhase);
     }
 
-    // 4. Specular Divider Line & Ambient Glow (BeforeAfterSlider.kt lines 155-184)
-    const glowGrad = ctx.createLinearGradient(0, 0, 0, viewH);
+    // 4. Specular Divider Line & Ambient Glow (aligned to photo height)
+    const lineTop = drawY;
+    const lineBottom = drawY + drawH;
+
+    const glowGrad = ctx.createLinearGradient(0, lineTop, 0, lineBottom);
     glowGrad.addColorStop(0, 'rgba(76, 215, 246, 0.05)');
-    glowGrad.addColorStop(0.5, 'rgba(76, 215, 246, 0.38)');
+    glowGrad.addColorStop(0.5, 'rgba(76, 215, 246, 0.45)');
     glowGrad.addColorStop(1, 'rgba(76, 215, 246, 0.05)');
     ctx.strokeStyle = glowGrad;
     ctx.lineWidth = 8;
     ctx.beginPath();
-    ctx.moveTo(splitX, 0);
-    ctx.lineTo(splitX, viewH);
+    ctx.moveTo(splitX, lineTop);
+    ctx.lineTo(splitX, lineBottom);
     ctx.stroke();
 
-    const lineGrad = ctx.createLinearGradient(0, 0, 0, viewH);
-    lineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
-    lineGrad.addColorStop(0.5, 'rgba(76, 215, 246, 0.92)');
-    lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0.25)');
+    const lineGrad = ctx.createLinearGradient(0, lineTop, 0, lineBottom);
+    lineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+    lineGrad.addColorStop(0.5, 'rgba(76, 215, 246, 0.95)');
+    lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0.28)');
     ctx.strokeStyle = lineGrad;
-    ctx.lineWidth = 1.8;
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
-    ctx.moveTo(splitX, 0);
-    ctx.lineTo(splitX, viewH);
+    ctx.moveTo(splitX, lineTop);
+    ctx.lineTo(splitX, lineBottom);
     ctx.stroke();
 
-    // 5. Specular Glass Disc Thumb Handle (BeforeAfterSlider.kt lines 187-237)
-    const handleY = viewH * 0.5;
-    const outerRadius = 26;
-    const innerRadius = 20;
+    // 5. Specular Glass Disc Thumb Handle centered on photo
+    const handleY = Math.round(drawY + drawH * 0.5);
+    const outerRadius = 24;
+    const innerRadius = 18;
 
     const haloGrad = ctx.createRadialGradient(splitX, handleY, 2, splitX, handleY, outerRadius);
-    haloGrad.addColorStop(0, 'rgba(3, 181, 211, 0.42)');
+    haloGrad.addColorStop(0, 'rgba(3, 181, 211, 0.45)');
     haloGrad.addColorStop(1, 'rgba(3, 181, 211, 0)');
     ctx.fillStyle = haloGrad;
     ctx.beginPath();
     ctx.arc(splitX, handleY, outerRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = 'rgba(31, 31, 33, 0.88)';
+    ctx.fillStyle = 'rgba(31, 31, 33, 0.90)';
     ctx.beginPath();
     ctx.arc(splitX, handleY, innerRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.80)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(splitX, handleY, innerRadius, 0, Math.PI * 2);
     ctx.stroke();
 
     // Left & Right Chevrons (< >) inside Handle
-    const chevSize = 4.5;
-    const chevOffset = 6.5;
-    ctx.strokeStyle = '#E5E1E4';
+    const chevSize = 4.2;
+    const chevOffset = 5.8;
+    ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = 2.0;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -1240,15 +1297,15 @@
   /**
    * Draws the Biometric Facial Landmark Mesh Overlay (BeforeAfterSlider.kt drawFacialLandmarkWireframe)
    */
-  function drawFacialLandmarkWireframe(ctx, w, h, pulsePhase) {
+  function drawFacialLandmarkWireframe(ctx, drawX, drawY, drawW, drawH, pulsePhase) {
     const face = state.detectedFace && state.detectedFace.found
       ? state.detectedFace
       : { cx: 0.50, cy: 0.39, rx: 0.20, ry: 0.26 };
 
-    const cx = w * face.cx;
-    const cy = h * face.cy;
-    const rx = Math.min(w, h) * face.rx * 1.05;
-    const ry = Math.min(w, h) * face.ry * 1.15;
+    const cx = drawX + drawW * face.cx;
+    const cy = drawY + drawH * face.cy;
+    const rx = Math.min(drawW, drawH) * face.rx * 1.05;
+    const ry = Math.min(drawW, drawH) * face.ry * 1.15;
     const alpha = 0.26 + pulsePhase * 0.22;
 
     const landmarks = [
@@ -1316,8 +1373,16 @@
       const rect = containerEl.getBoundingClientRect();
       if (rect.width <= 0) return;
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const normX = (clientX - rect.left) / rect.width;
-      state.splitProgress = Math.max(0.02, Math.min(0.98, normX));
+      const relX = clientX - rect.left;
+
+      const bounds = state.canvasPhotoBounds;
+      if (bounds && bounds.drawW > 20) {
+        const normX = (relX - bounds.drawX) / bounds.drawW;
+        state.splitProgress = Math.max(0.01, Math.min(0.99, normX));
+      } else {
+        const normX = relX / rect.width;
+        state.splitProgress = Math.max(0.01, Math.min(0.99, normX));
+      }
       requestStudioCanvasRender();
     }
 
@@ -1356,14 +1421,17 @@
     const zoomBtn = document.getElementById('btnComparisonZoomPill');
     const telemetryText = document.getElementById('comparisonTelemetryText');
     if (zoomBtn) {
-      zoomBtn.textContent = state.isZoomed200 ? '200%' : '100%';
+      zoomBtn.textContent = state.isZoomed200 ? '200%' : 'Fit';
+      zoomBtn.title = state.isZoomed200 ? 'Click to show full photo (Fit)' : 'Click to zoom in 200%';
       zoomBtn.classList.toggle('zoomed', state.isZoomed200);
     }
     if (telemetryText) {
       if (state.studioBottomTab === 'MAGNIFIER') {
-        telemetryText.textContent = `Biometric Pore Mesh • Zoom: ${state.isZoomed200 ? '200%' : '100%'} (Double-tap)`;
+        telemetryText.textContent = `Biometric Pore Mesh • Zoom: ${state.isZoomed200 ? '200%' : 'Fit'} (Double-tap)`;
       } else {
-        telemetryText.textContent = '1080p → 4320p (4K UHD) • Sharpness: Ultra';
+        telemetryText.textContent = state.isZoomed200
+          ? '4K UHD • 200% Detail Zoom (Double-tap to Fit)'
+          : '1080p → 4320p (4K UHD) • Full Photo View';
       }
     }
   }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'reminiskinai-aura-v2.9.3';
+const CACHE_NAME = 'reminiskinai-aura-v2.9.4';
 
 const PRECACHE_ASSETS = [
   './',

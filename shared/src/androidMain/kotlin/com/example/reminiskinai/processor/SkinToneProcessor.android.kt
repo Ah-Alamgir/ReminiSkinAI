@@ -57,35 +57,40 @@ actual object SkinToneProcessor {
             // 5. Bangladeshi: South Asian warm golden wheat glow, rich amber undertones
             val (pRMult, pGMult, pBMult, pRadBoost, pContrast) = when (preset) {
                 AestheticPreset.REMINI_NATURAL -> {
-                    Tuple5(1.02f, 1.01f, 1.01f, 14f, 1.03f)
+                    // Remini Natural: Signature fair ivory porcelain & natural studio clarity (Default)
+                    Tuple5(1.02f, 1.01f, 1.00f, 12f, 1.03f)
+                }
+                AestheticPreset.WARM_PEACH -> {
+                    // Warm Honey Peach: Soft sun-kissed amber warmth & radiant golden peach
+                    Tuple5(1.06f, 1.03f, 0.95f, 18f, 1.04f)
                 }
                 AestheticPreset.AMERICAN -> {
                     // American: Fair white/creamy complexion, neutral cool-ivory undertones
-                    Tuple5(1.02f, 1.02f, 1.03f, 18f, 1.02f)
+                    Tuple5(1.04f, 1.02f, 1.03f, 20f, 1.02f)
                 }
                 AestheticPreset.AFRICAN -> {
                     // African: Authentic deep melanin black/dark rich bronze with velvety specular highlights
-                    Tuple5(1.00f, 0.99f, 0.99f, 8f, 1.06f)
+                    Tuple5(1.25f, 0.82f, 0.64f, 6f, 1.08f)
                 }
                 AestheticPreset.KOREAN -> {
-                    // Korean: K-Beauty luminous porcelain glass skin, peach highlight, clear and fair
-                    Tuple5(1.03f, 1.02f, 1.05f, 26f, 1.02f)
+                    // Korean: K-Beauty luminous porcelain glass skin, rosy-peach highlight, clear and fair
+                    Tuple5(1.06f, 1.02f, 1.05f, 26f, 1.03f)
                 }
                 AestheticPreset.BANGLADESHI -> {
                     // South Asian: Warm golden wheat glow
-                    Tuple5(1.05f, 1.03f, 0.98f, 16f, 1.03f)
+                    Tuple5(1.18f, 0.94f, 0.76f, 16f, 1.04f)
                 }
                 AestheticPreset.LATINA_OLIVE -> {
                     // Latina Olive: Sun-kissed golden honey bronze
-                    Tuple5(1.06f, 1.03f, 0.96f, 20f, 1.04f)
+                    Tuple5(1.14f, 0.98f, 0.80f, 20f, 1.04f)
                 }
                 AestheticPreset.NORDIC_FAIR -> {
                     // Nordic Alabaster: Ultra-bright cool fair porcelain
-                    Tuple5(1.02f, 1.02f, 1.04f, 22f, 1.02f)
+                    Tuple5(1.03f, 1.02f, 1.06f, 22f, 1.02f)
                 }
                 AestheticPreset.MEDITERRANEAN -> {
                     // Mediterranean: Golden warm terracotta radiance
-                    Tuple5(1.07f, 1.03f, 0.95f, 18f, 1.04f)
+                    Tuple5(1.16f, 0.96f, 0.78f, 18f, 1.04f)
                 }
             }
 

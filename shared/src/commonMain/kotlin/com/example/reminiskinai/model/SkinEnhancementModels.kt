@@ -15,11 +15,19 @@ enum class AestheticPreset(
 ) {
     REMINI_NATURAL(
         title = "Remini Natural",
-        subtitle = "Signature studio clarity & healthy rosy-peach glow (Default)",
-        swatchColor = 0xFFF5D0C0,
+        subtitle = "Signature fair ivory porcelain & natural studio clarity (Default)",
+        swatchColor = 0xFFDCC1AB,
         warmthBoost = 1.00f,
         contrastLift = 1.03f,
         saturationBoost = 1.00f
+    ),
+    WARM_PEACH(
+        title = "Warm Honey Peach",
+        subtitle = "Soft sun-kissed amber warmth & radiant golden peach",
+        swatchColor = 0xFFCE9E7E,
+        warmthBoost = 1.06f,
+        contrastLift = 1.04f,
+        saturationBoost = 1.03f
     ),
     AMERICAN(
         title = "American Fair White",
@@ -31,11 +39,11 @@ enum class AestheticPreset(
     ),
     KOREAN(
         title = "Korean Glass Skin",
-        subtitle = "K-Beauty translucent ivory & luminous peach highlight",
-        swatchColor = 0xFFFFF1EB,
-        warmthBoost = 0.96f,
+        subtitle = "K-Beauty translucent ivory & luminous rosy-peach highlight",
+        swatchColor = 0xFFEDC2B9,
+        warmthBoost = 0.98f,
         contrastLift = 1.02f,
-        saturationBoost = 1.00f
+        saturationBoost = 1.01f
     ),
     AFRICAN(
         title = "African Deep Melanin",

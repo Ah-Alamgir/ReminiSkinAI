@@ -41,17 +41,35 @@
       id: 'REMINI_NATURAL',
       displayName: 'Remini Natural',
       tag: 'DEFAULT',
-      subtitle: 'Signature studio clarity & healthy rosy-peach glow (Default)',
-      previewHex: '#F5D0C0',
+      subtitle: 'Signature fair ivory porcelain & natural studio clarity (Default)',
+      previewHex: '#DCC1AB',
+      lumFactor: 1.02,
       warmth: 1.00,
       radiance: 1.00,
       smoothness: 0.85,
-      rMult: 1.02,
-      gMult: 1.01,
-      bMult: 1.01,
-      radBoost: 14,
-      contrast: 1.03,
+      rMult: 1.03,
+      gMult: 1.00,
+      bMult: 0.97,
+      radBoost: 12,
+      contrast: 1.04,
       isDefault: true
+    },
+    {
+      id: 'WARM_PEACH',
+      displayName: 'Warm Honey Peach',
+      tag: 'HONEY PEACH',
+      subtitle: 'Soft sun-kissed amber warmth & radiant golden peach',
+      previewHex: '#CE9E7E',
+      lumFactor: 0.96,
+      warmth: 1.06,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.12,
+      gMult: 0.98,
+      bMult: 0.84,
+      radBoost: 18,
+      contrast: 1.04,
+      isDefault: false
     },
     {
       id: 'AMERICAN',
@@ -59,13 +77,14 @@
       tag: 'PORCELAIN',
       subtitle: 'Fair creamy-white porcelain with neutral undertones',
       previewHex: '#FCEFE4',
+      lumFactor: 1.10,
       warmth: 1.00,
-      radiance: 1.02,
+      radiance: 1.04,
       smoothness: 0.85,
-      rMult: 1.02,
+      rMult: 1.04,
       gMult: 1.02,
       bMult: 1.03,
-      radBoost: 18,
+      radBoost: 20,
       contrast: 1.02,
       isDefault: false
     },
@@ -73,16 +92,17 @@
       id: 'KOREAN',
       displayName: 'Korean Glass Skin',
       tag: 'K-BEAUTY',
-      subtitle: 'K-Beauty translucent ivory & luminous peach highlight',
-      previewHex: '#FFF1EB',
-      warmth: 0.96,
+      subtitle: 'K-Beauty translucent ivory & luminous rosy-peach highlight',
+      previewHex: '#EDC2B9',
+      lumFactor: 1.14,
+      warmth: 0.98,
       radiance: 1.10,
       smoothness: 0.90,
-      rMult: 1.03,
+      rMult: 1.06,
       gMult: 1.02,
       bMult: 1.05,
       radBoost: 26,
-      contrast: 1.02,
+      contrast: 1.03,
       isDefault: false
     },
     {
@@ -91,14 +111,15 @@
       tag: 'RICH MELANIN',
       subtitle: 'Authentic rich black/ebony with velvety luster & bronze highlights',
       previewHex: '#4A3026',
-      warmth: 1.00,
-      radiance: 0.98,
+      lumFactor: 0.46,
+      warmth: 1.02,
+      radiance: 0.95,
       smoothness: 0.85,
-      rMult: 1.00,
-      gMult: 0.99,
-      bMult: 0.99,
-      radBoost: 8,
-      contrast: 1.06,
+      rMult: 1.25,
+      gMult: 0.82,
+      bMult: 0.64,
+      radBoost: 6,
+      contrast: 1.08,
       isDefault: false
     },
     {
@@ -107,14 +128,15 @@
       tag: 'GOLDEN WARMTH',
       subtitle: 'Warm golden-wheat glow & rich amber undertones',
       previewHex: '#C68A5E',
+      lumFactor: 0.88,
       warmth: 1.05,
       radiance: 1.02,
       smoothness: 0.85,
-      rMult: 1.05,
-      gMult: 1.03,
-      bMult: 0.98,
+      rMult: 1.18,
+      gMult: 0.94,
+      bMult: 0.76,
       radBoost: 16,
-      contrast: 1.03,
+      contrast: 1.04,
       isDefault: false
     },
     {
@@ -123,12 +145,13 @@
       tag: 'HONEY BRONZE',
       subtitle: 'Sun-kissed warm olive & radiant honey bronze',
       previewHex: '#D29B6C',
+      lumFactor: 0.92,
       warmth: 1.06,
       radiance: 1.04,
       smoothness: 0.85,
-      rMult: 1.06,
-      gMult: 1.03,
-      bMult: 0.96,
+      rMult: 1.14,
+      gMult: 0.98,
+      bMult: 0.80,
       radBoost: 20,
       contrast: 1.04,
       isDefault: false
@@ -139,12 +162,13 @@
       tag: 'COOL ALABASTER',
       subtitle: 'Ultra-bright cool alabaster & crystal clarity',
       previewHex: '#FFF5F0',
+      lumFactor: 1.16,
       warmth: 0.98,
-      radiance: 1.02,
+      radiance: 1.04,
       smoothness: 0.85,
-      rMult: 1.02,
+      rMult: 1.03,
       gMult: 1.02,
-      bMult: 1.04,
+      bMult: 1.06,
       radBoost: 22,
       contrast: 1.02,
       isDefault: false
@@ -155,12 +179,13 @@
       tag: 'TERRACOTTA',
       subtitle: 'Golden warm terracotta & sunlit radiance',
       previewHex: '#DC9E75',
-      warmth: 1.07,
-      radiance: 1.03,
+      lumFactor: 0.94,
+      warmth: 1.05,
+      radiance: 1.02,
       smoothness: 0.85,
-      rMult: 1.07,
-      gMult: 1.03,
-      bMult: 0.95,
+      rMult: 1.16,
+      gMult: 0.96,
+      bMult: 0.78,
       radBoost: 18,
       contrast: 1.04,
       isDefault: false
@@ -872,12 +897,18 @@
       : computeFeatheredSkinWeights(src, w, h);
 
     const activeTone = REMINI_SKIN_TONES.find((t) => t.id === state.selectedSkinToneId) || REMINI_SKIN_TONES[0];
-    const effWarmth = Math.max(0.6, Math.min(1.4, params.skinWarmth));
-    const effRMult = activeTone.rMult * effWarmth;
-    const effGMult = activeTone.gMult * ((effWarmth - 1.0) * 0.25 + 1.0);
-    const effBMult = Math.max(0.70, Math.min(1.30, activeTone.bMult / effWarmth));
-    const radOffset = Math.max(-25, Math.min(35, (params.skinRadiance - 1.0) * activeTone.radBoost));
-    const pContrast = activeTone.contrast;
+    const toneIntensity = (params.skinSmoothness !== undefined) ? Math.max(0, Math.min(1.0, params.skinSmoothness)) : 0.85;
+
+    const effWarmth = Math.max(0.6, Math.min(1.4, params.skinWarmth || 1.0));
+    const effRadiance = Math.max(0.6, Math.min(1.4, params.skinRadiance || 1.0));
+
+    const lumFactor = (activeTone.lumFactor !== undefined) ? activeTone.lumFactor : 1.0;
+    const effRMult = (activeTone.rMult || 1.0) * effWarmth;
+    const effGMult = (activeTone.gMult || 1.0) * ((effWarmth - 1.0) * 0.25 + 1.0);
+    const effBMult = Math.max(0.55, (activeTone.bMult || 1.0) / effWarmth);
+
+    const radOffset = Math.max(-25, Math.min(35, (effRadiance - 1.0) * activeTone.radBoost));
+    const pContrast = activeTone.contrast || 1.0;
 
     for (let i = 0; i < totalPixels; i++) {
       const idx = i * 4;
@@ -892,31 +923,51 @@
       let finalG = g;
       let finalB = b;
 
-      // Authentic Remini Dermis Color & Radiance Grading (applies ONLY to segmented human skin dermis)
+      // Authentic Remini Dermis Melanin & Tone Grading (applies ONLY to segmented human dermis)
       if (sw > 0.02) {
         const yLum = 0.299 * r + 0.587 * g + 0.114 * b;
-        let contrastFactor = 1.0;
-        if (yLum > 128) {
-          contrastFactor = 1.0 + (pContrast - 1.0) * ((yLum - 128) / 128);
-        } else {
-          contrastFactor = 1.0 - (pContrast - 1.0) * ((128 - yLum) / 128) * 0.4;
-        }
 
-        const rGraded = Math.max(0, Math.min(255, r * effRMult * contrastFactor + radOffset));
-        const gGraded = Math.max(0, Math.min(255, g * effGMult * contrastFactor + radOffset * 0.85));
-        const bGraded = Math.max(0, Math.min(255, b * effBMult * contrastFactor + radOffset * 0.80));
+        // Strict protection for whites of eyes (sclera) and teeth so they never get stained
+        const isWhiteFeature = (yLum > 140) && (Math.abs(r - g) < 14) && (Math.abs(g - b) < 14);
+        const effSw = isWhiteFeature ? 0.0 : Math.min(1.0, sw * 1.30);
 
-        // Smooth skin blend with Gaussian feathering
-        finalR = r * (1.0 - sw) + rGraded * sw;
-        finalG = g * (1.0 - sw) + gGraded * sw;
-        finalB = b * (1.0 - sw) + bGraded * sw;
+        if (effSw > 0.01) {
+          const yNorm = Math.max(0.001, Math.min(1.0, yLum / 255.0));
+          let targetLum;
+          if (lumFactor < 1.0) {
+            // Melanin depth transformation: non-linear gamma preserves specular cheek/forehead highlights
+            const gamma = 1.0 + (1.0 - lumFactor) * 0.40;
+            targetLum = Math.pow(yNorm, gamma) * 255.0 * lumFactor;
+          } else {
+            // Porcelain / ivory / alabaster lift
+            targetLum = Math.min(255.0, Math.pow(yNorm, 0.90) * 255.0 * lumFactor + radOffset);
+          }
 
-        // Micro-contrast pore retention
-        if (yLum > 35 && yLum < 225) {
-          const midWeight = Math.sin((yLum / 255.0) * Math.PI) * sw * 0.04;
-          finalR = finalR * (1.0 + midWeight);
-          finalG = finalG * (1.0 + midWeight * 0.8);
-          finalB = finalB * (1.0 + midWeight * 0.6);
+          if (pContrast !== 1.0) {
+            if (targetLum > 128) {
+              targetLum = 128 + (targetLum - 128) * pContrast;
+            } else {
+              targetLum = 128 - (128 - targetLum) * (1.0 + (pContrast - 1.0) * 0.5);
+            }
+          }
+
+          let rTarget = Math.max(0, Math.min(255, targetLum * effRMult));
+          let gTarget = Math.max(0, Math.min(255, targetLum * effGMult));
+          let bTarget = Math.max(0, Math.min(255, targetLum * effBMult));
+
+          // Retain micro-texture and subtle dermis pore depth
+          if (yLum > 30 && yLum < 230) {
+            const poreDepth = Math.sin((yLum / 255.0) * Math.PI) * 0.035;
+            rTarget = rTarget * (1.0 + poreDepth);
+            gTarget = gTarget * (1.0 + poreDepth * 0.8);
+            bTarget = bTarget * (1.0 + poreDepth * 0.6);
+          }
+
+          // Blend with intensity slider and skin segmentation mask
+          const blend = effSw * toneIntensity;
+          finalR = r * (1.0 - blend) + rTarget * blend;
+          finalG = g * (1.0 - blend) + gTarget * blend;
+          finalB = b * (1.0 - blend) + bTarget * blend;
         }
       }
 
@@ -988,20 +1039,21 @@
       const baseLipB = lipPixelCount > 10 ? (sumBaseB / lipPixelCount) : 90.0;
 
       // Step B: Calculate base-adaptive color vitality and tint offsets
-      // Proportional to the subject's own base lip pigment
+      // Proportional to the subject's own base lip pigment & overall melanin level
       const chosenLipPreset = LIP_SHADE_PRESETS.find((lp) => lp.id === params.lipShade);
-      let targetRBoost = (baseLipR / 255.0) * 42.0 * effLipIntensity;
-      let targetGTint = -6.0 * effLipIntensity * (baseLipG / 128.0);
-      let targetBTint = -7.0 * effLipIntensity * (baseLipB / 128.0);
+      const skinLumScale = Math.min(1.15, Math.max(0.60, lumFactor));
+      let targetRBoost = (baseLipR / 255.0) * 42.0 * effLipIntensity * skinLumScale;
+      let targetGTint = -6.0 * effLipIntensity * (baseLipG / 128.0) * skinLumScale;
+      let targetBTint = -7.0 * effLipIntensity * (baseLipB / 128.0) * skinLumScale;
 
       if (chosenLipPreset && chosenLipPreset.id !== 'NONE') {
         // Harmonize preset tone with the individual's natural base color
         const harmonizedR = (chosenLipPreset.r * 0.40 + baseLipR * 0.60);
         const harmonizedG = (chosenLipPreset.g * 0.40 + baseLipG * 0.60);
         const harmonizedB = (chosenLipPreset.b * 0.40 + baseLipB * 0.60);
-        targetRBoost = (harmonizedR - baseLipR) * effLipIntensity * 0.80 + targetRBoost * 0.45;
-        targetGTint = (harmonizedG - baseLipG) * effLipIntensity * 0.80 + targetGTint * 0.35;
-        targetBTint = (harmonizedB - baseLipB) * effLipIntensity * 0.80 + targetBTint * 0.35;
+        targetRBoost = ((harmonizedR - baseLipR) * effLipIntensity * 0.80 + targetRBoost * 0.45) * skinLumScale;
+        targetGTint = ((harmonizedG - baseLipG) * effLipIntensity * 0.80 + targetGTint * 0.35) * skinLumScale;
+        targetBTint = ((harmonizedB - baseLipB) * effLipIntensity * 0.80 + targetBTint * 0.35) * skinLumScale;
       }
 
       // Step C: Apply lip vitality with Gaussian radial feathering and teeth protection
@@ -1025,8 +1077,8 @@
 
           // Strict teeth protection: ensure zero color spill onto teeth
           let teethProtect = 0.0;
-          if (yLum > 140 && Math.abs(curR - curG) < 26 && Math.abs(curG - curB) < 28) {
-            teethProtect = Math.min(1.0, ((yLum - 140) / 40.0) * (1.0 - Math.abs(curR - curG) / 26.0));
+          if (yLum > 140 && Math.abs(curR - curG) < 16 && Math.abs(curG - curB) < 18) {
+            teethProtect = Math.min(1.0, ((yLum - 140) / 35.0) * (1.0 - Math.abs(curR - curG) / 16.0));
           }
 
           // Smooth elliptical feathering

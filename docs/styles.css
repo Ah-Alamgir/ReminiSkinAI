@@ -1088,7 +1088,7 @@ button {
 
 .studio-tool-pills-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
@@ -3218,6 +3218,89 @@ button {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);
   margin: 4px 0;
+}
+
+.skin-tone-grid-5x5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 4px 0 12px;
+}
+
+.skin-tone-grid-tile {
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  padding: 0;
+  outline: none;
+  background-clip: padding-box;
+}
+
+.skin-tone-grid-tile:hover {
+  transform: scale(1.10);
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+.skin-tone-grid-tile.active {
+  border-color: var(--aura-cyan);
+  box-shadow: 0 0 0 2px rgba(76, 215, 246, 0.5), 0 0 14px rgba(76, 215, 246, 0.7);
+  transform: scale(1.06);
+  z-index: 3;
+}
+
+.skin-tone-grid-tile .preset-check-icon {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+.dialog-selected-tone-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--aura-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
+.dialog-selected-tone-card .skin-swatch-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.skin-tone-grid-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dialog-tone-count-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--aura-cyan);
+  background: rgba(76, 215, 246, 0.12);
+  border: 1px solid rgba(76, 215, 246, 0.28);
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .dialog-skin-tone-list {

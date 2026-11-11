@@ -35,40 +35,58 @@
     }
   ];
 
-  // Authentic Remini Biological & Regional Skin Tone Presets
+  // Authentic Remini Biological & Regional Skin Tone Presets (5x5 Palette = 25 Calibrated Shades)
   const REMINI_SKIN_TONES = [
+    // --- ROW 1: Very Fair / Alabaster / Porcelain / Glass Skin (Fitzpatrick I) ---
     {
-      id: 'REMINI_NATURAL',
-      displayName: 'Remini Natural',
-      tag: 'DEFAULT',
-      subtitle: 'Signature fair ivory porcelain & natural studio clarity (Default)',
-      previewHex: '#DCC1AB',
-      lumFactor: 1.02,
-      warmth: 1.00,
-      radiance: 1.00,
+      id: 'NORDIC_FAIR',
+      displayName: 'Nordic Alabaster',
+      tag: 'ALABASTER',
+      subtitle: 'Ultra-bright cool alabaster & crystal clarity',
+      previewHex: '#FFF5F0',
+      lumFactor: 1.16,
+      warmth: 0.98,
+      radiance: 1.04,
       smoothness: 0.85,
       rMult: 1.03,
-      gMult: 1.00,
-      bMult: 0.97,
-      radBoost: 12,
-      contrast: 1.04,
-      isDefault: true
+      gMult: 1.02,
+      bMult: 1.06,
+      radBoost: 22,
+      contrast: 1.02,
+      isDefault: false
     },
     {
-      id: 'WARM_PEACH',
-      displayName: 'Warm Honey Peach',
-      tag: 'HONEY PEACH',
-      subtitle: 'Soft sun-kissed amber warmth & radiant golden peach',
-      previewHex: '#CE9E7E',
-      lumFactor: 0.96,
-      warmth: 1.06,
-      radiance: 1.02,
+      id: 'PORCELAIN_IVORY',
+      displayName: 'Porcelain Ivory',
+      tag: 'IVORY',
+      subtitle: 'Pure translucent porcelain ivory with soft neutral light',
+      previewHex: '#FDF0E6',
+      lumFactor: 1.13,
+      warmth: 0.99,
+      radiance: 1.03,
       smoothness: 0.85,
-      rMult: 1.12,
-      gMult: 0.98,
-      bMult: 0.84,
-      radBoost: 18,
-      contrast: 1.04,
+      rMult: 1.03,
+      gMult: 1.02,
+      bMult: 1.04,
+      radBoost: 21,
+      contrast: 1.02,
+      isDefault: false
+    },
+    {
+      id: 'COOL_ROSY',
+      displayName: 'Cool Rosy Fair',
+      tag: 'ROSY FAIR',
+      subtitle: 'Cool fair tone with delicate natural pink-rose undertones',
+      previewHex: '#FBE8E2',
+      lumFactor: 1.11,
+      warmth: 0.99,
+      radiance: 1.03,
+      smoothness: 0.85,
+      rMult: 1.05,
+      gMult: 1.01,
+      bMult: 1.04,
+      radBoost: 20,
+      contrast: 1.03,
       isDefault: false
     },
     {
@@ -105,21 +123,127 @@
       contrast: 1.03,
       isDefault: false
     },
+
+    // --- ROW 2: Fair to Light Neutral / Peach / Soft Amber (Fitzpatrick II) ---
     {
-      id: 'AFRICAN',
-      displayName: 'African Deep Melanin',
-      tag: 'RICH MELANIN',
-      subtitle: 'Authentic rich black/ebony with velvety luster & bronze highlights',
-      previewHex: '#4A3026',
-      lumFactor: 0.46,
+      id: 'WARM_IVORY',
+      displayName: 'Warm Ivory',
+      tag: 'WARM IVORY',
+      subtitle: 'Soft warm ivory with gentle golden undertones',
+      previewHex: '#F5E2CF',
+      lumFactor: 1.06,
       warmth: 1.02,
-      radiance: 0.95,
+      radiance: 1.02,
       smoothness: 0.85,
-      rMult: 1.25,
-      gMult: 0.82,
-      bMult: 0.64,
-      radBoost: 6,
-      contrast: 1.08,
+      rMult: 1.06,
+      gMult: 1.01,
+      bMult: 0.98,
+      radBoost: 16,
+      contrast: 1.03,
+      isDefault: false
+    },
+    {
+      id: 'REMINI_NATURAL',
+      displayName: 'Remini Natural',
+      tag: 'DEFAULT',
+      subtitle: 'Signature fair ivory porcelain & natural studio clarity (Default)',
+      previewHex: '#DCC1AB',
+      lumFactor: 1.02,
+      warmth: 1.00,
+      radiance: 1.00,
+      smoothness: 0.85,
+      rMult: 1.03,
+      gMult: 1.00,
+      bMult: 0.97,
+      radBoost: 12,
+      contrast: 1.04,
+      isDefault: true
+    },
+    {
+      id: 'CREAMY_PEACH',
+      displayName: 'Creamy Peach',
+      tag: 'PEACH',
+      subtitle: 'Soft creamy peach with fresh luminous warmth',
+      previewHex: '#F0D3BC',
+      lumFactor: 1.04,
+      warmth: 1.03,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.08,
+      gMult: 1.00,
+      bMult: 0.94,
+      radBoost: 16,
+      contrast: 1.04,
+      isDefault: false
+    },
+    {
+      id: 'LIGHT_BEIGE',
+      displayName: 'Neutral Light Beige',
+      tag: 'BEIGE',
+      subtitle: 'Balanced neutral light beige for natural portrait harmony',
+      previewHex: '#E5C5A8',
+      lumFactor: 1.00,
+      warmth: 1.01,
+      radiance: 1.01,
+      smoothness: 0.85,
+      rMult: 1.05,
+      gMult: 1.00,
+      bMult: 0.95,
+      radBoost: 14,
+      contrast: 1.04,
+      isDefault: false
+    },
+    {
+      id: 'WARM_PEACH',
+      displayName: 'Warm Honey Peach',
+      tag: 'HONEY PEACH',
+      subtitle: 'Soft sun-kissed amber warmth & radiant golden peach',
+      previewHex: '#CE9E7E',
+      lumFactor: 0.96,
+      warmth: 1.06,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.12,
+      gMult: 0.98,
+      bMult: 0.84,
+      radBoost: 18,
+      contrast: 1.04,
+      isDefault: false
+    },
+
+    // --- ROW 3: Medium / Golden / Olive / Sunlit Terracotta (Fitzpatrick III) ---
+    {
+      id: 'GOLDEN_WHEAT',
+      displayName: 'Golden Wheat',
+      tag: 'GOLDEN',
+      subtitle: 'Radiant golden wheat with warm sunlit glow',
+      previewHex: '#E0B58D',
+      lumFactor: 0.95,
+      warmth: 1.04,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.10,
+      gMult: 0.98,
+      bMult: 0.86,
+      radBoost: 16,
+      contrast: 1.04,
+      isDefault: false
+    },
+    {
+      id: 'MEDITERRANEAN',
+      displayName: 'Mediterranean Sun',
+      tag: 'TERRACOTTA',
+      subtitle: 'Golden warm terracotta & sunlit radiance',
+      previewHex: '#DC9E75',
+      lumFactor: 0.94,
+      warmth: 1.05,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.16,
+      gMult: 0.96,
+      bMult: 0.78,
+      radBoost: 18,
+      contrast: 1.05,
       isDefault: false
     },
     {
@@ -157,37 +281,194 @@
       isDefault: false
     },
     {
-      id: 'NORDIC_FAIR',
-      displayName: 'Nordic Alabaster',
-      tag: 'COOL ALABASTER',
-      subtitle: 'Ultra-bright cool alabaster & crystal clarity',
-      previewHex: '#FFF5F0',
-      lumFactor: 1.16,
-      warmth: 0.98,
-      radiance: 1.04,
+      id: 'DESERT_SAND',
+      displayName: 'Desert Sand Tan',
+      tag: 'WARM TAN',
+      subtitle: 'Velvety warm sand tan with balanced neutral-warm depth',
+      previewHex: '#C99369',
+      lumFactor: 0.86,
+      warmth: 1.04,
+      radiance: 1.01,
       smoothness: 0.85,
-      rMult: 1.03,
-      gMult: 1.02,
-      bMult: 1.06,
-      radBoost: 22,
-      contrast: 1.02,
+      rMult: 1.15,
+      gMult: 0.95,
+      bMult: 0.78,
+      radBoost: 15,
+      contrast: 1.04,
+      isDefault: false
+    },
+
+    // --- ROW 4: Medium-Deep / Caramel / Amber / Warm Bronze (Fitzpatrick IV) ---
+    {
+      id: 'WARM_CARAMEL',
+      displayName: 'Warm Caramel',
+      tag: 'CARAMEL',
+      subtitle: 'Rich buttery caramel with golden honey highlights',
+      previewHex: '#B87948',
+      lumFactor: 0.80,
+      warmth: 1.06,
+      radiance: 1.02,
+      smoothness: 0.85,
+      rMult: 1.18,
+      gMult: 0.92,
+      bMult: 0.72,
+      radBoost: 15,
+      contrast: 1.05,
       isDefault: false
     },
     {
-      id: 'MEDITERRANEAN',
-      displayName: 'Mediterranean Sun',
-      tag: 'TERRACOTTA',
-      subtitle: 'Golden warm terracotta & sunlit radiance',
-      previewHex: '#DC9E75',
-      lumFactor: 0.94,
-      warmth: 1.05,
-      radiance: 1.02,
+      id: 'RICH_AMBER',
+      displayName: 'Rich Amber Bronze',
+      tag: 'AMBER',
+      subtitle: 'Deep lustrous amber with warm radiant highlights',
+      previewHex: '#B56F3F',
+      lumFactor: 0.76,
+      warmth: 1.07,
+      radiance: 1.03,
       smoothness: 0.85,
-      rMult: 1.16,
-      gMult: 0.96,
-      bMult: 0.78,
-      radBoost: 18,
-      contrast: 1.04,
+      rMult: 1.20,
+      gMult: 0.90,
+      bMult: 0.70,
+      radBoost: 16,
+      contrast: 1.05,
+      isDefault: false
+    },
+    {
+      id: 'HONEY_CHESTNUT',
+      displayName: 'Honey Chestnut',
+      tag: 'CHESTNUT',
+      subtitle: 'Warm polished chestnut with deep glowing undertones',
+      previewHex: '#A46238',
+      lumFactor: 0.72,
+      warmth: 1.05,
+      radiance: 1.01,
+      smoothness: 0.85,
+      rMult: 1.20,
+      gMult: 0.88,
+      bMult: 0.68,
+      radBoost: 14,
+      contrast: 1.06,
+      isDefault: false
+    },
+    {
+      id: 'DEEP_BRONZE',
+      displayName: 'Deep Radiant Bronze',
+      tag: 'BRONZE',
+      subtitle: 'Deep radiant bronze with rich warm depth',
+      previewHex: '#92522B',
+      lumFactor: 0.68,
+      warmth: 1.04,
+      radiance: 1.00,
+      smoothness: 0.85,
+      rMult: 1.21,
+      gMult: 0.86,
+      bMult: 0.66,
+      radBoost: 13,
+      contrast: 1.06,
+      isDefault: false
+    },
+    {
+      id: 'WARM_TERRACOTTA',
+      displayName: 'Rich Terracotta',
+      tag: 'TERRACOTTA',
+      subtitle: 'Deep earthy terracotta with fiery sun-baked warmth',
+      previewHex: '#854523',
+      lumFactor: 0.64,
+      warmth: 1.06,
+      radiance: 1.00,
+      smoothness: 0.85,
+      rMult: 1.23,
+      gMult: 0.85,
+      bMult: 0.65,
+      radBoost: 12,
+      contrast: 1.07,
+      isDefault: false
+    },
+
+    // --- ROW 5: Deep Melanin / Espresso / Ebony (Fitzpatrick V & VI) ---
+    {
+      id: 'WARM_ALMOND',
+      displayName: 'Dark Almond',
+      tag: 'ALMOND',
+      subtitle: 'Deep velvety almond with refined bronze highlights',
+      previewHex: '#723B1E',
+      lumFactor: 0.58,
+      warmth: 1.04,
+      radiance: 0.98,
+      smoothness: 0.85,
+      rMult: 1.23,
+      gMult: 0.84,
+      bMult: 0.64,
+      radBoost: 10,
+      contrast: 1.07,
+      isDefault: false
+    },
+    {
+      id: 'DARK_ESPRESSO',
+      displayName: 'Dark Espresso',
+      tag: 'ESPRESSO',
+      subtitle: 'Rich roasted espresso with satin dermis sheen',
+      previewHex: '#5E2E16',
+      lumFactor: 0.52,
+      warmth: 1.03,
+      radiance: 0.96,
+      smoothness: 0.85,
+      rMult: 1.24,
+      gMult: 0.83,
+      bMult: 0.64,
+      radBoost: 8,
+      contrast: 1.08,
+      isDefault: false
+    },
+    {
+      id: 'AFRICAN',
+      displayName: 'African Deep Melanin',
+      tag: 'RICH MELANIN',
+      subtitle: 'Authentic rich black/ebony with velvety luster & bronze highlights',
+      previewHex: '#4A3026',
+      lumFactor: 0.46,
+      warmth: 1.02,
+      radiance: 0.95,
+      smoothness: 0.85,
+      rMult: 1.25,
+      gMult: 0.82,
+      bMult: 0.64,
+      radBoost: 6,
+      contrast: 1.08,
+      isDefault: false
+    },
+    {
+      id: 'ROYAL_EBONY',
+      displayName: 'Royal Ebony',
+      tag: 'EBONY',
+      subtitle: 'Deep royal ebony with luxurious cool satin luster',
+      previewHex: '#392118',
+      lumFactor: 0.40,
+      warmth: 1.01,
+      radiance: 0.94,
+      smoothness: 0.85,
+      rMult: 1.24,
+      gMult: 0.82,
+      bMult: 0.65,
+      radBoost: 5,
+      contrast: 1.09,
+      isDefault: false
+    },
+    {
+      id: 'MIDNIGHT_NOIR',
+      displayName: 'Midnight Melanin',
+      tag: 'MIDNIGHT',
+      subtitle: 'Ultra-deep obsidian melanin with luminous specular highlights',
+      previewHex: '#2A1810',
+      lumFactor: 0.35,
+      warmth: 1.00,
+      radiance: 0.92,
+      smoothness: 0.85,
+      rMult: 1.23,
+      gMult: 0.81,
+      bMult: 0.66,
+      radBoost: 4,
+      contrast: 1.10,
       isDefault: false
     }
   ];
@@ -401,7 +682,7 @@
     // Navigation (AppScreen.MAIN vs AppScreen.PASSPORT_STUDIO)
     currentAppScreen: 'MAIN',
     screenMode: 'HOME', // HOME | COMPARISON_STUDIO | RETOUCH_SUITE | PROCESSING | SAVED_SHARE
-    studioBottomTab: 'ENHANCE', // ENHANCE | RETOUCH | MAGNIFIER | SKIN_AI
+    studioBottomTab: 'ENHANCE', // ENHANCE | RETOUCH | MAGNIFIER
     retouchTab: 'RETOUCH', // RESTORE | RETOUCH | COLORIZE | BACKGROUND
 
     // Credits
@@ -1804,21 +2085,25 @@
   }
 
   function populateDynamicSkinToneAndShadeLists() {
-    // 1. Retouch Suite 2-Column Remini Skin Tones Grid
+    const tone = getSelectedSkinTone();
+
+    // 0. Update Dialog Active Tone Preview Header
+    const selSwatch = document.getElementById('dialogSelectedToneSwatch');
+    const selName = document.getElementById('dialogSelectedToneName');
+    const selTag = document.getElementById('dialogSelectedToneTag');
+    const selSub = document.getElementById('dialogSelectedToneSub');
+    if (selSwatch && tone) selSwatch.style.backgroundColor = tone.previewHex;
+    if (selName && tone) selName.textContent = tone.displayName;
+    if (selTag && tone) selTag.textContent = tone.tag;
+    if (selSub && tone) selSub.textContent = tone.subtitle;
+
+    // 1. Retouch Suite 5x5 Remini Skin Tones Grid
     const grid = document.getElementById('retouchSkinToneGrid');
     if (grid) {
-      grid.innerHTML = REMINI_SKIN_TONES.map((tone) => `
-        <button type="button" class="skin-tone-preset-card ${tone.id === state.selectedSkinToneId ? 'active' : ''}" data-skin-tone-id="${tone.id}">
-          <div class="skin-tone-card-top">
-            <div class="skin-swatch-circle" style="background: ${tone.previewHex}">
-              <span class="material-symbols-rounded preset-check-icon" style="display: ${tone.id === state.selectedSkinToneId ? 'inline-flex' : 'none'}">check</span>
-            </div>
-            <span class="model-pill-badge badge-pro">${tone.tag}</span>
-          </div>
-          <div>
-            <div class="skin-tone-card-title">${tone.displayName}</div>
-            <div class="skin-tone-card-sub">${tone.subtitle}</div>
-          </div>
+      grid.className = 'skin-tone-grid-5x5';
+      grid.innerHTML = REMINI_SKIN_TONES.map((t) => `
+        <button type="button" class="skin-tone-grid-tile ${t.id === state.selectedSkinToneId ? 'active' : ''}" data-skin-tone-id="${t.id}" title="${t.displayName} (${t.tag}) • ${t.previewHex}" style="background-color: ${t.previewHex}" aria-label="${t.displayName}">
+          <span class="material-symbols-rounded preset-check-icon" style="display: ${t.id === state.selectedSkinToneId ? 'inline-flex' : 'none'}">check</span>
         </button>
       `).join('');
 
@@ -1829,29 +2114,22 @@
       });
     }
 
-    // 2. Dialog Remini Skin Tones Radio List
+    // 2. Dialog Remini Skin Tones 5x5 Grid (Replaces old row list)
     const dlgList = document.getElementById('dialogSkinToneList');
     if (dlgList) {
-      dlgList.innerHTML = REMINI_SKIN_TONES.map((tone) => `
-        <div class="dialog-skin-row ${tone.id === state.selectedSkinToneId ? 'active' : ''}" data-skin-tone-id="${tone.id}" role="button" tabindex="0">
-          <div class="skin-swatch-circle" style="background: ${tone.previewHex}">
-            <span class="material-symbols-rounded preset-check-icon" style="display: ${tone.id === state.selectedSkinToneId ? 'inline-flex' : 'none'}">check</span>
-          </div>
-          <div style="flex: 1">
-            <div style="display: flex; align-items: center; justify-content: space-between">
-              <span style="font-size: 13px; font-weight: 700; color: #E5E1E4">${tone.displayName}</span>
-              <span class="model-pill-badge badge-pro">${tone.tag}</span>
-            </div>
-            <div style="font-size: 11px; color: #C3C6CF; margin-top: 3px">${tone.subtitle}</div>
-          </div>
-        </div>
+      dlgList.className = 'skin-tone-grid-5x5';
+      dlgList.innerHTML = REMINI_SKIN_TONES.map((t) => `
+        <button type="button" class="skin-tone-grid-tile ${t.id === state.selectedSkinToneId ? 'active' : ''}" data-skin-tone-id="${t.id}" title="${t.displayName} (${t.tag}) • ${t.previewHex}" style="background-color: ${t.previewHex}" aria-label="${t.displayName}">
+          <span class="material-symbols-rounded preset-check-icon" style="display: ${t.id === state.selectedSkinToneId ? 'inline-flex' : 'none'}">check</span>
+        </button>
       `).join('');
 
-      dlgList.querySelectorAll('[data-skin-tone-id]').forEach((row) => {
-        row.addEventListener('click', () => {
-          selectSkinTone(row.getAttribute('data-skin-tone-id'));
+      dlgList.querySelectorAll('[data-skin-tone-id]').forEach((tile) => {
+        tile.addEventListener('click', () => {
+          selectSkinTone(tile.getAttribute('data-skin-tone-id'));
         });
       });
+    });
     }
 
     // 3. Lip Shade Chips
@@ -2954,7 +3232,7 @@
     document.querySelectorAll('[data-studio-tool]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const tool = btn.getAttribute('data-studio-tool');
-        if (tool === 'RETOUCH' || tool === 'SKIN_AI') {
+        if (tool === 'RETOUCH') {
           openModal('skinToneModal');
           return;
         }
@@ -3443,7 +3721,7 @@
           reg.update();
         }
       });
-      navigator.serviceWorker.register('./sw.js?v=2.3.0').catch(() => {});
+      navigator.serviceWorker.register('./sw.js?v=2.9.8').catch(() => {});
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
       });

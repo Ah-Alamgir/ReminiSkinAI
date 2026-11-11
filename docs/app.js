@@ -493,6 +493,8 @@
       if (savedParams) {
         const parsed = JSON.parse(savedParams);
         Object.assign(state.editParams, parsed);
+        // Guarantee diagnostic segmentation mask is ALWAYS OFF by default
+        state.editParams.showSkinMaskOverlay = false;
         if (parsed.preset && REMINI_SKIN_TONES.some((t) => t.id === parsed.preset)) {
           state.selectedSkinToneId = parsed.preset;
         }
@@ -510,7 +512,8 @@
     try {
       localStorage.setItem(STORAGE_KEY_PRESET, state.selectedModelId);
       localStorage.setItem('remini_selected_skin_tone', state.selectedSkinToneId);
-      localStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(state.editParams));
+      const toSave = { ...state.editParams, showSkinMaskOverlay: false };
+      localStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(toSave));
       localStorage.setItem(STORAGE_KEY_CREDITS, String(state.userCredits));
     } catch (e) {
       // Ignore storage errors
@@ -972,10 +975,10 @@
       }
 
       if (params.showSkinMaskOverlay && sw > 0.18) {
-        const overlayAlpha = Math.min(0.50, sw * 0.50);
-        finalR = finalR * (1 - overlayAlpha) + 76 * overlayAlpha;
-        finalG = finalG * (1 - overlayAlpha) + 215 * overlayAlpha;
-        finalB = finalB * (1 - overlayAlpha) + 246 * overlayAlpha;
+        const overlayAlpha = Math.min(0.20, sw * 0.20);
+        finalR = finalR * (1 - overlayAlpha) + 220 * overlayAlpha;
+        finalG = finalG * (1 - overlayAlpha) + 100 * overlayAlpha;
+        finalB = finalB * (1 - overlayAlpha) + 140 * overlayAlpha;
       }
 
       dst[idx] = Math.max(0, Math.min(255, Math.round(finalR)));
@@ -1732,6 +1735,10 @@
     }
     if (maskLabel) {
       maskLabel.textContent = params.showSkinMaskOverlay ? 'ON' : 'OFF';
+    }
+    const quickToneEl = document.getElementById('studioQuickToneName');
+    if (quickToneEl) {
+      quickToneEl.textContent = tone.displayName;
     }
 
     // Studio Tool Pills
@@ -2922,6 +2929,7 @@
     // Comparison Studio Bottom Dock Controls
     bindClick('btnStudioOpenSkinToneModal', () => openModal('skinToneModal'));
     bindClick('btnStudioTonePickerChip', () => openModal('skinToneModal'));
+    bindClick('btnStudioModelChip', () => openModal('modelArchModal'));
     bindClick('btnStudioUploadOwnChip', () => globalPhotoInput && globalPhotoInput.click());
     bindClick('btnStudioToggleMaskChip', () => {
       state.editParams.showSkinMaskOverlay = !state.editParams.showSkinMaskOverlay;

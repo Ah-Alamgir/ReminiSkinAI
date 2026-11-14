@@ -2129,7 +2129,6 @@
           selectSkinTone(tile.getAttribute('data-skin-tone-id'));
         });
       });
-    });
     }
 
     // 3. Lip Shade Chips
@@ -3721,7 +3720,7 @@
           reg.update();
         }
       });
-      navigator.serviceWorker.register('./sw.js?v=2.9.8').catch(() => {});
+      navigator.serviceWorker.register('./sw.js?v=2.9.9').catch(() => {});
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
       });
